@@ -1,0 +1,3 @@
+﻿language: c
+script:
+- xbuild ./StarryboundServer/StarryboundServer.csproj
