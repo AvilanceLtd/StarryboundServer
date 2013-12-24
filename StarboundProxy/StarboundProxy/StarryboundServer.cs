@@ -92,7 +92,7 @@ namespace com.avilance.Starrybound
             logInfo("##############################################");
             logInfo("####   Avilance Ltd. StarryBound Server   ####");
             logInfo("####   Copyright (c) Avilance Ltd. 2013   ####");
-            logInfo("####     onwards. ALL RIGHTS RESERVED.    ####");
+            logInfo("####       Licensed under the GPLv3       ####");
             logInfo("##############################################");
             logInfo("Version: " + VersionNum);
 
