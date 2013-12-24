@@ -109,11 +109,6 @@ namespace com.avilance.Starrybound
 
             Bans.readBansFromFile();
 
-            ListenerThread listener = new ListenerThread();
-
-            listenerThread = new Thread(new ThreadStart(listener.run));
-            listenerThread.Start();
-
             sbServer = new ServerThread();
             sbServerThread = new Thread(new ThreadStart(sbServer.run));
             sbServerThread.Start();
@@ -122,6 +117,11 @@ namespace com.avilance.Starrybound
             while (serverState != ServerState.StartingProxy) { if (serverState == ServerState.Crashed) return; }
 
             logInfo("Starbound server is ready. Starting proxy wrapper.");
+
+            ListenerThread listener = new ListenerThread();
+
+            listenerThread = new Thread(new ThreadStart(listener.run));
+            listenerThread.Start();
         }
 
         public static void crashMonitor()

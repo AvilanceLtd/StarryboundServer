@@ -70,7 +70,7 @@ namespace com.avilance.Starrybound
                 StarryboundServer.uniqueID++;
 
                 sSocket = new TcpClient();
-                sSocket.Connect(StarryboundServer.config.serverIP, StarryboundServer.config.serverPort);
+                sSocket.Connect("127.0.0.1", 21024);
 
                 this.sIn = new BinaryReader(this.sSocket.GetStream());
                 this.sOut = new BinaryWriter(this.sSocket.GetStream());
