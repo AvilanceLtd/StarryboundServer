@@ -24,6 +24,7 @@ using com.avilance.Starrybound.Packets;
 
 namespace com.avilance.Starrybound
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     class ClientThread
     {
         public Player playerData = new Player();

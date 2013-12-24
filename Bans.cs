@@ -125,11 +125,9 @@ namespace com.avilance.Starrybound
 
             try
             {
-                using (FileStream fs = new FileStream("banned-players.txt", FileMode.Append, FileAccess.Write))
-                using (StreamWriter sw = new StreamWriter(fs))
-                {
-                    sw.WriteLine(String.Join("|", args));
-                }
+                FileStream fs = new FileStream("banned-players.txt", FileMode.Append, FileAccess.Write);
+                StreamWriter sw = new StreamWriter(fs);
+                sw.WriteLine(String.Join("|", args));
 
                 Ban ban = new Ban(nextBanID, username, uuid, ipaddress, timeBanned, admin, expiry, reason);
 

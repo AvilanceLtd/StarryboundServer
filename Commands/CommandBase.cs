@@ -20,7 +20,6 @@ namespace com.avilance.Starrybound.Commands
     abstract class CommandBase
     {
         public string name { get; set; }
-        public bool DoLog ;
         public string HelpText = "No help available.";
         public List<string> Permission;
 
