@@ -81,14 +81,6 @@ namespace com.avilance.Starrybound
 
             serverState = ServerState.Starting;
 
-            string gitVersion = String.Empty;
-            using (Stream stream = Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("com.avilance.Starrybound." + "version.git"))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                gitVersion = reader.ReadToEnd();
-            }
-
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(ProcessExit);
 
             monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
@@ -102,7 +94,7 @@ namespace com.avilance.Starrybound
             logInfo("####   Copyright (c) Avilance Ltd. 2013   ####");
             logInfo("####     onwards. ALL RIGHTS RESERVED.    ####");
             logInfo("##############################################");
-            logInfo("Version: " + VersionNum + "-" + gitVersion);
+            logInfo("Version: " + VersionNum);
 
             if (config.logLevel == LogType.Debug)
             {
