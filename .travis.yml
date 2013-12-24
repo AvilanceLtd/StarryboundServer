@@ -1,3 +1,6 @@
 ﻿language: c
 script:
 - xbuild ./StarryboundServer/StarryboundServer.csproj
+notification:
+  email:
+    - crashdoom@avilance.com
