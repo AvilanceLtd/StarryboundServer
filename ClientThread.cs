@@ -78,14 +78,17 @@ namespace com.avilance.Starrybound
 
                 if (!sSocket.Connected)
                 {
-                    StarryboundServer.logException("[" + this.clientUUID + "]: Client unable to connect to server.");
-                    
-                    /*Packet2ConnectResponse packet = new Packet2ConnectResponse(this, null, Direction.Client);
-                    if (StarryboundServer.serverState == ServerState.Crashed || StarryboundServer.serverState == ServerState.Restarting) packet.prepare(false, 0, "The server is restarting. Please try again in 60 seconds.");
-                    else if (StarryboundServer.serverState != ServerState.Running) packet.prepare(false, 0, "Unable to connect to server - Please try again in 30 seconds.");
-                    packet.onSend();*/
+                    StarryboundServer.logWarn("[" + this.clientUUID + "]: Client unable to connect to parent server.");
 
-                    throw new Exception("Unable to connect to proxy server - Aborting connection");
+                    MemoryStream packet = new MemoryStream();
+                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                    this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+
+                    Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this, false, Util.Direction.Client);
+                    packet2.prepare(false, 0, "Starrybound Server was unable to connect to the parent server.");
+                    packet2.onSend();
+                    return;
                 }
 
                 // Forwarding for data from SERVER (sIn) to CLIENT (cOut)
