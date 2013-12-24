@@ -215,10 +215,12 @@ namespace com.avilance.Starrybound
 
             try
             {
-                FileStream fs = new FileStream(config.logFile, FileMode.Append, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs);
                 if ((int)logType >= (int)config.logLevel) Console.WriteLine(message);
-                sw.WriteLine(message);
+
+                using (StreamWriter w = File.AppendText("log.txt"))
+                {
+                    w.WriteLine(message);
+                }                
             }
             catch(Exception e)
             {
