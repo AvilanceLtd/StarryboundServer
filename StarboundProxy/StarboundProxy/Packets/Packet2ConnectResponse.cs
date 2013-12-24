@@ -47,6 +47,17 @@ namespace com.avilance.Starrybound.Packets
                 return true;
             }
 
+            if (StarryboundServer.serverState != ServerState.Running) {
+                tmpArray.Add("success", false);
+                tmpArray.Add("clientID", clientID);
+                tmpArray.Add("rejectReason", "The server cannot accept your connection right now, please try again later.");
+
+                this.onSend();
+
+                this.mClient.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
+                return false;
+            }
+
             string[] reasonExpiry = Bans.checkForBan(new string[] { player.name, player.UUID, player.ip.ToString() });
 
             if (reasonExpiry.Length == 2)

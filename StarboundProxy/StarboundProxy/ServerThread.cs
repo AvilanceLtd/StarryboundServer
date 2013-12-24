@@ -65,9 +65,13 @@ namespace com.avilance.Starrybound
                 StarryboundServer.serverState = Util.ServerState.Restarting;
             }
 
-            if (consoleLine.Contains("Done scanning for router for portforwarding")) StarryboundServer.serverState = Util.ServerState.StartingProxy;
+            if (consoleLine.Contains("Done scanning for router for portforwarding"))
+            {
+                StarryboundServer.serverState = Util.ServerState.StartingProxy;
+                return;
+            }
 
-            StarryboundServer.logInfo("[Server Console] " + consoleLine);
+            Console.WriteLine("[Debug Console Output] " + consoleLine);
         }
     }
 }

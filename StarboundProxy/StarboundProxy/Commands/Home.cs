@@ -25,7 +25,7 @@ namespace com.avilance.Starrybound.Commands
         public Home(ClientThread client)
         {
             this.name = "home";
-            this.HelpText = "Woot";
+            this.HelpText = "Allows you to teleport to your home planet.";
 
             this.client = client;
             this.player = client.playerData;

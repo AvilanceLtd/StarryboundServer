@@ -68,4 +68,31 @@ namespace com.avilance.Starrybound.Commands
             return true;
         }
     }
+
+    class Restart : CommandBase
+    {
+        public Restart(ClientThread client)
+        {
+            this.name = "restart";
+            this.HelpText = "Initiate a restart of the server, 30 second delay.";
+            this.Permission = new List<string>();
+            this.Permission.Add("admin.restart");
+
+            this.client = client;
+            this.player = client.playerData;
+        }
+
+        public override bool doProcess(string[] args)
+        {
+            if (!hasPermission()) { permissionError(); return false; }
+
+            StarryboundServer.sendGlobalMessage("^#f75d5d;The server will restart in 30 seconds. We will be back shortly.");
+
+            StarryboundServer.serverState = ServerState.Restarting;
+
+            StarryboundServer.restartTime = StarryboundServer.getTimestamp() + 30;
+
+            return true;
+        }
+    }
 }
