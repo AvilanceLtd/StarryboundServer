@@ -36,8 +36,6 @@ namespace com.avilance.Starrybound
             {
                 while (true)
                 {
-                    if (!StarryboundServer.allowNewClients) continue;
-
                     TcpClient clientSocket = serversocket.AcceptTcpClient();
 
                     new Thread(new ThreadStart(new ClientThread(clientSocket).run)).Start();

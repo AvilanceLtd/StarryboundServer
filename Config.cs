@@ -20,32 +20,62 @@ using Newtonsoft.Json;
 
 namespace com.avilance.Starrybound
 {
-    class Config
+    class Config {
+        internal static string RulesPath { get { return Path.Combine(StarryboundServer.SavePath, "rules.txt"); } }
+        internal static string MotdPath { get { return Path.Combine(StarryboundServer.SavePath, "motd.txt"); } }
+        internal static string ConfigPath { get { return Path.Combine(StarryboundServer.SavePath, "config.json"); } }
+
+        public static void CreateIfNot(string file, string data = "")
+        {
+            if (!File.Exists(file))
+            {
+                File.WriteAllText(file, data);
+            }
+        }
+
+        public static void SetupConfig()
+        {
+            if (!Directory.Exists(StarryboundServer.SavePath))
+            {
+                Directory.CreateDirectory(StarryboundServer.SavePath);
+            }
+
+            CreateIfNot(RulesPath, "1) Respect all players 2) No griefing/hacking 3) Have fun!");
+            CreateIfNot(MotdPath, "This server is running Starrybound Server.\nType /help for a list of commands.\nThere are currently %players% player(s) online.");
+            if (File.Exists(ConfigPath))
+            {
+                StarryboundServer.config = ConfigFile.Read(ConfigPath);
+            }
+            StarryboundServer.config.Write(ConfigPath);
+        }
+    }
+
+    class ConfigFile
     {
         public string serverAccount = "";
         public string serverPass = "";
 
-        public readonly string proxyIP = "0.0.0.0";
-        public readonly short proxyPort = 21025;
-        public readonly string proxyPass = "Testing";
-        public readonly int passwordRounds = 5000;
+        public string proxyIP = "0.0.0.0";
+        public short proxyPort = 21025;
+        public string proxyPass = "";
+        public int passwordRounds = 5000;
 
-        public readonly int maxClients = 40;
+        public int maxClients = 40;
 
-        public readonly string logFile = "proxy.log";
+        public string logFile = "proxy.log";
 
-        public readonly LogType logLevel = LogType.Debug;
-        public readonly bool debug = true;
+        public LogType logLevel = LogType.Debug;
+        public bool debug = true;
 
-        public readonly string[] adminUUID = new string[] { "be17d6d1257ea51ecb920ecc8d0c3bff", "49be2a484fb0cebc4ec427095cb0dc6b" };
+        public string[] adminUUID = new string[] { "" };
 
-        public readonly bool allowSpaces = false;
+        public bool allowSpaces = false;
 
-        public readonly bool allowSymbols = false;
-
-        public static Config Read(string path) {
+        public bool allowSymbols = false;
+        
+        public static ConfigFile Read(string path) {
             if (!File.Exists(path))
-                return new Config();
+                return new ConfigFile();
 
             using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -53,11 +83,28 @@ namespace com.avilance.Starrybound
             }
         }
 
-        public static Config Read(Stream stream)
+        public static ConfigFile Read(Stream stream)
         {
             using (var sr = new StreamReader(stream))
             {
-                return JsonConvert.DeserializeObject<Config>(sr.ReadToEnd()); 
+                return JsonConvert.DeserializeObject<ConfigFile>(sr.ReadToEnd()); 
+            }
+        }
+
+        public void Write(string path)
+        {
+            using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write))
+            {
+                Write(fs);
+            }
+        }
+
+        public void Write(Stream stream)
+        {
+            var str = JsonConvert.SerializeObject(this, Formatting.Indented);
+            using (var sw = new StreamWriter(stream))
+            {
+                sw.Write(str);
             }
         }
     }

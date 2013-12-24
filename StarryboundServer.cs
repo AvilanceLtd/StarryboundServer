@@ -26,7 +26,8 @@ namespace com.avilance.Starrybound
 {
     class StarryboundServer
     {
-        public static Config config = new Config();
+        public static readonly string SavePath = "..\\starrybound";
+        public static ConfigFile config = new ConfigFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly int ProtocolVersion = 628;
         
@@ -85,6 +86,8 @@ namespace com.avilance.Starrybound
 
             monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
             monitorThread.Start();
+
+            Config.SetupConfig();
 
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
