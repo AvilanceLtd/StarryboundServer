@@ -117,6 +117,10 @@ namespace com.avilance.Starrybound.Packets
                             new Shutdown(this.mClient).doProcess(args);
                             break;
 
+                        case "restart":
+                            new Restart(this.mClient).doProcess(args);
+                            break;
+
                         case "build":
                             new Build(this.mClient).doProcess(args);
                             break;
