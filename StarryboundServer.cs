@@ -254,7 +254,7 @@ namespace com.avilance.Starrybound
         {
             foreach (ClientThread client in clients.Values)
             {
-                client.sendChatMessage(null, "^#5dc4f4;" + message);
+                client.sendChatMessage("^#5dc4f4;" + message);
             }
         }
     }
