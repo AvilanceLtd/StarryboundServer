@@ -12,8 +12,8 @@ namespace com.avilance.Starrybound.Commands
     {
         public Item(ClientThread client)
         {
-            this.name = "item";
-            this.HelpText = "Woot";
+            this.name = "item, /give";
+            this.HelpText = "<item> <amount>; Allows you to give items to yourself.";
 
             this.client = client;
             this.player = client.playerData;
@@ -21,6 +21,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (args.Length < 2) { showHelpText(); return false; }
+
             string item = args[1];
             uint count = Convert.ToUInt32(args[2]);
             if (String.IsNullOrEmpty(item) || count < 1) { showHelpText(); return false; }
