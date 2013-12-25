@@ -49,7 +49,7 @@ namespace com.avilance.Starrybound.Commands
 
                 string uuid = target.playerData.uuid;
                 string name = target.playerData.name;
-                string ip = target.playerData.ip.ToString();
+                string ip = target.playerData.ip;
 
                 int timeNow = Utils.getTimestamp();
 

@@ -148,7 +148,6 @@ namespace com.avilance.Starrybound
             foreach (ClientThread client in clients.Values)
             {
                 client.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-                client.sendClientPacket(Packet.ServerDisconnect, new byte[1]);
                 client.forceDisconnect("Server Restarting");
             }
 

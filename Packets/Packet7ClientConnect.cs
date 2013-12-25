@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound.Packets
@@ -44,6 +45,45 @@ namespace com.avilance.Starrybound.Packets
             this.mClient.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
             this.mClient.playerData.name = name;
             this.mClient.playerData.account = account;
+
+            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.mClient.playerData.uuid, this.mClient.playerData.ip });
+
+            if (reasonExpiry.Length == 2)
+            {
+                this.mClient.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
+                return false;
+            }
+
+            if (StarryboundServer.clients.ContainsKey(name))
+            {
+                this.mClient.rejectPreConnected("This username is already in use.");
+                return false;
+            }
+
+            if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
+            {
+                this.mClient.rejectPreConnected("The server is full. Please try again later.");
+                return false;
+            }
+
+            if (!StarryboundServer.config.allowSpaces)
+            {
+                if (this.mClient.playerData.name.Contains(" ") || String.IsNullOrWhiteSpace(this.mClient.playerData.name))
+                {
+                    this.mClient.rejectPreConnected("You may not have spaces in your name on this server.");
+                    return false;
+                }
+            }
+
+            if (!StarryboundServer.config.allowSymbols)
+            {
+                Regex r = new Regex("^[a-zA-Z0-9_]*$");
+                if (!r.IsMatch(this.mClient.playerData.name))
+                {
+                    this.mClient.rejectPreConnected("You may not have special characters in your name on this server.");
+                    return false;
+                }
+            }
 
             return null;
         }

@@ -73,11 +73,7 @@ namespace com.avilance.Starrybound
                     packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
-                    Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this, false, Util.Direction.Client);
-                    packet2.prepare("Starrybound Server was unable to connect to the parent server.");
-                    packet2.onSend();
-
-                    this.forceDisconnect("Unable to connect to parent server.");
+                    rejectPreConnected("Starrybound server was unable to connect to the parent server.");
                     return;
                 }
 
@@ -184,6 +180,14 @@ namespace com.avilance.Starrybound
                 }
                 catch (Exception) { }
             }
+        }
+
+        public void rejectPreConnected(string reason)
+        {
+            Packet2ConnectResponse packet = new Packet2ConnectResponse(this, false, Util.Direction.Client);
+            packet.prepare(reason);
+            packet.onSend();
+            forceDisconnect(reason);
         }
 
         public void forceDisconnect(string reason)

@@ -69,7 +69,6 @@ namespace com.avilance.Starrybound.Commands
             packetWrite.WriteBE(satellite);
             packetWrite.WriteStarString(player);
             client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
-            client.sendClientPacket(Packet.WarpCommand, packetWarp.ToArray());
 
             return true;
         }

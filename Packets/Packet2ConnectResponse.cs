@@ -16,7 +16,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using com.avilance.Starrybound.Extensions;
-using System.Text.RegularExpressions;
 
 namespace com.avilance.Starrybound.Packets
 {
@@ -46,65 +45,6 @@ namespace com.avilance.Starrybound.Packets
             {
                 this.mClient.forceDisconnect("Rejected by parent server: " + rejectReason);
                 return true;
-            }
-
-            string[] reasonExpiry = Bans.checkForBan(new string[] { player.name, player.uuid, player.ip.ToString() });
-
-            if (reasonExpiry.Length == 2)
-            {
-                tmpArray.Add("success", false);
-                tmpArray.Add("clientID", clientID);
-                tmpArray.Add("rejectReason", "You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
-                this.onSend();
-                this.mClient.forceDisconnect(((reasonExpiry[1] == "0") ? "Permanently" : "Temporarily") + " banned. (Name: " + player.name + "; UUID: " + player.uuid + ") - Ban Expires: " + reasonExpiry[1]);
-                return false;
-            }
-
-            if (StarryboundServer.clients.ContainsKey(player.name))
-            {
-                tmpArray.Add("success", false);
-                tmpArray.Add("clientID", clientID);
-                tmpArray.Add("rejectReason", "This username is already in use.");
-                this.onSend();
-                this.mClient.forceDisconnect("Attempted to use a username already in use! (Name: " + player.name + "; UUID: " + player.uuid + ")");
-                return false;
-            }
-
-            if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
-            {
-                tmpArray.Add("success", false);
-                tmpArray.Add("clientID", clientID);
-                tmpArray.Add("rejectReason", "The server is full. Please try again later.");
-                this.onSend();
-                this.mClient.forceDisconnect("Server is full.");
-                return false;
-            }
-
-            if (!StarryboundServer.config.allowSpaces)
-            {
-                if (this.mClient.playerData.name.Contains(" ") || String.IsNullOrWhiteSpace(this.mClient.playerData.name))
-                {
-                    tmpArray.Add("success", false);
-                    tmpArray.Add("clientID", clientID);
-                    tmpArray.Add("rejectReason", "You may not have spaces in your name on this server.");
-                    this.onSend();
-                    this.mClient.forceDisconnect("Username contained a space.");
-                    return false;
-                }
-            }
-
-            if (!StarryboundServer.config.allowSymbols)
-            {
-                Regex r = new Regex("^[a-zA-Z0-9_]*$");
-                if (!r.IsMatch(this.mClient.playerData.name))
-                {
-                    tmpArray.Add("success", false);
-                    tmpArray.Add("clientID", clientID);
-                    tmpArray.Add("rejectReason", "You may not have special characters in your name on this server.");
-                    this.onSend();
-                    this.mClient.forceDisconnect("Username contained a symbol.");
-                    return false;
-                }
             }
 
             StarryboundServer.clients.Add(player.name, this.mClient);

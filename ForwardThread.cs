@@ -157,10 +157,7 @@ namespace com.avilance.Starrybound
                             string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.mParent.playerData.account + passwordSalt, StarryboundServer.config.passwordRounds);
                             if (passwordHash != verifyHash)
                             {
-                                Packet2ConnectResponse packet = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
-                                packet.prepare("Your password was incorrect.");
-                                packet.onSend();
-                                this.mParent.forceDisconnect("Password was incorrect");
+                                this.mParent.rejectPreConnected("Your password was incorrect.");
                             }
 
                             this.mParent.clientState = ClientState.PendingConnectResponse;
@@ -205,11 +202,8 @@ namespace com.avilance.Starrybound
                                 packetWrite.WriteBE(protocolVersion);
                                 this.mParent.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
-                                Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
-                                packet2.prepare("Starrybound Server was unable to handle the parent server protocol version.");
-                                packet2.onSend();
+                                this.mParent.rejectPreConnected("Starrybound Server was unable to handle the parent server protocol version.");
                                 returnData = false;
-                                this.mParent.errorDisconnect(mDirection, "Cannot handle protocol version [" + protocolVersion + "].");
                             }
                         }
                         else if (packetID == Packet.HandshakeChallenge)
