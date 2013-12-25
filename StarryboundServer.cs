@@ -28,6 +28,7 @@ namespace com.avilance.Starrybound
     {
         public static readonly string SavePath = "..\\starrybound";
         public static ConfigFile config = new ConfigFile();
+        public static ServerFile serverConfig = new ServerFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly int ProtocolVersion = 628;
         
@@ -86,6 +87,7 @@ namespace com.avilance.Starrybound
             monitorThread.Start();
 
             Config.SetupConfig();
+            ServerConfig.SetupConfig();
 
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
@@ -228,7 +230,7 @@ namespace com.avilance.Starrybound
         {
             foreach (ClientThread client in clients.Values)
             {
-                client.sendChatMessage("^#5dc4f4;" + message);
+                client.sendChatMessage(null, "^#5dc4f4;" + message);
             }
         }
     }

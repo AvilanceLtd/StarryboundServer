@@ -58,6 +58,10 @@ namespace com.avilance.Starrybound.Packets
                         new Kick(this.mClient).doProcess(args);
                         break;
 
+                    case "me":
+                        new MeCommand(this.mClient).doProcess(args);
+                        break;
+
                     case "pvp":
                     case "w":
                         return true;
