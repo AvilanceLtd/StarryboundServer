@@ -64,6 +64,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -79,6 +80,7 @@
     <Compile Include="Commands\BanCommand.cs" />
     <Compile Include="Commands\Find.cs" />
     <Compile Include="Commands\Item.cs" />
+    <Compile Include="Commands\MeCommand.cs" />
     <Compile Include="Commands\Planet.cs" />
     <Compile Include="Commands\Kick.cs" />
     <Compile Include="Commands\Mute.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="Packets\Packet7ClientConnect.cs" />
     <Compile Include="Packets\PacketBase.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="ServerConfig.cs" />
     <Compile Include="ServerThread.cs" />
     <Compile Include="StarryboundServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

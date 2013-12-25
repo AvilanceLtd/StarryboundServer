@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace com.avilance.Starrybound
 {
@@ -52,6 +53,7 @@ namespace com.avilance.Starrybound
 
     class ConfigFile
     {
+        [Description("")]
         public string serverAccount = "";
         public string serverPass = "";
         public short serverPort = 21024;
@@ -81,15 +83,25 @@ namespace com.avilance.Starrybound
 
             using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return Read(fs);
+                ConfigFile file = Read(fs);
+                StarryboundServer.logInfo("Starrybound config loaded successfully.");
+                return file;
             }
         }
 
         public static ConfigFile Read(Stream stream)
         {
-            using (var sr = new StreamReader(stream))
+            try
             {
-                return JsonConvert.DeserializeObject<ConfigFile>(sr.ReadToEnd()); 
+                using (var sr = new StreamReader(stream))
+                {
+                    return JsonConvert.DeserializeObject<ConfigFile>(sr.ReadToEnd());
+                }
+            }
+            catch (Exception) 
+            {
+                StarryboundServer.logException("Starrybound config is unreadable - Re-creating config with default values");
+                return new ConfigFile(); 
             }
         }
 
