@@ -105,132 +105,158 @@ namespace com.avilance.Starrybound
 
                     //Create packet parser
                     BinaryReader packetData = new BinaryReader(ms);
+                    #endregion
 
                     //Return data for packet processor
                     object returnData = true;
-                    #endregion
 
-                    #region Handle Packet Data
-                    //Process packet
-                    if (packetID == Packet.ChatSend && mDirection == Direction.Client)
+                    if (mDirection == Direction.Client)
+                    #region Handle Client Packets
                     {
-                        returnData = new Packet11ChatSend(this.mParent, packetData, this.mDirection).onReceive();
-                    }
-                    else if (packetID == Packet.ChatReceive && mDirection == Direction.Server)
-                    {
-                        returnData = new Packet5ChatReceive(this.mParent, packetData, this.mDirection).onReceive();
-                    }
-                    else if (packetID == Packet.ProtocolVersion && mDirection == Direction.Server)
-                    {
-                        uint protocolVersion = packetData.ReadUInt32BE();
-                        if(protocolVersion != StarryboundServer.ProtocolVersion)
+                        #region Protocol State Security
+                        ClientState curState = this.mParent.clientState;
+                        if(curState != ClientState.Connected)
                         {
+                            if(curState == ClientState.PendingConnect && packetID != Packet.ClientConnect)
+                            {
+                                this.mParent.forceDisconnect("Violated PendingConnect protocol state with " + packetName);
+                            }
+                            else if(curState == ClientState.PendingAuthentication && packetID != Packet.HandshakeResponse)
+                            {
+                                this.mParent.forceDisconnect("Violated PendingAuthentication protocol state with " + packetName);
+                            }
+                            else if(curState == ClientState.PendingConnectResponse)
+                            {
+                                this.mParent.forceDisconnect("Violated PendingConnectResponse protocol state with " + packetName);
+                            }
+                        }
+                        #endregion
+
+                        if (packetID == Packet.ChatSend)
+                        {
+                            returnData = new Packet11ChatSend(this.mParent, packetData, this.mDirection).onReceive();
+                        }
+                        else if (packetID == Packet.ClientConnect)
+                        {
+                            this.mParent.clientState = ClientState.PendingAuthentication;
+                            returnData = new Packet7ClientConnect(this.mParent, packetData, this.mDirection).onReceive();
                             MemoryStream packet = new MemoryStream();
                             BinaryWriter packetWrite = new BinaryWriter(packet);
-                            packetWrite.WriteBE(protocolVersion);
-                            this.mParent.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-                            
-                            Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
-                            packet2.prepare("Starrybound Server was unable to handle the parent server protocol version.");
-                            packet2.onSend();
+
+                            passwordSalt = Utils.GenerateSecureSalt();
+                            packetWrite.WriteStarString("");
+                            packetWrite.WriteStarString(passwordSalt);
+                            packetWrite.WriteBE(StarryboundServer.config.passwordRounds);
+                            this.mParent.sendClientPacket(Packet.HandshakeChallenge, packet.ToArray());
+                        }
+                        else if (packetID == Packet.HandshakeResponse)
+                        {
+                            string claimResponse = packetData.ReadStarString();
+                            string passwordHash = packetData.ReadStarString();
+
+                            string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.mParent.playerData.account + passwordSalt, StarryboundServer.config.passwordRounds);
+                            if (passwordHash != verifyHash)
+                            {
+                                Packet2ConnectResponse packet = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
+                                packet.prepare("Your password was incorrect.");
+                                packet.onSend();
+                                this.mParent.forceDisconnect("Password was incorrect");
+                            }
+
+                            this.mParent.clientState = ClientState.PendingConnectResponse;
                             returnData = false;
-                            this.mParent.errorDisconnect(mDirection, "Cannot handle protocol version [" + protocolVersion + "].");
                         }
-                    }
-                    else if (packetID == Packet.ClientConnect && mDirection == Direction.Client)
-                    {
-                        this.mParent.clientState = ClientState.PendingAuthentication;
-                        returnData = new Packet7ClientConnect(this.mParent, packetData, this.mDirection).onReceive();
-                        MemoryStream packet = new MemoryStream();
-                        BinaryWriter packetWrite = new BinaryWriter(packet);
-
-                        passwordSalt = Utils.GenerateSecureSalt();
-                        packetWrite.WriteStarString("");
-                        packetWrite.WriteStarString(passwordSalt);
-                        packetWrite.WriteBE(StarryboundServer.config.passwordRounds);
-                        this.mParent.sendClientPacket(Packet.HandshakeChallenge, packet.ToArray());
-                    }
-                    else if (packetID == Packet.HandshakeChallenge && mDirection == Direction.Server)
-                    {
-                        string claimMessage = packetData.ReadString();
-                        string passwordSalt = packetData.ReadStarString();
-                        int passwordRounds = packetData.ReadInt32BE();
-
-                        MemoryStream packet = new MemoryStream();
-                        BinaryWriter packetWrite = new BinaryWriter(packet);
-                        string passwordHash = Utils.StarHashPassword(StarryboundServer.config.serverPass, StarryboundServer.config.serverAccount + passwordSalt, passwordRounds);
-                        packetWrite.WriteStarString("");
-                        packetWrite.WriteStarString(passwordHash);
-                        this.mParent.sendServerPacket(Packet.HandshakeResponse, packet.ToArray());
-
-                        returnData = false;
-                    }
-                    else if (packetID == Packet.HandshakeResponse && mDirection == Direction.Client)
-                    {
-                        string claimResponse = packetData.ReadStarString();
-                        string passwordHash = packetData.ReadStarString();
-
-                        string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.mParent.playerData.account + passwordSalt, StarryboundServer.config.passwordRounds);
-                        if(passwordHash != verifyHash)
+                        else if (packetID == Packet.WarpCommand)
                         {
-                            Packet2ConnectResponse packet = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
-                            packet.prepare("Your password was incorrect.");
-                            packet.onSend();
-                            this.mParent.forceDisconnect("Password was incorrect");
+                            uint warp = packetData.ReadUInt32BE();
+                            string sector = packetData.ReadStarString();
+                            int x = packetData.ReadInt32BE();
+                            int y = packetData.ReadInt32BE();
+                            int z = packetData.ReadInt32BE();
+                            int planet = packetData.ReadInt32BE();
+                            int satellite = packetData.ReadInt32BE();
+                            string player = packetData.ReadStarString();
+                            StarryboundServer.logInfo("[" + this.mParent.playerData.client + "] WarpCommand [" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
                         }
-
-                        this.mParent.clientState = ClientState.PendingConnectResponse;
-                        returnData = false;
-                    }
-                    else if (packetID == Packet.ConnectResponse && mDirection == Direction.Server)
-                    {
-                        while (this.mParent.clientState != ClientState.PendingConnectResponse) { } //TODO: needs timeout
-                        returnData = new Packet2ConnectResponse(this.mParent, packetData, this.mDirection).onReceive();
-                    }
-                    else if (packetID == Packet.WorldStart && mDirection == Direction.Server)
-                    {
-                        byte[] data1 = packetData.ReadStarByteArray();
-                        byte[] data2 = packetData.ReadStarByteArray();
-                        byte[] data3 = packetData.ReadStarByteArray();
-                        byte[] data4 = packetData.ReadStarByteArray();
-                        float spawnX = packetData.ReadSingleBE();
-                        float spawnY = packetData.ReadSingleBE();
-                        uint mapParamsSize = packetData.ReadVarUInt32();
-                        List<string> mapParamsKeys = new List<string>();
-                        List<object> mapParamsValues = new List<object>();
-                        for (int i = 0; i < mapParamsSize; i++)
+                        else if (packetID == Packet.DamageTile)
                         {
-                            mapParamsKeys.Add(packetData.ReadStarString());
-                            mapParamsValues.Add(packetData.ReadStarVariant());
+                            if (!this.mParent.playerData.canBuild) continue;
                         }
-                        uint uint1 = packetData.ReadUInt32BE();
-                        bool bool1 = packetData.ReadBoolean();
+                        else if (packetID == Packet.DamageTileGroup)
+                        {
+                            if (!this.mParent.playerData.canBuild) continue;
+                        }
                     }
-                    else if (packetID == Packet.WorldStop && mDirection == Direction.Server)
+                    #endregion
+                    else
+                    #region Handle Server Packets
                     {
-                        string status = packetData.ReadStarString();
+                        if (packetID == Packet.ChatReceive)
+                        {
+                            returnData = new Packet5ChatReceive(this.mParent, packetData, this.mDirection).onReceive();
+                        }
+                        else if (packetID == Packet.ProtocolVersion)
+                        {
+                            uint protocolVersion = packetData.ReadUInt32BE();
+                            if (protocolVersion != StarryboundServer.ProtocolVersion)
+                            {
+                                MemoryStream packet = new MemoryStream();
+                                BinaryWriter packetWrite = new BinaryWriter(packet);
+                                packetWrite.WriteBE(protocolVersion);
+                                this.mParent.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+
+                                Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
+                                packet2.prepare("Starrybound Server was unable to handle the parent server protocol version.");
+                                packet2.onSend();
+                                returnData = false;
+                                this.mParent.errorDisconnect(mDirection, "Cannot handle protocol version [" + protocolVersion + "].");
+                            }
+                        }
+                        else if (packetID == Packet.HandshakeChallenge)
+                        {
+                            string claimMessage = packetData.ReadString();
+                            string passwordSalt = packetData.ReadStarString();
+                            int passwordRounds = packetData.ReadInt32BE();
+
+                            MemoryStream packet = new MemoryStream();
+                            BinaryWriter packetWrite = new BinaryWriter(packet);
+                            string passwordHash = Utils.StarHashPassword(StarryboundServer.config.serverPass, StarryboundServer.config.serverAccount + passwordSalt, passwordRounds);
+                            packetWrite.WriteStarString("");
+                            packetWrite.WriteStarString(passwordHash);
+                            this.mParent.sendServerPacket(Packet.HandshakeResponse, packet.ToArray());
+
+                            returnData = false;
+                        }
+                        else if (packetID == Packet.ConnectResponse)
+                        {
+                            while (this.mParent.clientState != ClientState.PendingConnectResponse) { } //TODO: needs timeout
+                            returnData = new Packet2ConnectResponse(this.mParent, packetData, this.mDirection).onReceive();
+                        }
+                        else if (packetID == Packet.WorldStart)
+                        {
+                            byte[] data1 = packetData.ReadStarByteArray();
+                            byte[] data2 = packetData.ReadStarByteArray();
+                            byte[] data3 = packetData.ReadStarByteArray();
+                            byte[] data4 = packetData.ReadStarByteArray();
+                            float spawnX = packetData.ReadSingleBE();
+                            float spawnY = packetData.ReadSingleBE();
+                            uint mapParamsSize = packetData.ReadVarUInt32();
+                            List<string> mapParamsKeys = new List<string>();
+                            List<object> mapParamsValues = new List<object>();
+                            for (int i = 0; i < mapParamsSize; i++)
+                            {
+                                mapParamsKeys.Add(packetData.ReadStarString());
+                                mapParamsValues.Add(packetData.ReadStarVariant());
+                            }
+                            uint uint1 = packetData.ReadUInt32BE();
+                            bool bool1 = packetData.ReadBoolean();
+                        }
+                        else if (packetID == Packet.WorldStop)
+                        {
+                            string status = packetData.ReadStarString();
+                        }
                     }
-                    else if (packetID == Packet.WarpCommand && mDirection == Direction.Client)
-                    {
-                        uint warp = packetData.ReadUInt32BE();
-                        string sector = packetData.ReadStarString();
-                        int x = packetData.ReadInt32BE();
-                        int y = packetData.ReadInt32BE();
-                        int z = packetData.ReadInt32BE();
-                        int planet = packetData.ReadInt32BE();
-                        int satellite = packetData.ReadInt32BE();
-                        string player = packetData.ReadStarString();
-                        StarryboundServer.logInfo("[" + this.mParent.playerData.client + "] WarpCommand [" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
-                    }
-                    else if(packetID == Packet.DamageTile)
-                    {
-                        if (!this.mParent.playerData.canBuild) continue;
-                    }
-                    else if (packetID == Packet.DamageTileGroup)
-                    {
-                        if (!this.mParent.playerData.canBuild) continue;
-                    }
-#endregion
+                    #endregion
 
                     #if DEBUG
                     if (StarryboundServer.config.logLevel == LogType.Debug)
