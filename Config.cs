@@ -54,6 +54,7 @@ namespace com.avilance.Starrybound
     {
         public string serverAccount = "";
         public string serverPass = "";
+        public short serverPort = 21024;
 
         public string proxyIP = "0.0.0.0";
         public short proxyPort = 21025;
@@ -71,6 +72,8 @@ namespace com.avilance.Starrybound
         public bool allowSpaces = false;
 
         public bool allowSymbols = false;
+
+        public string[] sectors = new string[] { "alpha", "beta", "gamma", "delta", "sectorx" };
         
         public static ConfigFile Read(string path) {
             if (!File.Exists(path))

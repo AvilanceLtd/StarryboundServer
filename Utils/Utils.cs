@@ -77,5 +77,31 @@ namespace com.avilance.Starrybound.Util
             unixTimeStamp = (Int32)(zuluTime.Subtract(unixEpoch)).TotalSeconds;
             return unixTimeStamp;
         }
+
+        public static byte[] findGlobalCoords(byte[] input)
+        {
+            try
+            {
+                for (int i = 0; i < input.Length - 10; i++)
+                {
+                    foreach (byte[] sector in StarryboundServer.sectors)
+                    {
+                        byte[] buffer = new byte[sector.Length];
+                        Buffer.BlockCopy(input, i, buffer, 0, sector.Length);
+                        if (sector.SequenceEqual(buffer))
+                        {
+                            byte[] returnBytes = new byte[sector.Length + 21];
+                            Buffer.BlockCopy(input, i - 1, returnBytes, 0, sector.Length + 21);
+                            return returnBytes;
+                        }
+                    }
+                }
+                return null;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
+        }
     }
 }

@@ -173,7 +173,28 @@ namespace com.avilance.Starrybound
                             int planet = packetData.ReadInt32BE();
                             int satellite = packetData.ReadInt32BE();
                             string player = packetData.ReadStarString();
-                            StarryboundServer.logInfo("[" + this.mParent.playerData.client + "] WarpCommand [" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
+                            WarpType cmd = (WarpType)warp;
+                            if(cmd == WarpType.WarpToHomePlanet)
+                            {
+                                this.mParent.playerData.lastPlayerShip = this.mParent.playerData.inPlayerShip;
+                                this.mParent.playerData.inPlayerShip = "";
+                            }
+                            else if(cmd == WarpType.WarpToOrbitedPlanet)
+                            {
+                                this.mParent.playerData.lastPlayerShip = this.mParent.playerData.inPlayerShip;
+                                this.mParent.playerData.inPlayerShip = "";
+                            }
+                            else if (cmd == WarpType.WarpToOwnShip)
+                            {
+                                if (this.mParent.playerData.name != this.mParent.playerData.lastPlayerShip) this.mParent.playerData.lastPlayerShip = this.mParent.playerData.inPlayerShip;
+                                this.mParent.playerData.inPlayerShip = this.mParent.playerData.name; //This is likely wrong if they are on a friends ship.
+                            }
+                            else if(cmd == WarpType.WarpToPlayerShip)
+                            {
+                                if (player != this.mParent.playerData.lastPlayerShip) this.mParent.playerData.lastPlayerShip = this.mParent.playerData.inPlayerShip;
+                                this.mParent.playerData.inPlayerShip = player;
+                            }
+                            StarryboundServer.logDebug("WarpCommand", "[" + this.mParent.playerData.client + "][" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
                         }
                         else if (packetID == Packet.DamageTile)
                         {
@@ -249,15 +270,45 @@ namespace com.avilance.Starrybound
                         {
                             string status = packetData.ReadStarString();
                         }
+                        else if (packetID == Packet.GiveItem)
+                        {
+                            string name = packetData.ReadStarString();
+                            uint count = packetData.ReadVarUInt32();
+                            List<object> itemDesc = packetData.ReadStarVariant();
+                        }
+                        else if (packetID == Packet.EnvironmentUpdate && packetSize > 80)
+                        {
+                            try
+                            {
+                                byte[] data1 = packetData.ReadStarByteArray();
+                                byte[] data2 = packetData.ReadStarByteArray();
+                                byte[] coords = Utils.findGlobalCoords(data1);
+                                if (coords != null)
+                                {
+                                    BinaryReader getCoords = new BinaryReader(new MemoryStream(coords));
+                                    string sector = this.mParent.playerData.sector = getCoords.ReadStarString();
+                                    int x = this.mParent.playerData.x = getCoords.ReadInt32BE();
+                                    int y = this.mParent.playerData.y = getCoords.ReadInt32BE();
+                                    int z = this.mParent.playerData.z = getCoords.ReadInt32BE();
+                                    int planet = this.mParent.playerData.planet = getCoords.ReadInt32BE();
+                                    int satellite = this.mParent.playerData.satellite = getCoords.ReadInt32BE();
+                                    StarryboundServer.logDebug("EnvUpdate", "[" + this.mParent.playerData.client + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "]");
+                                }
+                            }
+                            catch(Exception) { }
+                        }
                     }
                     #endregion
 
                     #if DEBUG
                     if (StarryboundServer.config.logLevel == LogType.Debug)
                     {
-                        if (packetData.BaseStream.Position != ms.Length)
-                            StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetName + ":" + packetID + "] failed parse (" + packetData.BaseStream.Position + " != " + ms.Length + ")");
-                        StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetName + ":" + packetID + "] Dumping " + ms.Length + " bytes: " + Utils.ByteArrayToString(ms.ToArray()));
+                        if ((packetID == Packet.EnvironmentUpdate && packetSize > 100))
+                        {
+                            if (ms.Position != ms.Length)
+                                StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetName + ":" + packetID + "] failed parse (" + ms.Position + " != " + ms.Length + ")");
+                            StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetName + ":" + packetID + "] Dumping " + ms.Length + " bytes: " + Utils.ByteArrayToString(ms.ToArray()));
+                        }
                     }
                     #endif
 

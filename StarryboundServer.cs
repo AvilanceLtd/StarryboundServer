@@ -50,6 +50,8 @@ namespace com.avilance.Starrybound
         public static int startTime;
         public static int restartTime = 0;
 
+        public static List<byte[]> sectors = new List<byte[]>();
+
         private static void ProcessExit(object sender, EventArgs e)
         {
             try
@@ -102,6 +104,20 @@ namespace com.avilance.Starrybound
                 logWarn("The logLevel in your config is currently set to DEBUG. This **WILL** flood your console and log file, if you do not want this please edit your config logLevel to INFO");
                 logWarn("Launch will proceed in 5 seconds.");
                 System.Threading.Thread.Sleep(5000);
+            }
+
+            if(config.proxyPort == config.serverPort)
+            {
+                logFatal("You cannot have the serverPort and proxyPort on the same port!");
+                logFatal("Press any key to continue...");
+                Console.ReadKey(true);
+                Environment.Exit(0);
+            }
+
+            //Precompute for global position search
+            foreach(string sector in config.sectors)
+            {
+                sectors.Add(Encoding.UTF8.GetBytes(sector));
             }
 
             Bans.readBansFromFile();

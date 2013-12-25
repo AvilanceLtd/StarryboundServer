@@ -26,6 +26,16 @@ namespace com.avilance.Starrybound
         public uint id;
         public string uuid;
 
+        public string sector;
+        public int x;
+        public int y;
+        public int z;
+        public int planet;
+        public int satellite;
+
+        public string inPlayerShip = "";
+        public string lastPlayerShip = "";
+
         public string client { get { if (String.IsNullOrEmpty(name)) return ip; else return name; } }
 
         public bool isMuted = false;

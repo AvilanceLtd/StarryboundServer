@@ -45,6 +45,7 @@ namespace com.avilance.Starrybound.Packets
             this.mClient.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
             this.mClient.playerData.name = name;
             this.mClient.playerData.account = account;
+            this.mClient.playerData.lastPlayerShip = this.mClient.playerData.inPlayerShip = name;
 
             string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.mClient.playerData.uuid, this.mClient.playerData.ip });
 

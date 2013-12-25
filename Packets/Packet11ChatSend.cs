@@ -42,78 +42,102 @@ namespace com.avilance.Starrybound.Packets
             string message = packetData.ReadStarString();
             byte context = packetData.ReadByte();
 
+            #region Command Processor
             if (message.StartsWith("/"))
             {
-                StarryboundServer.logInfo("[Command] [" + this.mClient.playerData.name + "]: " + message);
-                string[] args = message.Remove(0, 1).Split(' ');
-                string cmd = args[0].ToLower();
-                args = message.Remove(0, cmd.Length + 1).Split(' ');
+                try
+                {
+                    StarryboundServer.logInfo("[Command] [" + this.mClient.playerData.name + "]: " + message);
+                    string[] args = message.Remove(0, 1).Split(' ');
+                    string cmd = args[0].ToLower();
+                    args = message.Remove(0, cmd.Length + 1).Split(' ');
 
-                switch (cmd) {
-                    case "ban":
-                        new BanCommand(this.mClient).doProcess(args);
-                        break;
+                    switch (cmd)
+                    {
+                        case "ban":
+                            new BanCommand(this.mClient).doProcess(args);
+                            break;
 
-                    case "kick":
-                        new Kick(this.mClient).doProcess(args);
-                        break;
+                        case "kick":
+                            new Kick(this.mClient).doProcess(args);
+                            break;
 
-                    case "pvp":
-                    case "w":
-                        return true;
+                        case "pvp":
+                        case "w":
+                            return true;
 
-                    case "nick":
-                        if (this.mClient.playerData.hasPermission("cmd.nick")) return true;
-                        else
-                        {
-                            this.mClient.sendChatMessage(ChatReceiveContext.Whisper, "", "You do not have permission to use this command.");
-                        }
-                        break;
+                        case "nick":
+                            if (this.mClient.playerData.hasPermission("cmd.nick")) return true;
+                            else
+                            {
+                                this.mClient.sendChatMessage(ChatReceiveContext.Whisper, "", "You do not have permission to use this command.");
+                            }
+                            break;
 
-                    case "who":
-                    case "online":
-                    case "players":
-                        new Players(this.mClient).doProcess(args);
-                        break;
+                        case "who":
+                        case "online":
+                        case "players":
+                            new Players(this.mClient).doProcess(args);
+                            break;
 
-                    case "broadcast":
-                        new Broadcast(this.mClient).doProcess(args);
-                        break;
+                        case "broadcast":
+                            new Broadcast(this.mClient).doProcess(args);
+                            break;
 
-                    case "ship":
-                        new Ship(this.mClient).doProcess(args);
-                        break;
+                        case "ship":
+                            new Ship(this.mClient).doProcess(args);
+                            break;
 
-                    case "planet":
-                        new Planet(this.mClient).doProcess(args);
-                        break;
+                        case "planet":
+                            new Planet(this.mClient).doProcess(args);
+                            break;
 
-                    case "home":
-                        new Home(this.mClient).doProcess(args);
-                        break;
+                        case "home":
+                            new Home(this.mClient).doProcess(args);
+                            break;
 
-                    case "mute":
-                        new Mute(this.mClient).doProcess(args);
-                        break;
+                        case "item":
+                        case "give":
+                            new Item(this.mClient).doProcess(args);
+                            break;
 
-                    case "uptime":
-                        new Uptime(this.mClient).doProcess(args);
-                        break;
+                        case "mute":
+                            new Mute(this.mClient).doProcess(args);
+                            break;
 
-                    case "shutdown":
-                        new Shutdown(this.mClient).doProcess(args);
-                        break;
+                        case "uptime":
+                            new Uptime(this.mClient).doProcess(args);
+                            break;
 
-                    case "build":
-                        new Build(this.mClient).doProcess(args);
-                        break;
+                        case "shutdown":
+                            new Shutdown(this.mClient).doProcess(args);
+                            break;
 
-                    default:
-                        this.mClient.sendCommandMessage("Command " + cmd + " not found.");
-                        break;
+                        case "build":
+                            new Build(this.mClient).doProcess(args);
+                            break;
+
+                        case "where":
+                        case "find":
+                            new Find(this.mClient).doProcess(args);
+                            break;
+
+                        case "warpship":
+                            new WarpShip(this.mClient).doProcess(args);
+                            break;
+
+                        default:
+                            this.mClient.sendCommandMessage("Command " + cmd + " not found.");
+                            break;
+                    }
+                    return false;
                 }
-                return false;
+                catch (Exception e)
+                {
+                    this.mClient.sendCommandMessage("Command failed: " + e.Message);
+                }
             }
+            #endregion
 
             if (this.mClient.playerData.isMuted)
             {

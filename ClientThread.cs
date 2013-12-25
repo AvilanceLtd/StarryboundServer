@@ -61,7 +61,7 @@ namespace com.avilance.Starrybound
                 StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
                 sSocket = new TcpClient();
-                sSocket.Connect("127.0.0.1", 21024);
+                sSocket.Connect("127.0.0.1", StarryboundServer.config.serverPort);
 
                 this.sIn = new BinaryReader(this.sSocket.GetStream());
                 this.sOut = new BinaryWriter(this.sSocket.GetStream());
