@@ -30,6 +30,7 @@ namespace com.avilance.Starrybound
         public static ConfigFile config = new ConfigFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly int ProtocolVersion = 628;
+        public static StarboundVersion starboundVersion = new StarboundVersion();
         
         // Dictionary<string, ClientThread>
         // string           Username        Unique username for client, MUST be lowercase
@@ -222,6 +223,13 @@ namespace com.avilance.Starrybound
             }
 
             if ((int)logType >= (int)config.logLevel) Console.WriteLine(message);
+        }
+
+        public struct StarboundVersion
+        {
+            public int Major;
+            public int Minor;
+            public string Name;
         }
 
         public static void sendGlobalMessage (string message) 

@@ -54,7 +54,14 @@ namespace com.avilance.Starrybound
 
                 if (consoleLine.Contains("Info: Server version"))
                 {
-                    // Grab server version
+                    string[] versionString = consoleLine.Split('\'');
+                    string versionName = versionString[1];
+                    int versionMajor = int.Parse(versionString[3]);
+                    int versionMinor = int.Parse(versionString[5]);
+                    StarryboundServer.starboundVersion.Major = versionMajor;
+                    StarryboundServer.starboundVersion.Minor = versionMinor;
+                    StarryboundServer.starboundVersion.Name = versionName;
+                    StarryboundServer.logInfo("Starbound version detected: " + versionName + " ("+versionMajor+"."+versionMinor+")");
                 }
 
                 if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
@@ -69,6 +76,14 @@ namespace com.avilance.Starrybound
                 if (consoleLine.Contains("TcpServer listening on: "))
                 {
                     StarryboundServer.serverState = Util.ServerState.StartingProxy;
+                }
+
+                if (consoleLine.Contains("Info: Client "))
+                {
+                    if (consoleLine.Contains(" connected"))
+                    {
+
+                    }
                 }
 
                 Console.WriteLine("[STAR] " + consoleLine);
