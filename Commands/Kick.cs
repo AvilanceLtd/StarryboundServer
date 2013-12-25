@@ -45,10 +45,7 @@ namespace com.avilance.Starrybound.Commands
             }
             else
             {
-                Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "Player '" + player + "' not found.");
-                packet.onSend();
-
+                this.client.sendCommandMessage("Player '" + player + "' not found.");
                 return false;
             }
         }

@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using com.avilance.Starrybound.Util;
 
 namespace com.avilance.Starrybound.Commands
 {
@@ -30,11 +31,9 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
-            int seconds = StarryboundServer.getTimestamp() - StarryboundServer.startTime;
+            int seconds = Utils.getTimestamp() - StarryboundServer.startTime;
 
-            Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-            packet.prepare(Util.ChatReceiveContext.White, "", 0, "server", "I have been online for " + string.Format("{0:0} hour(s) {1:0} minute(s) and {2:0} second(s).",seconds/3600,(seconds/60)%60,seconds%60));
-            packet.onSend();
+            this.client.sendCommandMessage("I have been online for " + string.Format("{0:0} hour(s) {1:0} minute(s) and {2:0} second(s).", seconds / 3600, (seconds / 60) % 60, seconds % 60));
 
             return true;
         }

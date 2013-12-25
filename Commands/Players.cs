@@ -42,11 +42,7 @@ namespace com.avilance.Starrybound.Commands
 
                 i++;
             }
-
-            Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-            packet.prepare(Util.ChatReceiveContext.White, "", 0, "server", noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s): " + list);
-            packet.onSend();
-
+            this.client.sendCommandMessage(noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s): " + list);
             return true;
         }
     }

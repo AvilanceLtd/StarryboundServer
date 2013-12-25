@@ -28,25 +28,18 @@ namespace com.avilance.Starrybound
     class ClientThread
     {
         public Player playerData = new Player();
-        public string clientUUID { get { return playerData.UUID; } set { playerData.UUID = value; } }
-
-        public bool kickException = false;
-
         public ClientState clientState = ClientState.PendingConnect;
-        public string passwordSalt;
 
-        TcpClient cSocket;
-        BinaryReader cIn;
-        BinaryWriter cOut;
+        private TcpClient cSocket;
+        private BinaryReader cIn;
+        private BinaryWriter cOut;
 
-        TcpClient sSocket;
-        BinaryReader sIn;
-        BinaryWriter sOut;
+        private TcpClient sSocket;
+        private BinaryReader sIn;
+        private BinaryWriter sOut;
 
-        public Int32 targetTimestamp = 0;
-
-        public Boolean blockPackets = false;
-        public Boolean connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected) return true; else return false; } }
+        public int kickTargetTimestamp = 0;
+        public bool connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected && this.clientState != ClientState.Disposing) return true; else return false; } }
 
         public ClientThread(TcpClient aClient)
         {
@@ -63,12 +56,9 @@ namespace com.avilance.Starrybound
                 IPEndPoint ipep = (IPEndPoint)this.cSocket.Client.RemoteEndPoint;
                 IPAddress ipa = ipep.Address;
 
-                this.playerData.ip = ipep.Address;
+                this.playerData.ip = ipep.Address.ToString();
 
-                StarryboundServer.logInfo("Accepting new connection from " + ipa.ToString());
-
-                this.clientUUID = StarryboundServer.uniqueID.ToString();
-                StarryboundServer.uniqueID++;
+                StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
                 sSocket = new TcpClient();
                 sSocket.Connect("127.0.0.1", 21024);
@@ -78,16 +68,16 @@ namespace com.avilance.Starrybound
 
                 if (!sSocket.Connected)
                 {
-                    StarryboundServer.logWarn("[" + this.clientUUID + "]: Client unable to connect to parent server.");
-
                     MemoryStream packet = new MemoryStream();
                     BinaryWriter packetWrite = new BinaryWriter(packet);
                     packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
                     Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this, false, Util.Direction.Client);
-                    packet2.prepare(false, 0, "Starrybound Server was unable to connect to the parent server.");
+                    packet2.prepare("Starrybound Server was unable to connect to the parent server.");
                     packet2.onSend();
+
+                    this.forceDisconnect("Unable to connect to parent server.");
                     return;
                 }
 
@@ -99,106 +89,121 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                StarryboundServer.logException("Client (" + this.playerData.name + ") encountered an error: ");
-                StarryboundServer.logException(e.ToString());
+                this.forceDisconnect("ClientThread Error: " + e.ToString());
             }
         }
 
         public void sendClientPacket(Packet packetID, byte[] packetData)
         {
-            this.cOut.WriteVarUInt32((uint)packetID);
-            this.cOut.WriteVarInt32((int)packetData.Length);
-            this.cOut.Write(packetData);
-            this.cOut.Flush();
+            try
+            {
+                this.cOut.WriteVarUInt32((uint)packetID);
+                this.cOut.WriteVarInt32((int)packetData.Length);
+                this.cOut.Write(packetData);
+                this.cOut.Flush();
+            }
+            catch (Exception e)
+            {
+                this.errorDisconnect(Direction.Client, "Failed to send packet: " + e.Message);
+            }
         }
 
         public void sendServerPacket(Packet packetID, byte[] packetData)
         {
-            this.sOut.WriteVarUInt32((uint)packetID);
-            this.sOut.WriteVarInt32((int)packetData.Length);
-            this.sOut.Write(packetData);
-            this.sOut.Flush();
+            try
+            {
+                this.sOut.WriteVarUInt32((uint)packetID);
+                this.sOut.WriteVarInt32((int)packetData.Length);
+                this.sOut.Write(packetData);
+                this.sOut.Flush();
+            }
+            catch (Exception e)
+            {
+                this.errorDisconnect(Direction.Server, "Failed to send packet: " + e.Message);
+            }
         }
 
-        public void connectionClosed()
+        public void sendCommandMessage(string message)
         {
-            if (StarryboundServer.clients.ContainsKey(this.playerData.name) && this.clientState != ClientState.Disposing)
-            {
-                StarryboundServer.clients.Remove(this.playerData.name);
-                StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
-            }
+            sendChatMessage(ChatReceiveContext.CommandResult, "", message);
+        }
 
-            this.clientState = ClientState.Disposing;
+        public void sendChatMessage(string message)
+        {
+            sendChatMessage("", message);
+        }
 
-            this.cSocket.Close();
-            this.sSocket.Close();
+        public void sendChatMessage(string name, string message)
+        {
+            sendChatMessage(ChatReceiveContext.Broadcast, "", message);
+        }
+
+        public void sendChatMessage(ChatReceiveContext context, string name, string message)
+        {
+            if (clientState != ClientState.Connected) return;
+            Packet11ChatSend packet = new Packet11ChatSend(this, false, Util.Direction.Client);
+            packet.prepare(context, "", 0, name, message);
+            packet.onSend();
         }
 
         public void banClient(string reason)
         {
-            try
-            {
-                sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-
-                Packet11ChatSend packet = new Packet11ChatSend(this, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.Broadcast, "", 0, "server", "^#f75d5d;You have been banned from the server for " + reason + ".");
-                packet.onSend();
-
-                this.clientState = ClientState.Disposing;
-
-                StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been banned from the server for " + reason + "!");
-                StarryboundServer.clients.Remove(this.playerData.name);
-
-                this.blockPackets = true;
-
-                targetTimestamp = StarryboundServer.getTimestamp() + 7;
-
-            }
-            catch (Exception) { }
+            sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
+            sendChatMessage("^#f75d5d;You have been banned from the server for " + reason + ".");
+            StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been banned from the server for " + reason + "!");
+            kickTargetTimestamp = Utils.getTimestamp() + 7;
         }
 
         public void kickClient(string reason)
         {
-            
-            try
-            {
-                sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-
-                Packet11ChatSend packet = new Packet11ChatSend(this, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.Broadcast, "", 0, "server", "^#f75d5d;You have been kicked from the server by an administrator.");
-                packet.onSend();
-
-                this.clientState = ClientState.Disposing;
-
-                StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been kicked from the server!");
-                StarryboundServer.clients.Remove(this.playerData.name);
-
-                this.blockPackets = true;
-
-                targetTimestamp = StarryboundServer.getTimestamp() + 7;
-            
-            }
-            catch (Exception) {}
+            sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
+            sendChatMessage("^#f75d5d;You have been kicked from the server by an administrator.");
+            StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been kicked from the server!");
+            kickTargetTimestamp = Utils.getTimestamp() + 7;
         }
 
-        public void connectionLost(Direction direction, string reason)
+        private void doDisconnect(bool log)
         {
-            try
+            if (this.playerData.name != null)
             {
-                if (StarryboundServer.clients.ContainsKey(this.playerData.name) && this.clientState != ClientState.Disposing)
+                if (StarryboundServer.clients.ContainsKey(this.playerData.name))
                 {
                     StarryboundServer.clients.Remove(this.playerData.name);
                     StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    if(!log)
+                        StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
                 }
-
-                this.clientState = ClientState.Disposing;
-
-                sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-                connectionClosed();
             }
-            catch (Exception) {}
+            if (this.clientState != ClientState.Disposing)
+            {
+                this.clientState = ClientState.Disposing;
+                try
+                {
+                    this.cSocket.Close();
+                    this.sSocket.Close();
+                }
+                catch (Exception) { }
+            }
+        }
 
-            StarryboundServer.logError("- Connection from " + this.clientUUID + " dropped by " + direction.ToString() + " for " + reason);
+        public void forceDisconnect(string reason)
+        {
+            if (this.clientState != ClientState.Disposing)
+                StarryboundServer.logWarn("[" + playerData.client + "] Dropped for " + reason);
+            doDisconnect(true);
+        }
+
+        public void errorDisconnect(Direction direction, string reason)
+        {
+            if (this.clientState != ClientState.Disposing)
+                StarryboundServer.logError("[" + playerData.client + "] Dropped by parent " + direction.ToString() + " for " + reason);
+            doDisconnect(true);
+        }
+
+
+        public void forceDisconnect()
+        {
+            doDisconnect(false);
         }
     }
 }

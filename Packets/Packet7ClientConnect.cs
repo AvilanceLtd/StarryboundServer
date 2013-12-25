@@ -41,11 +41,9 @@ namespace com.avilance.Starrybound.Packets
             string account = packetData.ReadStarString();
 
             // Identify player to server
-            this.mClient.playerData.UUID = Utils.ByteArrayToString(UUID).ToLower();
+            this.mClient.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
             this.mClient.playerData.name = name;
             this.mClient.playerData.account = account;
-
-            StarryboundServer.logDebug("[" + this.mClient.clientUUID + "][" + this.mDirection.ToString() + "] ClientConnect:[" + name + ":" + account + ":" + species + ":" + Utils.ByteArrayToString(UUID).ToLower() + "]");
 
             return null;
         }

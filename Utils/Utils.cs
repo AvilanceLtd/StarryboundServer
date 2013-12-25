@@ -66,6 +66,16 @@ namespace com.avilance.Starrybound.Util
             byte[] buffer = new byte[24];
             rng.GetNonZeroBytes(buffer);
             return Convert.ToBase64String(buffer);
-        }    
+        }
+
+        public static int getTimestamp()
+        {
+            int unixTimeStamp;
+            DateTime currentTime = DateTime.Now;
+            DateTime zuluTime = currentTime.ToUniversalTime();
+            DateTime unixEpoch = new DateTime(1970, 1, 1);
+            unixTimeStamp = (Int32)(zuluTime.Subtract(unixEpoch)).TotalSeconds;
+            return unixTimeStamp;
+        }
     }
 }

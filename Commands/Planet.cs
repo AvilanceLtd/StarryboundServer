@@ -33,9 +33,7 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
-            Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-            packet.prepare(Util.ChatReceiveContext.White, "", 0, "server", "Teleporting to orbited planet.");
-            packet.onSend();
+            this.client.sendCommandMessage("Teleporting to orbited planet.");
 
             MemoryStream packetWarp = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packetWarp);

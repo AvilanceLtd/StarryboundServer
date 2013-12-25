@@ -44,10 +44,9 @@ namespace com.avilance.Starrybound.Packets
 
             if (message.StartsWith("/"))
             {
+                StarryboundServer.logInfo("[Command] [" + this.mClient.playerData.name + "]: " + message);
                 string[] args = message.Remove(0, 1).Split(' ');
-
                 string cmd = args[0].ToLower();
-
                 args = message.Remove(0, cmd.Length + 1).Split(' ');
 
                 switch (cmd) {
@@ -67,9 +66,7 @@ namespace com.avilance.Starrybound.Packets
                         if (this.mClient.playerData.hasPermission("cmd.nick")) return true;
                         else
                         {
-                            Packet11ChatSend packetE = new Packet11ChatSend(this.mClient, false, Util.Direction.Client);
-                            packetE.prepare(Util.ChatReceiveContext.Whisper, "", 0, "server", "You do not have permission to use this command.");
-                            packetE.onSend();
+                            this.mClient.sendChatMessage(ChatReceiveContext.Whisper, "", "You do not have permission to use this command.");
                         }
                         break;
 
@@ -112,26 +109,38 @@ namespace com.avilance.Starrybound.Packets
                         break;
 
                     default:
-                        Packet11ChatSend packet = new Packet11ChatSend(this.mClient, false, Util.Direction.Client);
-                        packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "Command " + cmd + " not found.");
-                        packet.onSend();
+                        this.mClient.sendCommandMessage("Command " + cmd + " not found.");
                         break;
-                }
-
-                if (this.mClient.playerData.isMuted)
-                {
-                    Packet11ChatSend packet = new Packet11ChatSend(this.mClient, false, Util.Direction.Client);
-                    packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "^#f75d5d;You try to speak, but nothing comes out... You have been muted.");
-                    packet.onSend();
-
-                    return false;
                 }
                 return false;
             }
 
-            StarryboundServer.logInfo("[" + this.mClient.clientUUID + "][" + this.mDirection.ToString() + "] Chat: [" + context + "] Message: " + message);
+            if (this.mClient.playerData.isMuted)
+            {
+                this.mClient.sendCommandMessage("^#f75d5d;You try to speak, but nothing comes out... You have been muted.");
+                return false;
+            }
 
+            StarryboundServer.logInfo("[" + ((ChatSendContext)context).ToString() + "] [" + this.mClient.playerData.name + "]: " + message);
             return true;
+        }
+
+        public void prepare(ChatReceiveContext context, string message)
+        {
+            tmpArray.Add("context", context);
+            tmpArray.Add("world", "");
+            tmpArray.Add("entityID", 0);
+            tmpArray.Add("name", "");
+            tmpArray.Add("message", message);
+        }
+
+        public void prepare(ChatReceiveContext context, string name, string message)
+        {
+            tmpArray.Add("context", context);
+            tmpArray.Add("world", "");
+            tmpArray.Add("entityID", 0);
+            tmpArray.Add("name", name);
+            tmpArray.Add("message", message);
         }
 
         public void prepare(ChatReceiveContext context, string world, uint entityID, string name, string message)

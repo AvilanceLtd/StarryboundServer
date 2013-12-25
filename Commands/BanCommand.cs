@@ -47,11 +47,11 @@ namespace com.avilance.Starrybound.Commands
             {
                 ClientThread target = StarryboundServer.clients[player];
 
-                string uuid = target.playerData.UUID;
+                string uuid = target.playerData.uuid;
                 string name = target.playerData.name;
                 string ip = target.playerData.ip.ToString();
 
-                int timeNow = StarryboundServer.getTimestamp();
+                int timeNow = Utils.getTimestamp();
 
                 try
                 {
@@ -67,21 +67,14 @@ namespace com.avilance.Starrybound.Commands
                 }
                 catch (Exception e)
                 {
-                    Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-                    packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "An exception occured while attempting to ban " + player);
-                    packet.onSend();
-
+                    this.client.sendCommandMessage("An exception occured while attempting to ban " + player);
                     StarryboundServer.logException("Error occured while banning player " + player + ": " + e.ToString());
-
                     return false;
                 }
             }
             else
             {
-                Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "Player '" + player + "' not found.");
-                packet.onSend();
-
+                this.client.sendCommandMessage("Player '" + player + "' not found.");
                 return false;
             }
         }
@@ -103,13 +96,8 @@ namespace com.avilance.Starrybound.Commands
         public override bool doProcess(string[] args)
         {
             if (!hasPermission()) { permissionError(); return false; }
-
-            Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-            packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "Attempting to reload all server bans from banned-players.txt");
-            packet.onSend();
-
+            this.client.sendChatMessage("Attempting to reload all server bans from banned-players.txt");
             Bans.readBansFromFile();
-
             return true;
         }
     }

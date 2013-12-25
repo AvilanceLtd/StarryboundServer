@@ -17,6 +17,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using com.avilance.Starrybound.Util;
 
 namespace com.avilance.Starrybound
 {
@@ -28,22 +29,20 @@ namespace com.avilance.Starrybound
             TcpListener serversocket = new TcpListener(localAdd, StarryboundServer.config.proxyPort);
 
             serversocket.Start();
-            StarryboundServer.logInfo("> Proxy server has been started on " + localAdd.ToString() + ":" + StarryboundServer.config.proxyPort);
-
-            StarryboundServer.serverState = Util.ServerState.Running;
+            StarryboundServer.logInfo("Proxy server has been started on " + localAdd.ToString() + ":" + StarryboundServer.config.proxyPort);
+            StarryboundServer.serverState = ServerState.Running;
 
             try
             {
                 while (true)
                 {
                     TcpClient clientSocket = serversocket.AcceptTcpClient();
-
                     new Thread(new ThreadStart(new ClientThread(clientSocket).run)).Start();
                 }
             }
             catch (Exception e)
             {
-                StarryboundServer.logException(e.ToString());
+                StarryboundServer.logException("ListenerThread: " + e.ToString());
             }
 
             serversocket.Stop();

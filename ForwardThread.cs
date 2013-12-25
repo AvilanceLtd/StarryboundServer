@@ -28,6 +28,7 @@ namespace com.avilance.Starrybound
         BinaryWriter mOutput;
         ClientThread mParent;
         Direction mDirection;
+        private string passwordSalt;
 
         public ForwardThread(ClientThread aParent, BinaryReader aInput, BinaryWriter aOutput, Direction aDirection) {
             this.mParent = aParent;
@@ -42,28 +43,33 @@ namespace com.avilance.Starrybound
             {
                 for (;;)
                 {
-                    if (this.mParent.blockPackets)
+                    if (!this.mParent.connectionAlive)
                     {
-                        if (this.mParent.targetTimestamp < StarryboundServer.getTimestamp())
+                        this.mParent.forceDisconnect("Connection Lost");
+                        return;
+                    }
+
+
+                    if (this.mParent.kickTargetTimestamp != 0)
+                    {
+                        if (this.mParent.kickTargetTimestamp < Utils.getTimestamp())
                         {
-                            this.mParent.connectionClosed();
+                            this.mParent.forceDisconnect("Kicked from server");
                             return;
                         }
                         continue;
                     }
 
-                    if (!this.mParent.connectionAlive) this.mParent.connectionLost(mDirection, "connection no longer alive");
-
+                    #region Process Packet
                     //Packet ID and Vaildity Check.
                     uint temp = this.mInput.ReadVarUInt32();
                     if (temp < 1 || temp > 48)
                     {
-                        StarryboundServer.logException("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] ERROR: Invalid Packet ID: [" + temp + "]");
-                        this.mParent.connectionLost(this.mDirection, "invalid packet ID");
+                        this.mParent.errorDisconnect(mDirection, "Sent invalid packet ID [" + temp + "].");
                         return;
                     }
                     Packet packetID = (Packet)temp;
-                    string packetName = temp.ToString();
+                    string packetName = packetID.ToString();
 
                     //Packet Size and Compression Check.
                     bool compressed = false;
@@ -102,7 +108,9 @@ namespace com.avilance.Starrybound
 
                     //Return data for packet processor
                     object returnData = true;
+                    #endregion
 
+                    #region Handle Packet Data
                     //Process packet
                     if (packetID == Packet.ChatSend && mDirection == Direction.Client)
                     {
@@ -117,19 +125,17 @@ namespace com.avilance.Starrybound
                         uint protocolVersion = packetData.ReadUInt32BE();
                         if(protocolVersion != StarryboundServer.ProtocolVersion)
                         {
-                            StarryboundServer.logFatal("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] ProtocolVersion:[" + protocolVersion + "] Cannot handle this protocol version.");
                             MemoryStream packet = new MemoryStream();
                             BinaryWriter packetWrite = new BinaryWriter(packet);
                             packetWrite.WriteBE(protocolVersion);
                             this.mParent.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
                             
                             Packet2ConnectResponse packet2 = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
-                            packet2.prepare(false, 0, "Starrybound Server was unable to handle the parent server protocol version.");
+                            packet2.prepare("Starrybound Server was unable to handle the parent server protocol version.");
                             packet2.onSend();
                             returnData = false;
-                            this.mParent.connectionClosed();
+                            this.mParent.errorDisconnect(mDirection, "Cannot handle protocol version [" + protocolVersion + "].");
                         }
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] ProtocolVersion:[" + protocolVersion + "]");
                     }
                     else if (packetID == Packet.ClientConnect && mDirection == Direction.Client)
                     {
@@ -138,9 +144,9 @@ namespace com.avilance.Starrybound
                         MemoryStream packet = new MemoryStream();
                         BinaryWriter packetWrite = new BinaryWriter(packet);
 
-                        this.mParent.passwordSalt = Utils.GenerateSecureSalt();
+                        passwordSalt = Utils.GenerateSecureSalt();
                         packetWrite.WriteStarString("");
-                        packetWrite.WriteStarString(this.mParent.passwordSalt);
+                        packetWrite.WriteStarString(passwordSalt);
                         packetWrite.WriteBE(StarryboundServer.config.passwordRounds);
                         this.mParent.sendClientPacket(Packet.HandshakeChallenge, packet.ToArray());
                     }
@@ -164,14 +170,13 @@ namespace com.avilance.Starrybound
                         string claimResponse = packetData.ReadStarString();
                         string passwordHash = packetData.ReadStarString();
 
-                        string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.mParent.playerData.account + this.mParent.passwordSalt, StarryboundServer.config.passwordRounds);
+                        string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.mParent.playerData.account + passwordSalt, StarryboundServer.config.passwordRounds);
                         if(passwordHash != verifyHash)
                         {
-                            StarryboundServer.logWarn("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Could not authenticate with password.");
                             Packet2ConnectResponse packet = new Packet2ConnectResponse(this.mParent, false, Util.Direction.Client);
-                            packet.prepare(false, 0, "Your password was incorrect.");
+                            packet.prepare("Your password was incorrect.");
                             packet.onSend();
-                            this.mParent.connectionClosed();
+                            this.mParent.forceDisconnect("Password was incorrect");
                         }
 
                         this.mParent.clientState = ClientState.PendingConnectResponse;
@@ -200,16 +205,10 @@ namespace com.avilance.Starrybound
                         }
                         uint uint1 = packetData.ReadUInt32BE();
                         bool bool1 = packetData.ReadBoolean();
-
-                        if (packetData.BaseStream.Position != ms.Length)
-                            StarryboundServer.logException("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] WorldStart failed parse (" + packetData.BaseStream.Position + " != " + ms.Length + ")");
-                        else
-                            StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] WorldStart:[" + spawnX + ":" + spawnY + ":" + uint1 + ":" + bool1.ToString() + ":" + string.Join(":", mapParamsKeys.ToArray()) + ":" + Encoding.ASCII.GetString(data1) + ":" + Encoding.ASCII.GetString(data2) + ":" + Encoding.ASCII.GetString(data3) + ":" + Encoding.ASCII.GetString(data4) + "]");
                     }
                     else if (packetID == Packet.WorldStop && mDirection == Direction.Server)
                     {
                         string status = packetData.ReadStarString();
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] WorldStop:[" + status + "]");
                     }
                     else if (packetID == Packet.WarpCommand && mDirection == Direction.Client)
                     {
@@ -221,28 +220,7 @@ namespace com.avilance.Starrybound
                         int planet = packetData.ReadInt32BE();
                         int satellite = packetData.ReadInt32BE();
                         string player = packetData.ReadStarString();
-                        StarryboundServer.logInfo(packetID + ":" + Utils.ByteArrayToString(ms.ToArray()));
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] WarpCommand:[" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
-                    }
-                    else if (packetID == Packet.TileDamageUpdate)
-                    {
-
-                    }
-                    else if (packetID == Packet.TileUpdate)
-                    {
-
-                    }
-                    else if (packetID == Packet.TileLiquidUpdate)
-                    {
-
-                    }
-                    else if (packetID == Packet.TileArrayUpdate)
-                    {
-
-                    }
-                    else if (packetID == Packet.TileDamageUpdate)
-                    {
-
+                        StarryboundServer.logInfo("[" + this.mParent.playerData.client + "] WarpCommand [" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
                     }
                     else if(packetID == Packet.DamageTile)
                     {
@@ -252,39 +230,18 @@ namespace com.avilance.Starrybound
                     {
                         if (!this.mParent.playerData.canBuild) continue;
                     }
-                    else if (packetID == Packet.WorldClientStateUpdate && mDirection == Direction.Client)
-                    {
-                        byte[] byteArray = packetData.ReadStarByteArray();
-                        if (byteArray.Length > 0)
-                            StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] WorldClientStateUpdate:[" + Encoding.ASCII.GetString(byteArray) + "]");
-                    }
-                    else if(packetID == Packet.ClientContextUpdate && mDirection == Direction.Client)
-                    {
-                        byte[] byteArray = packetData.ReadStarByteArray();
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Dumping packet [" + packetName + ":" + packetID + "] (" + ms.Length + ") " + Encoding.ASCII.GetString(ms.ToArray()));
-                    }
-                    else if(packetID == Packet.ClientContextUpdate && mDirection == Direction.Server)
-                    {
-                        //StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Dumping packet [" + packetName + ":" + packetID + "] (" + ms.Length + ") bytes: " + Utils.ByteArrayToString(ms.ToArray()));
-                        //StarryboundServer.logDebug("[" + Encoding.ASCII.GetString(ms.ToArray()) + "]");
-                    }
-                    else if (packetID == Packet.Heartbeat || packetID == Packet.UniverseTimeUpdate || packetID == Packet.EnvironmentUpdate) //Time updates and heartbeats can gtfo.
-                    {
+#endregion
 
-                    }
-                    else if(packetID == Packet.EntityCreate && mDirection == Direction.Client)
+                    #if DEBUG
+                    if (StarryboundServer.config.logLevel == LogType.Debug)
                     {
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Dumping packet [" + packetName + ":" + packetID + "] (" + ms.Length + ") " + Encoding.ASCII.GetString(ms.ToArray()));
+                        if (packetData.BaseStream.Position != ms.Length)
+                            StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetName + ":" + packetID + "] failed parse (" + packetData.BaseStream.Position + " != " + ms.Length + ")");
+                        StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetName + ":" + packetID + "] Dumping " + ms.Length + " bytes: " + Utils.ByteArrayToString(ms.ToArray()));
                     }
-                    else if (packetID == Packet.EntityUpdate && mDirection == Direction.Client)
-                    {
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Dumping packet [" + packetName + ":" + packetID + "] (" + ms.Length + ") bytes: " + Utils.ByteArrayToString(dataBuffer));
-                    }
-                    else if (StarryboundServer.config.debug)
-                    {
-                        StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Dumping packet [" + packetName + ":" + packetID + "] (" + ms.Length + ") bytes: " + Utils.ByteArrayToString(ms.ToArray()));
-                    }
+                    #endif
 
+                    //Check return data
                     if (returnData is Boolean)
                     {
                         if ((Boolean)returnData == false) continue;
@@ -293,10 +250,12 @@ namespace com.avilance.Starrybound
                     {
                         if ((int)returnData == -1)
                         {
-                            throw new Exception("Command processor requested to drop client " + this.mParent.playerData.name);
+                            this.mParent.forceDisconnect("Command processor requested to drop client");
                         }
                     }
 
+                    #region Forward Packet
+                    //Write data to dest
                     this.mOutput.WriteVarUInt32((uint)packetID);
                     if (compressed)
                     {
@@ -309,20 +268,18 @@ namespace com.avilance.Starrybound
                         this.mOutput.Write(dataBuffer, 0, packetSize);
                     }
                     this.mOutput.Flush();
+                    #endregion
 
+                    //If disconnect was forwarded to client, lets disconnect.
                     if(packetID == Packet.ServerDisconnect && mDirection == Direction.Server)
                     {
-                        this.mParent.clientState = ClientState.Disposing;
-                        StarryboundServer.sendGlobalMessage(this.mParent.playerData.name + "has left the server.");
-                        StarryboundServer.clients.Remove(this.mParent.playerData.name);
-                        this.mParent.connectionClosed();
+                        this.mParent.forceDisconnect();
                     }
                 }
             }
             catch (Exception e)
             {
-                StarryboundServer.logException("[" + this.mParent.clientUUID + "][" + this.mDirection + "]" + e.ToString());
-                this.mParent.connectionLost(this.mDirection, "Exception: " + e.Message);
+                this.mParent.errorDisconnect(mDirection, "ForwardThread Error: " + e.Message);
             }
         }
     }

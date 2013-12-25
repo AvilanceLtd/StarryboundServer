@@ -42,18 +42,8 @@ namespace com.avilance.Starrybound.Commands
             foreach (ClientThread client in StarryboundServer.clients.Values)
             {
                 client.sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-
-                Packet11ChatSend packet = new Packet11ChatSend(client, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.Broadcast, "", 0, "server", "^#f75d5d;You have been disconnected.");
-                packet.onSend();
-
-                client.clientState = ClientState.Disposing;
-
-                StarryboundServer.clients.Remove(client.playerData.name);
-
-                client.blockPackets = true;
-
-                client.targetTimestamp = StarryboundServer.getTimestamp() + 7;
+                this.client.sendChatMessage("^#f75d5d;You have been disconnected.");
+                client.kickTargetTimestamp = Utils.getTimestamp() + 7;
             }
 
             while (StarryboundServer.clients.Count > 0)
@@ -90,7 +80,7 @@ namespace com.avilance.Starrybound.Commands
 
             StarryboundServer.serverState = ServerState.Restarting;
 
-            StarryboundServer.restartTime = StarryboundServer.getTimestamp() + 30;
+            StarryboundServer.restartTime = Utils.getTimestamp() + 30;
 
             return true;
         }

@@ -37,8 +37,6 @@ namespace com.avilance.Starrybound
         public static Dictionary<string, ClientThread> clients = new Dictionary<string, ClientThread>();
         public static int clientCount { get { return clients.Count; } set { return; } }
 
-        public static int uniqueID = 1;
-
         public static ServerThread sbServer;
 
         static Thread listenerThread;
@@ -78,7 +76,7 @@ namespace com.avilance.Starrybound
             }
             catch (Exception) { }
 
-            startTime = getTimestamp();
+            startTime = Utils.getTimestamp();
 
             serverState = ServerState.Starting;
 
@@ -102,10 +100,6 @@ namespace com.avilance.Starrybound
             if (config.logLevel == LogType.Debug)
             {
                 logWarn("The logLevel in your config is currently set to DEBUG. This **WILL** flood your console and log file, if you do not want this please edit your config logLevel to INFO");
-                logWarn("Launch will proceed in 5 seconds.");
-                System.Threading.Thread.Sleep(5000);
-            } else if (config.debug) {
-                logWarn("The debug flag in your config is currently set to TRUE. This **WILL** flood your log file with development data, please only use this flag if you require assistance.");
                 logWarn("Launch will proceed in 5 seconds.");
                 System.Threading.Thread.Sleep(5000);
             }
@@ -133,7 +127,7 @@ namespace com.avilance.Starrybound
             {
                 if (restartTime != 0)
                 {
-                    if (restartTime < getTimestamp()) doRestart();
+                    if (restartTime < Utils.getTimestamp()) doRestart();
                     break;
                 }
 
@@ -155,7 +149,7 @@ namespace com.avilance.Starrybound
             {
                 client.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
                 client.sendClientPacket(Packet.ServerDisconnect, new byte[1]);
-                client.connectionClosed();
+                client.forceDisconnect("Server Restarting");
             }
 
             if (listenerThread != null) listenerThread.Abort();
@@ -173,7 +167,7 @@ namespace com.avilance.Starrybound
             Environment.Exit(1);
         }
 
-        public static void logDebug(string message) { writeLog(message, LogType.Debug); }
+        public static void logDebug(string source, string message) { writeLog("[" + source + "]:" + message, LogType.Debug); }
 
         public static void logInfo(string message) { writeLog(message, LogType.Info); }
 
@@ -187,7 +181,7 @@ namespace com.avilance.Starrybound
 
         public static void writeLog(string message, LogType logType)
         {
-            if ((int)config.logLevel > (int)logType && config.debug == false && logType != LogType.FileOnly) return;
+            if ((int)config.logLevel > (int)logType && logType != LogType.FileOnly) return;
 
             switch (logType)
             {
@@ -208,48 +202,34 @@ namespace com.avilance.Starrybound
                     break;
 
                 case LogType.Exception:
-                    message = "[Exception] Please report this to the developers: " + message;
+                    message = "[EXCEPTION] " + message;
                     break;
 
                 case LogType.Fatal:
-                    message = "[FATAL ERROR!] " + message;
+                    message = "[FATAL ERROR] " + message;
                     break;
             }
 
             try
             {
-                if ((int)logType >= (int)config.logLevel) Console.WriteLine(message);
-
                 using (StreamWriter w = File.AppendText("log.txt"))
                 {
                     w.WriteLine(message);
                 }                
             }
-            catch(Exception e)
+            catch(Exception e) 
             {
-                Console.WriteLine("EXCEPTION IN LOGGER: " + e.ToString());
+                if (config.logLevel == LogType.Debug) Console.WriteLine("[DEBUG] Logger Exception: " + e.ToString());
             }
-        }
 
-        public static Int32 getTimestamp()
-        {
-            Int32 unixTimeStamp;
-            DateTime currentTime = DateTime.Now;
-            DateTime zuluTime = currentTime.ToUniversalTime();
-            DateTime unixEpoch = new DateTime(1970, 1, 1);
-            unixTimeStamp = (Int32)(zuluTime.Subtract(unixEpoch)).TotalSeconds;
-            return unixTimeStamp;
+            if ((int)logType >= (int)config.logLevel) Console.WriteLine(message);
         }
 
         public static void sendGlobalMessage (string message) 
         {
             foreach (ClientThread client in clients.Values)
             {
-                if (client.clientState != ClientState.Connected) continue;
-
-                Packet11ChatSend packet = new Packet11ChatSend(client, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "^#5dc4f4;" + message);
-                packet.onSend();
+                client.sendChatMessage("^#5dc4f4;" + message);
             }
         }
     }

@@ -22,16 +22,18 @@ namespace com.avilance.Starrybound
     {
         public string name;
         public string account;
-        public IPAddress ip;
-        public uint ClientID;
-        public string UUID;
+        public string ip;
+        public uint id;
+        public string uuid;
+
+        public string client { get { if (String.IsNullOrEmpty(name)) return ip; else return name; } }
 
         public bool isMuted = false;
         public bool canBuild = true;
 
         public bool hasPermission(string node)
         {
-            if (StarryboundServer.config.adminUUID.Contains(UUID)) return true;
+            if (StarryboundServer.config.adminUUID.Contains(uuid)) return true;
             else return false;
         }
     }

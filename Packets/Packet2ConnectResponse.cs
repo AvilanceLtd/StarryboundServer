@@ -39,27 +39,24 @@ namespace com.avilance.Starrybound.Packets
             uint clientID = packetData.ReadVarUInt32();
             string rejectReason = packetData.ReadStarString();
 
+            this.mClient.playerData.id = clientID;
             Player player = this.mClient.playerData;
 
             if(!success)
             {
-                StarryboundServer.logError("Client from " + player.ip.ToString() + " was barred by parent: " + rejectReason);
+                this.mClient.forceDisconnect("Rejected by parent server: " + rejectReason);
                 return true;
             }
 
-            string[] reasonExpiry = Bans.checkForBan(new string[] { player.name, player.UUID, player.ip.ToString() });
+            string[] reasonExpiry = Bans.checkForBan(new string[] { player.name, player.uuid, player.ip.ToString() });
 
             if (reasonExpiry.Length == 2)
             {
                 tmpArray.Add("success", false);
                 tmpArray.Add("clientID", clientID);
                 tmpArray.Add("rejectReason", "You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
-
                 this.onSend();
-
-                this.mClient.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-
-                StarryboundServer.logError("Client from " + player.ip.ToString() + " is " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned! (Name: " + player.name + "; UUID: " + player.UUID + ") - Ban Expires: " + reasonExpiry[1]);
+                this.mClient.forceDisconnect(((reasonExpiry[1] == "0") ? "Permanently" : "Temporarily") + " banned. (Name: " + player.name + "; UUID: " + player.uuid + ") - Ban Expires: " + reasonExpiry[1]);
                 return false;
             }
 
@@ -68,12 +65,8 @@ namespace com.avilance.Starrybound.Packets
                 tmpArray.Add("success", false);
                 tmpArray.Add("clientID", clientID);
                 tmpArray.Add("rejectReason", "This username is already in use.");
-
                 this.onSend();
-
-                this.mClient.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-
-                StarryboundServer.logError("Client from " + player.ip.ToString() + " attempted to use a username already in use! (Name: " + player.name + "; UUID: " + player.UUID + ")");
+                this.mClient.forceDisconnect("Attempted to use a username already in use! (Name: " + player.name + "; UUID: " + player.uuid + ")");
                 return false;
             }
 
@@ -82,40 +75,20 @@ namespace com.avilance.Starrybound.Packets
                 tmpArray.Add("success", false);
                 tmpArray.Add("clientID", clientID);
                 tmpArray.Add("rejectReason", "The server is full. Please try again later.");
-
                 this.onSend();
-
-                this.mClient.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-
-                StarryboundServer.logInfo("- Connection from " + this.mClient.playerData.ip.ToString() + " dropped: Server is full.");
+                this.mClient.forceDisconnect("Server is full.");
                 return false;
             }
 
-            /*if (player.UUID == "be17d6d1257ea51ecb920ecc8d0c3bff")
-            {
-                tmpArray.Add("success", false);
-                tmpArray.Add("clientID", clientID);
-                tmpArray.Add("rejectReason", "You are banned from this server.\nReason: and I quote, he was 'tripping balls'");
-
-                this.onSend();
-
-                Program.logInfo("- Connection from " + this.mClient.playerData.ip.ToString() + " dropped: Server is full.");
-                return false;
-            }*/
-
             if (!StarryboundServer.config.allowSpaces)
             {
-                if (this.mClient.playerData.name.Contains(" "))
+                if (this.mClient.playerData.name.Contains(" ") || String.IsNullOrWhiteSpace(this.mClient.playerData.name))
                 {
                     tmpArray.Add("success", false);
                     tmpArray.Add("clientID", clientID);
                     tmpArray.Add("rejectReason", "You may not have spaces in your name on this server.");
-
                     this.onSend();
-
-                    this.mClient.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-
-                    StarryboundServer.logInfo("- Connection from " + this.mClient.playerData.ip.ToString() + " dropped: Username contained a space.");
+                    this.mClient.forceDisconnect("Username contained a space.");
                     return false;
                 }
             }
@@ -128,49 +101,34 @@ namespace com.avilance.Starrybound.Packets
                     tmpArray.Add("success", false);
                     tmpArray.Add("clientID", clientID);
                     tmpArray.Add("rejectReason", "You may not have special characters in your name on this server.");
-
                     this.onSend();
-
-                    this.mClient.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-
-                    StarryboundServer.logInfo("- Connection from " + this.mClient.playerData.ip.ToString() + " dropped: Username contained a space.");
+                    this.mClient.forceDisconnect("Username contained a symbol.");
                     return false;
                 }
             }
 
-            StarryboundServer.logDebug("[" + this.mClient.clientUUID + "][" + this.mDirection.ToString() + "] ConnectResponse:[" + success.ToString() + ":" + clientID + "]:[" + rejectReason + "]");
-
             StarryboundServer.clients.Add(player.name, this.mClient);
-
             StarryboundServer.sendGlobalMessage(player.name + " has joined the server!");
-
             this.mClient.clientState = ClientState.Connected;
-
-            StarryboundServer.logInfo("Player " + player.name + " with UUID " + player.UUID + " has connected!");
-
+            StarryboundServer.logInfo("[" + this.mClient.playerData.client + "][" + this.mClient.playerData.id + "] joined with UUID " + player.uuid);
             return true;
         }
 
-        public void prepare(bool success, uint clientID, string rejectReason)
+        public void prepare(string rejectReason)
         {
-            tmpArray.Add("success", success);
-            tmpArray.Add("clientID", clientID);
             tmpArray.Add("rejectReason", rejectReason);
         }
 
         public override void onSend()
         {
-
             MemoryStream packet = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packet);
 
-            packetWrite.Write((bool)tmpArray["success"]);
-            packetWrite.WriteVarUInt32((uint)tmpArray["clientID"]);
+            packetWrite.Write(false);
+            packetWrite.WriteVarUInt32(0);
             packetWrite.WriteStarString((string)tmpArray["rejectReason"]);
 
             this.mClient.sendClientPacket(Packet.ConnectResponse, packet.ToArray());
-
-            this.mClient.connectionClosed();
         }
 
         public override int getPacketID()

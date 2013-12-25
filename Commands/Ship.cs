@@ -39,18 +39,14 @@ namespace com.avilance.Starrybound.Commands
 
             if (player == null || player.Length < 1)
             {
-                Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.White, "", 0, "server", "Teleporting to your ship.");
-                packet.onSend();
+                this.client.sendCommandMessage("Teleporting to your ship.");
 
                 player = "";
                 warp = (uint)WarpType.WarpToOwnShip;
             }
             else
             {
-                Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-                packet.prepare(Util.ChatReceiveContext.White, "", 0, "server", "Teleporting to " + player + " ship!");
-                packet.onSend();
+                this.client.sendCommandMessage("Teleporting to " + player + " ship!");
 
                 warp = (uint)WarpType.WarpToPlayerShip;
             }

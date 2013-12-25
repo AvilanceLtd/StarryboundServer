@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using com.avilance.Starrybound.Util;
 
 namespace com.avilance.Starrybound
 {
@@ -11,14 +12,12 @@ namespace com.avilance.Starrybound
     {
 
         public Process process;
-        string[] filterConsole = new string[] { "Slow asset", "does not have a", "Perf: ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon" };
+        string[] filterConsole = new string[] { "Slow asset", "does not have a", "Perf: ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <" };
 
         public void run()
         {
             try
             {
-                Console.Write("!!!!!!!!!!!!!!!!!! ServerThread");
-
                 ProcessStartInfo startInfo = new ProcessStartInfo("starbound_server.exe")
                 {
                     WindowStyle = ProcessWindowStyle.Hidden,
@@ -46,32 +45,35 @@ namespace com.avilance.Starrybound
 
         void parseOutput(string consoleLine)
         {
-            foreach (string line in filterConsole)
+            try
             {
-                if (consoleLine.Contains(line)) return;
+                foreach (string line in filterConsole)
+                {
+                    if (consoleLine.Contains(line)) return;
+                }
+
+                if (consoleLine.Contains("Info: Server version"))
+                {
+                    // Grab server version
+                }
+
+                if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
+                {
+                    StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
+                    StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
+                    StarryboundServer.restartTime = Utils.getTimestamp() + 30;
+
+                    StarryboundServer.serverState = Util.ServerState.Restarting;
+                }
+
+                if (consoleLine.Contains("TcpServer listening on: "))
+                {
+                    StarryboundServer.serverState = Util.ServerState.StartingProxy;
+                }
+
+                Console.WriteLine("[STAR] " + consoleLine);
             }
-
-            if (consoleLine.Contains("Info: Server version"))
-            {
-                // Grab server version
-            }
-
-            if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
-            {
-                StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
-                StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
-                StarryboundServer.restartTime = StarryboundServer.getTimestamp() + 30;
-
-                StarryboundServer.serverState = Util.ServerState.Restarting;
-            }
-
-            if (consoleLine.Contains("Done scanning for router for portforwarding"))
-            {
-                StarryboundServer.serverState = Util.ServerState.StartingProxy;
-                return;
-            }
-
-            Console.WriteLine("[Debug Console Output] " + consoleLine);
+            catch (Exception) { }
         }
     }
 }

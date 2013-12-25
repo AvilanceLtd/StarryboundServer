@@ -64,8 +64,7 @@ namespace com.avilance.Starrybound
 
         public string logFile = "proxy.log";
 
-        public LogType logLevel = LogType.Debug;
-        public bool debug = true;
+        public LogType logLevel = LogType.Info;
 
         public string[] adminUUID = new string[] { "" };
 

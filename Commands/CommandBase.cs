@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using com.avilance.Starrybound.Util;
 
 namespace com.avilance.Starrybound.Commands
 {
@@ -44,16 +45,12 @@ namespace com.avilance.Starrybound.Commands
 
         public void permissionError()
         {
-            Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-            packet.prepare(Util.ChatReceiveContext.Whisper, "", 0, "server", "You do not have permission to use this command.");
-            packet.onSend();
+            this.client.sendChatMessage(ChatReceiveContext.CommandResult, "", "You do not have permission to use this command.");
         }
 
         public void showHelpText()
         {
-            Packet11ChatSend packet = new Packet11ChatSend(this.client, false, Util.Direction.Client);
-            packet.prepare(Util.ChatReceiveContext.CommandResult, "", 0, "server", "/" + this.name + ": " + this.HelpText);
-            packet.onSend();
+            this.client.sendCommandMessage("/" + this.name + ": " + this.HelpText);
         }
     }
 }

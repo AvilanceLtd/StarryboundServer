@@ -49,7 +49,7 @@ namespace com.avilance.Starrybound
         public bool hasExpired() 
         {
             if (this.expiry == 0) return false;
-            else if (StarryboundServer.getTimestamp() > this.expiry) return true; 
+            else if (Utils.getTimestamp() > this.expiry) return true; 
             else return false; 
         }
 

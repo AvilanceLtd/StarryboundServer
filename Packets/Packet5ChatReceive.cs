@@ -38,8 +38,6 @@ namespace com.avilance.Starrybound.Packets
             string name = packetData.ReadStarString();
             string message = packetData.ReadStarString();
 
-            StarryboundServer.logDebug("[" + this.mClient.clientUUID + "][" + this.mDirection.ToString() + "] Chat: [" + context + ":" + world + "] [" + clientID + "] " + name + ": " + message);
-
             return null;
         }
 
