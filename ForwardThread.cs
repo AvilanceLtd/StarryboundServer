@@ -268,7 +268,7 @@ namespace com.avilance.Starrybound
                         //StarryboundServer.logDebug("[" + this.mParent.clientUUID + "][" + this.mDirection.ToString() + "] Dumping packet [" + packetName + ":" + packetID + "] (" + ms.Length + ") bytes: " + Utils.ByteArrayToString(ms.ToArray()));
                         //StarryboundServer.logDebug("[" + Encoding.ASCII.GetString(ms.ToArray()) + "]");
                     }
-                    else if (packetID == Packet.Heartbeat || packetID == Packet.UniverseTimeUpdate || packetID == Packet.SkyUpdate) //Time updates and heartbeats can gtfo.
+                    else if (packetID == Packet.Heartbeat || packetID == Packet.UniverseTimeUpdate || packetID == Packet.EnvironmentUpdate) //Time updates and heartbeats can gtfo.
                     {
 
                     }
