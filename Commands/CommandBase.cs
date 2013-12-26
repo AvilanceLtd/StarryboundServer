@@ -41,11 +41,18 @@ namespace com.avilance.Starrybound.Commands
                 if (checkNode.StartsWith("e:"))
                 {
                     checkNode = checkNode.Substring(3, checkNode.Length - 2);
-                }
-                else { if (elevated) continue; }
 
-                if (player.hasPermission(checkNode))
-                    return true;
+                    if (player.hasPermission(checkNode))
+                        return true;
+                }
+                else 
+                {
+                    if (!elevated)
+                    {
+                        if (player.hasPermission(checkNode))
+                            return true;
+                    }
+                }
             }
 
             return false;

@@ -211,14 +211,44 @@ namespace com.avilance.Starrybound
                         else if (packetID == Packet.DamageTile)
                         {
                             if (!this.mParent.playerData.canBuild) continue;
+
+                            string planetCheck = this.mParent.playerData.sector + ":" + this.mParent.playerData.x + ":" + this.mParent.playerData.y + ":" + this.mParent.playerData.z + ":" + this.mParent.playerData.planet + ":" + this.mParent.playerData.satellite;
+                            string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
+
+                            if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
+
+                            if (planetCheck == spawnPlanet && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            {
+                                continue;
+                            }
                         }
                         else if (packetID == Packet.DamageTileGroup)
                         {
                             if (!this.mParent.playerData.canBuild) continue;
+
+                            string planetCheck = this.mParent.playerData.sector + ":" + this.mParent.playerData.x + ":" + this.mParent.playerData.y + ":" + this.mParent.playerData.z + ":" + this.mParent.playerData.planet + ":" + this.mParent.playerData.satellite;
+                            string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
+
+                            if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
+
+                            if (planetCheck == spawnPlanet && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            {
+                                continue;
+                            }
                         }
                         else if (packetID == Packet.ModifyTileList)
                         {
                             if (!this.mParent.playerData.canBuild) continue;
+
+                            string planetCheck = this.mParent.playerData.sector + ":" + this.mParent.playerData.x + ":" + this.mParent.playerData.y + ":" + this.mParent.playerData.z + ":" + this.mParent.playerData.planet + ":" + this.mParent.playerData.satellite;
+                            string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
+
+                            if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
+
+                            if (planetCheck == spawnPlanet && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            {
+                                continue;
+                            }
                         }
                     }
                     #endregion
