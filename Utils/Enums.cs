@@ -107,8 +107,7 @@ namespace com.avilance.Starrybound.Util
         PendingAuthentication = 1,
         PendingConnectResponse = 2,
         Connected = 3,
-        Kicked = 4,
-        Disposing = 5,
+        Disposing = 4,
     }
 
     public enum ServerState

@@ -23,7 +23,7 @@ namespace com.avilance.Starrybound.Commands
         public Shutdown(ClientThread client)
         {
             this.name = "shutdown";
-            this.HelpText = "Gracefully closes all connections";
+            this.HelpText = ": Gracefully closes all connections";
             this.Permission = new List<string>();
             this.Permission.Add("admin.shutdown");
 

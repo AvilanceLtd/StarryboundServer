@@ -10,7 +10,7 @@ namespace com.avilance.Starrybound.Commands
         public MeCommand(ClientThread client)
         {
             this.name = "me";
-            this.HelpText = "<message>; Sends a emote message.";
+            this.HelpText = " <message>: Sends an emote message.";
             this.Permission = new List<string>();
             this.Permission.Add("chat.emote");
 
@@ -26,7 +26,7 @@ namespace com.avilance.Starrybound.Commands
 
             if (message == null || message.Length < 1) { showHelpText(); return false; }
 
-            StarryboundServer.sendGlobalMessage(this.player.name + " " + message);
+            StarryboundServer.sendGlobalMessage(this.player.name + " " + message, "#f49413");
             return true;
         }
     }

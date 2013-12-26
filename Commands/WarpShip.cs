@@ -24,7 +24,7 @@ namespace com.avilance.Starrybound.Commands
         public WarpShip(ClientThread client)
         {
             this.name = "warpship";
-            this.HelpText = "Woot";
+            this.HelpText = " <name>: Teleports you to another player's ship.";
 
             this.client = client;
             this.player = client.playerData;

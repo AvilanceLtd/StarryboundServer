@@ -23,7 +23,7 @@ namespace com.avilance.Starrybound.Commands
         public BanCommand(ClientThread client)
         {
             this.name = "ban";
-            this.HelpText = "<username> <length (mins)> <reason>; Bans the user from the server for the specified time (in minutes) and reason.";
+            this.HelpText = " <username> <length (mins)> <reason>: Bans the user from the server for the specified time (in minutes) and reason.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.ban");
 
@@ -84,7 +84,7 @@ namespace com.avilance.Starrybound.Commands
         public BanReloadCommand(ClientThread client)
         {
             this.name = "banreload";
-            this.HelpText = "Reloads the banned-players.txt file";
+            this.HelpText = ": Reloads the banned-players.txt file";
             this.Permission = new List<string>();
             this.Permission.Add("admin.reload");
 

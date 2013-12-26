@@ -263,5 +263,13 @@ namespace com.avilance.Starrybound
                 client.sendChatMessage("^#5dc4f4;" + message);
             }
         }
+
+        public static void sendGlobalMessage(string message, string color)
+        {
+            foreach (ClientThread client in clients.Values)
+            {
+                client.sendChatMessage("^"+color+";" + message);
+            }
+        }
     }
 }

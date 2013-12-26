@@ -112,6 +112,7 @@ namespace com.avilance.Starrybound
 
         public void sendClientPacket(Packet packetID, byte[] packetData)
         {
+            if (this.kickTargetTimestamp != 0) return;
             try
             {
                 this.cOut.WriteVarUInt32((uint)packetID);
@@ -183,7 +184,6 @@ namespace com.avilance.Starrybound
         {
             sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
             sendChatMessage("^#f75d5d;You have been kicked from the server by an administrator.");
-            this.clientState = ClientState.Kicked;
             StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been kicked from the server!");
             kickTargetTimestamp = Utils.getTimestamp() + 7;
         }
@@ -195,7 +195,7 @@ namespace com.avilance.Starrybound
                 if (StarryboundServer.clients.ContainsKey(this.playerData.name))
                 {
                     StarryboundServer.clients.Remove(this.playerData.name);
-                    if (this.clientState != ClientState.Kicked) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    if(this.kickTargetTimestamp != 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                     if(!log)
                         StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
                 }

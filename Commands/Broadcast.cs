@@ -21,7 +21,7 @@ namespace com.avilance.Starrybound.Commands
         public Broadcast(ClientThread client)
         {
             this.name = "broadcast";
-            this.HelpText = "<message>; Sends a server-wide message to all clients.";
+            this.HelpText = " <message>: Sends a server-wide message to all clients.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.broadcast");
 

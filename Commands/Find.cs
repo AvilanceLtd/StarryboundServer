@@ -21,7 +21,8 @@ namespace com.avilance.Starrybound.Commands
         public Find(ClientThread client)
         {
             this.name = "find";
-            this.HelpText = "<player (optional)>; Find your world co-ordinates or those of a specified player.";
+            this.HelpText = " <player (optional)>; Find your world co-ordinates or those of a specified player.";
+            this.aliases = new string[] { "where" };
 
             this.client = client;
             this.player = client.playerData;

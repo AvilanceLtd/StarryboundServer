@@ -25,7 +25,7 @@ namespace com.avilance.Starrybound.Commands
         public Ship(ClientThread client)
         {
             this.name = "ship";
-            this.HelpText = "Woot";
+            this.HelpText = ": Teleports you to your ship.";
             this.Permission = new List<string>();
             this.Permission.Add("client.ship");
             this.Permission.Add("e:admin.ship");

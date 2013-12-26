@@ -80,6 +80,7 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\BanCommand.cs" />
     <Compile Include="Commands\Find.cs" />
+    <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\Item.cs" />
     <Compile Include="Commands\MeCommand.cs" />
     <Compile Include="Commands\Planet.cs" />

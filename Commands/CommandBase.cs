@@ -22,6 +22,7 @@ namespace com.avilance.Starrybound.Commands
     {
         public string name { get; set; }
         public string HelpText = "No help available.";
+        public string[] aliases { get; set; }
         public List<string> Permission;
 
         public Player player;
@@ -70,7 +71,7 @@ namespace com.avilance.Starrybound.Commands
 
         public void showHelpText()
         {
-            this.client.sendCommandMessage("/" + this.name + ": " + this.HelpText);
+            this.client.sendCommandMessage("/" + this.name + this.HelpText);
         }
     }
 }

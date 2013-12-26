@@ -23,7 +23,7 @@ namespace com.avilance.Starrybound.Commands
         public Uptime(ClientThread client)
         {
             this.name = "uptime";
-            this.HelpText = "Shows how long has past since the server was last restarted.";
+            this.HelpText = ": Shows how long has past since the server was last restarted.";
 
             this.client = client;
             this.player = client.playerData;

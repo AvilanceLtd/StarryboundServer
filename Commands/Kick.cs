@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
         public Kick(ClientThread client)
         {
             this.name = "kick";
-            this.HelpText = "<username>; Kicks the user from the server.";
+            this.HelpText = " <username>: Kicks the user from the server.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.kick");
 

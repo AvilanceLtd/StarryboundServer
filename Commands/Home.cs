@@ -25,7 +25,7 @@ namespace com.avilance.Starrybound.Commands
         public Home(ClientThread client)
         {
             this.name = "home";
-            this.HelpText = "Allows you to teleport to your home planet.";
+            this.HelpText = ": Allows you to teleport to your home planet.";
             this.Permission = new List<string>();
             this.Permission.Add("client.home");
 

@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
         public Build(ClientThread client)
         {
             this.name = "build";
-            this.HelpText = "<username>; Allows you to grant/revoke a player's building rights, this command is toggled.";
+            this.HelpText = " <username>: Allows you to grant/revoke a player's building rights, this command is toggled.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.build");
 

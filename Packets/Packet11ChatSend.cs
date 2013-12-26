@@ -146,6 +146,13 @@ namespace com.avilance.Starrybound.Packets
                             new WarpShip(this.mClient).doProcess(args);
                             break;
 
+                        case "help":
+                        case "commands":
+                        case "commandlist":
+                        case "?":
+                            new Help(this.mClient).doProcess(args);
+                            break;
+
                         default:
                             this.mClient.sendCommandMessage("Command " + cmd + " not found.");
                             break;
@@ -155,6 +162,7 @@ namespace com.avilance.Starrybound.Packets
                 catch (Exception e)
                 {
                     this.mClient.sendCommandMessage("Command failed: " + e.Message);
+                    //Console.WriteLine(e.ToString());
                 }
             }
             #endregion
@@ -199,8 +207,6 @@ namespace com.avilance.Starrybound.Packets
         public override void onSend()
         {
             if (tmpArray.Count < 5) return;
-
-            if (this.mClient.clientState == ClientState.Kicked) return;
 
             MemoryStream packet = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packet);
