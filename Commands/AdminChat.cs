@@ -9,25 +9,22 @@
  * You should have received a copy of the GNU General Public License along with Starrybound Server. If not, see http://www.gnu.org/licenses/.
 */
 
-using com.avilance.Starrybound.Packets;
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using com.avilance.Starrybound.Util;
-using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class Planet : CommandBase
+    class AdminChat : CommandBase
     {
-        public Planet(ClientThread client)
+        public AdminChat(ClientThread client)
         {
-            this.name = "planet";
-            this.HelpText = "Woot";
+            this.name = "admin, #";
+            this.HelpText = "<message>; Sends a message to all online admins.";
             this.Permission = new List<string>();
-            this.Permission.Add("client.planet");
+            this.Permission.Add("chat.admin");
+            this.Permission.Add("e:admin.chat");
 
             this.client = client;
             this.player = client.playerData;
@@ -37,28 +34,23 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            this.client.sendCommandMessage("Teleporting to orbited planet.");
+            string message = string.Join(" ", args).Trim();
 
-            MemoryStream packetWarp = new MemoryStream();
-            BinaryWriter packetWrite = new BinaryWriter(packetWarp);
+            if (message == null || message.Length < 1) { showHelpText(); return false; }
 
-            uint warp = (uint)WarpType.WarpToOrbitedPlanet;
-            string sector = "";
-            int x = 0;
-            int y = 0;
-            int z = 0;
-            int planet = 0;
-            int satellite = 0;
-            string player = "";
-            packetWrite.WriteBE(warp);
-            packetWrite.WriteStarString(sector);
-            packetWrite.WriteBE(x);
-            packetWrite.WriteBE(y);
-            packetWrite.WriteBE(z);
-            packetWrite.WriteBE(planet);
-            packetWrite.WriteBE(satellite);
-            packetWrite.WriteStarString(player);
-            client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
+            if (this.player.group.hasPermission("admin.chat"))
+            {
+                message = "^#f75d5d;[ADMIN] " + this.player.name + ": " + message;
+            }
+            else
+            {
+                message = "^#ff00c7;Message to admins from " + this.player.name + ": " + message;
+            }
+
+            foreach (ClientThread client in StarryboundServer.clients.Values)
+            {
+                if (client.playerData.group.hasPermission("admin.chat") || client == this.client) client.sendChatMessage(message);
+            }
 
             return true;
         }

@@ -11,6 +11,8 @@ namespace com.avilance.Starrybound.Commands
         {
             this.name = "me";
             this.HelpText = "<message>; Sends a emote message.";
+            this.Permission = new List<string>();
+            this.Permission.Add("chat.emote");
 
             this.client = client;
             this.player = client.playerData;
@@ -18,6 +20,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            //if (!hasPermission()) { permissionError(); return false; }
+
             string message = string.Join(" ", args).Trim();
 
             if (message == null || message.Length < 1) { showHelpText(); return false; }

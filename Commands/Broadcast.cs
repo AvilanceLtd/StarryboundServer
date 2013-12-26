@@ -23,7 +23,7 @@ namespace com.avilance.Starrybound.Commands
             this.name = "broadcast";
             this.HelpText = "<message>; Sends a server-wide message to all clients.";
             this.Permission = new List<string>();
-            this.Permission.Add("admin.kick");
+            this.Permission.Add("admin.broadcast");
 
             this.client = client;
             this.player = client.playerData;

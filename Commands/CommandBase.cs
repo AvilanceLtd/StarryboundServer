@@ -29,23 +29,43 @@ namespace com.avilance.Starrybound.Commands
 
         public abstract bool doProcess(string[] args);
 
-        public bool hasPermission()
+        public bool hasPermission(bool elevated = false)
         {
             if (Permission == null || Permission.Count < 1)
                 return true;
 
             foreach (var node in Permission)
             {
-                if (player.hasPermission(node))
+                string checkNode = node;
+                if (checkNode.StartsWith("e:"))
+                {
+                    checkNode = checkNode.Substring(3, checkNode.Length - 2);
+                }
+                else { if (elevated) continue; }
+
+                if (player.hasPermission(checkNode))
                     return true;
             }
 
             return false;
         }
 
-        public void permissionError()
+        public void permissionError(int errorCode = 1)
         {
-            this.client.sendChatMessage(ChatReceiveContext.CommandResult, "", "You do not have permission to use this command.");
+            string message = "An unknown error occurred.";
+
+            switch (errorCode)
+            {
+                case 1:
+                    message = "You do not have permission to use this command.";
+                    break;
+
+                case 2:
+                    message = "You do not have permission to target this player.";
+                    break;
+            }
+
+            this.client.sendChatMessage(ChatReceiveContext.CommandResult, "", message);
         }
 
         public void showHelpText()

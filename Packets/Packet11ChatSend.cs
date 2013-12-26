@@ -43,7 +43,15 @@ namespace com.avilance.Starrybound.Packets
             byte context = packetData.ReadByte();
 
             #region Command Processor
-            if (message.StartsWith("/"))
+            if (message.StartsWith("#"))
+            {
+                StarryboundServer.logInfo("[Admin Chat] [" + this.mClient.playerData.name + "]: " + message);
+
+                bool aChat = new AdminChat(this.mClient).doProcess(new string[] { message.Remove(0, 1) });
+
+                return false;
+            }
+            else if (message.StartsWith("/"))
             {
                 try
                 {
@@ -60,6 +68,10 @@ namespace com.avilance.Starrybound.Packets
 
                         case "kick":
                             new Kick(this.mClient).doProcess(args);
+                            break;
+
+                        case "admin":
+                            new AdminChat(this.mClient).doProcess(args);
                             break;
 
                         case "me":
@@ -187,6 +199,8 @@ namespace com.avilance.Starrybound.Packets
         public override void onSend()
         {
             if (tmpArray.Count < 5) return;
+
+            if (this.mClient.clientState == ClientState.Kicked) return;
 
             MemoryStream packet = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packet);

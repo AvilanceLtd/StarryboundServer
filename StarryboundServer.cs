@@ -21,6 +21,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using com.avilance.Starrybound.Permissions;
 
 namespace com.avilance.Starrybound
 {
@@ -39,6 +40,8 @@ namespace com.avilance.Starrybound
         public static Dictionary<string, ClientThread> clients = new Dictionary<string, ClientThread>();
         public static int clientCount { get { return clients.Count; } set { return; } }
 
+        public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
+
         public static ServerThread sbServer;
 
         static Thread listenerThread;
@@ -51,6 +54,8 @@ namespace com.avilance.Starrybound
 
         public static int startTime;
         public static int restartTime = 0;
+
+        public static string defaultGroup = null;
 
         public static List<byte[]> sectors = new List<byte[]>();
 
@@ -91,6 +96,7 @@ namespace com.avilance.Starrybound
 
             Config.SetupConfig();
             ServerConfig.SetupConfig();
+            Groups.SetupGroups();
 
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
@@ -230,7 +236,7 @@ namespace com.avilance.Starrybound
 
             try
             {
-                using (StreamWriter w = File.AppendText("log.txt"))
+                using (StreamWriter w = File.AppendText(Path.Combine(StarryboundServer.SavePath, "log.txt")))
                 {
                     w.WriteLine(message);
                 }                

@@ -72,7 +72,7 @@ namespace com.avilance.Starrybound
     {
         public static Dictionary<int, Ban> allBans = new Dictionary<int, Ban>();
 
-        static int nextBanID = 0;
+        static int nextBanID = 1;
 
         /// <summary>
         /// Checks to see if the data matches the ban record
@@ -95,24 +95,26 @@ namespace com.avilance.Starrybound
             try
             {
 
-                List<string> allLines = File.ReadLines("banned-players.txt").ToList();
+                List<string> allLines = File.ReadLines(Path.Combine(StarryboundServer.SavePath, "banned-players.txt")).ToList();
+                string[] saveLines = new string[allLines.Count];
 
-                foreach (string line in allLines) 
+                for (var i = 0; i < allLines.Count; i++) 
                 {
-                    if (line.StartsWith(banID.ToString())) allLines.Remove(line);
+                    string line = allLines[i];
+                    if (!line.StartsWith(banID.ToString())) saveLines[i] = line;
                 }
 
-                File.WriteAllLines("banned-players.txt", allLines.ToArray());
+                File.WriteAllLines(Path.Combine(StarryboundServer.SavePath, "banned-players.txt"), saveLines);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
+                StarryboundServer.logException("Exception while trying to remove ban from banned-players.txt - " + e.StackTrace);
             }
         }
 
         public static bool addNewBan(string username, string uuid, string ipaddress, int timeBanned, string admin, int expiry, string reason)
         {
-            string[] args = new string[6];
+            string[] args = new string[8];
 
             args[0] = nextBanID.ToString();
             args[1] = username;
@@ -125,9 +127,11 @@ namespace com.avilance.Starrybound
 
             try
             {
-                FileStream fs = new FileStream("banned-players.txt", FileMode.Append, FileAccess.Write);
+                FileStream fs = new FileStream(Path.Combine(StarryboundServer.SavePath, "banned-players.txt"), FileMode.Append, FileAccess.Write);
                 StreamWriter sw = new StreamWriter(fs);
                 sw.WriteLine(String.Join("|", args));
+                sw.Flush();
+                sw.Close();
 
                 Ban ban = new Ban(nextBanID, username, uuid, ipaddress, timeBanned, admin, expiry, reason);
 
@@ -147,7 +151,7 @@ namespace com.avilance.Starrybound
         {
             try
             {
-                StreamReader reader = File.OpenText("banned-players.txt");
+                StreamReader reader = File.OpenText(Path.Combine(StarryboundServer.SavePath, "banned-players.txt"));
                 string line;
                 int banCount = 0;
                 while ((line = reader.ReadLine()) != null)
@@ -193,11 +197,19 @@ namespace com.avilance.Starrybound
                     catch (Exception) { banCount--; StarryboundServer.logWarn("Invalid ban detected in banned-players.txt"); }
                 }
 
-                StarryboundServer.logInfo(banCount + " ban(s) have been loaded from file.");
+                reader.Close();
+
+                int removedCount = 0;
+                foreach (Ban ban in allBans.Values)
+                {
+                    if (ban.hasExpired()) { ban.remove(); removedCount++; }
+                }
+
+                StarryboundServer.logInfo(banCount + " ban(s) have been loaded from file. " + removedCount + " ban(s) have expired and been removed.");
             }
             catch (Exception)
             {
-                StarryboundServer.logWarn("Unable to read bans from banned-players.txt: File doesn't exist, or permission error while accessing.");
+                StarryboundServer.logWarn("Unable to read bans from banned-players.txt: File doesn't exist, permission error while accessing, or no bans were found.");
             }
         }
     }

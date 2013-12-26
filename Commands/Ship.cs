@@ -26,6 +26,9 @@ namespace com.avilance.Starrybound.Commands
         {
             this.name = "ship";
             this.HelpText = "Woot";
+            this.Permission = new List<string>();
+            this.Permission.Add("client.ship");
+            this.Permission.Add("e:admin.ship");
 
             this.client = client;
             this.player = client.playerData;
@@ -33,6 +36,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (!hasPermission()) { permissionError(); return false; }
+
             string player = string.Join(" ", args).Trim();
 
             uint warp;
@@ -46,6 +51,7 @@ namespace com.avilance.Starrybound.Commands
             }
             else
             {
+                if (!hasPermission(true)) { permissionError(2); return false; }
                 this.client.sendCommandMessage("Teleporting to " + player + " ship!");
 
                 warp = (uint)WarpType.WarpToPlayerShip;

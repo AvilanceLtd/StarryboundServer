@@ -194,6 +194,18 @@ namespace com.avilance.Starrybound
                                 if (player != this.mParent.playerData.lastPlayerShip) this.mParent.playerData.lastPlayerShip = this.mParent.playerData.inPlayerShip;
                                 this.mParent.playerData.inPlayerShip = player;
                             }
+
+                            // alpha:32145151:-15460793:-13973833:6
+                            string planetCheck = sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite;
+                            string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
+
+                            if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
+
+                            if (planetCheck == spawnPlanet && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            {
+                                this.mParent.sendChatMessage("^#f75d5d;You do not have permission to build on the spawn planet.");
+                            }
+
                             StarryboundServer.logDebug("WarpCommand", "[" + this.mParent.playerData.client + "][" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
                         }
                         else if (packetID == Packet.DamageTile)
@@ -201,6 +213,10 @@ namespace com.avilance.Starrybound
                             if (!this.mParent.playerData.canBuild) continue;
                         }
                         else if (packetID == Packet.DamageTileGroup)
+                        {
+                            if (!this.mParent.playerData.canBuild) continue;
+                        }
+                        else if (packetID == Packet.ModifyTileList)
                         {
                             if (!this.mParent.playerData.canBuild) continue;
                         }
