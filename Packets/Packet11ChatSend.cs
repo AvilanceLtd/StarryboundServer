@@ -200,8 +200,6 @@ namespace com.avilance.Starrybound.Packets
         {
             if (tmpArray.Count < 5) return;
 
-            if (this.mClient.clientState == ClientState.Kicked) return;
-
             MemoryStream packet = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packet);
 
