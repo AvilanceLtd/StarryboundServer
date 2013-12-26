@@ -32,14 +32,14 @@ namespace com.avilance.Starrybound.Permissions
 
             foreach (KeyValuePair<string, bool> key in permissions)
             {
-                if (key.Key.Equals("*")) { StarryboundServer.logInfo("Matched node: " + ("*")); return true; }
+                if (key.Key.Equals("*")) return true;
                 else if (key.Key.Equals(rootNode + "*"))
                 {
-                    if (key.Value) { StarryboundServer.logInfo("Matched node: " + (rootNode + "*")); return true; } else return false;
+                    if (key.Value) return true; else return false;
                 }
                 else if (key.Key.Equals(rootNode + subNode))
                 {
-                    if (key.Value) { StarryboundServer.logInfo("Matched node: " + (rootNode + subNode)); return true; } else return false;
+                    if (key.Value) return true; else return false;
                 }
             }
 
