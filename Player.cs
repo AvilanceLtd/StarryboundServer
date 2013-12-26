@@ -50,7 +50,16 @@ namespace com.avilance.Starrybound
 
         public string formatName 
         {
-            get { return ((group.prefix == null && group.nameColor == null) ? null : (group.prefix + " " + ((group.nameColor != null) ? "^" + group.nameColor + ";" : "") + this.name)); }
+            get 
+            { 
+                string prefix = group.prefix;
+                string color = group.nameColor;
+
+                if (prefix == null) prefix = "";
+                if (color == null) color = "";
+
+                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name; 
+            }
             set { return; }
         }
 
