@@ -36,6 +36,8 @@ namespace com.avilance.Starrybound
         public int planet;
         public int satellite;
 
+        public int lastOnline = 0;
+
         public string inPlayerShip = "";
         public string lastPlayerShip = "";
 
@@ -52,7 +54,7 @@ namespace com.avilance.Starrybound
 
         public bool hasPermission(string node)
         {
-            if (StarryboundServer.config.adminUUID.Contains(uuid)) return true;
+            if (this.group.hasPermission(node)) return true;
             else return false;
         }
     }

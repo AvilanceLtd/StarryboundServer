@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using com.avilance.Starrybound.Extensions;
+using com.avilance.Starrybound.Permissions;
 
 namespace com.avilance.Starrybound.Packets
 {
@@ -84,6 +85,31 @@ namespace com.avilance.Starrybound.Packets
                     this.mClient.rejectPreConnected("You may not have special characters in your name on this server.");
                     return false;
                 }
+            }
+
+            User userPData;
+            com.avilance.Starrybound.Permissions.Group userGroup;
+            try
+            {
+                userPData = Users.GetUser(name, Utils.ByteArrayToString(UUID).ToLower());
+
+                Player pData = this.mClient.playerData;
+
+                pData.isMuted = userPData.isMuted;
+                pData.canBuild = userPData.canBuild;
+                pData.lastOnline = userPData.lastOnline;
+                pData.group = userPData.getGroup();
+
+                if (userPData.name != pData.name)
+                {
+                    this.mClient.rejectPreConnected("Your character data is corrupt. Unable to connect to server.");
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                this.mClient.rejectPreConnected("The server was unable to accept your connection at this time.\nPlease try again later.");
+                return false;
             }
 
             return null;

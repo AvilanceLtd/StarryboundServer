@@ -67,26 +67,6 @@ namespace com.avilance.Starrybound
                 this.sIn = new BinaryReader(this.sSocket.GetStream());
                 this.sOut = new BinaryWriter(this.sSocket.GetStream());
 
-                Group defGroup;
-                try
-                {
-                    object groupObj = GroupFile.getGroup(StarryboundServer.defaultGroup);
-                    defGroup = (Group)groupObj;
-                }
-                catch (Exception)
-                {
-                    MemoryStream packet = new MemoryStream();
-                    BinaryWriter packetWrite = new BinaryWriter(packet);
-                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
-                    this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-
-                    rejectPreConnected("The server is not able to accept your connection at the moment.");
-                    StarryboundServer.logError("Unable to find default user group - Unable to continue");
-                    return;
-                }
-
-                this.playerData.group = defGroup;
-
                 if (!sSocket.Connected)
                 {
                     MemoryStream packet = new MemoryStream();
@@ -192,10 +172,11 @@ namespace com.avilance.Starrybound
         {
             if (this.playerData.name != null)
             {
+                Users.SaveUser(this.playerData);
                 if (StarryboundServer.clients.ContainsKey(this.playerData.name))
                 {
                     StarryboundServer.clients.Remove(this.playerData.name);
-                    if(this.kickTargetTimestamp != 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    if(this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                     if(!log)
                         StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
                 }

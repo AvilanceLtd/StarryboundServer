@@ -32,14 +32,14 @@ namespace com.avilance.Starrybound.Permissions
 
             foreach (KeyValuePair<string, bool> key in permissions)
             {
-                if (key.Key.Equals("*")) return true;
+                if (key.Key.Equals("*")) { StarryboundServer.logInfo("Matched node: " + ("*")); return true; }
                 else if (key.Key.Equals(rootNode + "*"))
                 {
-                    if (key.Value) return true; else return false;
+                    if (key.Value) { StarryboundServer.logInfo("Matched node: " + (rootNode + "*")); return true; } else return false;
                 }
                 else if (key.Key.Equals(rootNode + subNode))
                 {
-                    if (key.Value) return true; else return false;
+                    if (key.Value) { StarryboundServer.logInfo("Matched node: " + (rootNode + subNode)); return true; } else return false;
                 }
             }
 
@@ -66,8 +66,13 @@ namespace com.avilance.Starrybound.Permissions
             if (File.Exists(GroupsPath))
             {
                 GroupFile.ProcessGroups(GroupFile.Read(GroupsPath));
+                GroupFile.Write(GroupsPath);
             }
-            GroupFile.Write(GroupsPath);
+            else
+            {
+                GroupFile.Write(GroupsPath);
+                GroupFile.ProcessGroups(GroupFile.Read(GroupsPath));
+            }
         }
     }
 
@@ -144,13 +149,13 @@ namespace com.avilance.Starrybound.Permissions
             Dictionary<string, bool> pPerms = new Dictionary<string, bool>();
             pPerms.Add("client.*", true);
             pPerms.Add("chat.*", true);
-            Group player = new Group("player", null, null, mPerms);
+            Group player = new Group("player", null, null, pPerms);
             groups.Add(player);
 
             Dictionary<string, bool> gPerms = new Dictionary<string, bool>();
             gPerms.Add("client.*", true);
             gPerms.Add("chat.*", true);
-            Group guest = new Group("guest", null, null, mPerms, true);
+            Group guest = new Group("guest", null, null, gPerms, true);
             groups.Add(guest);
 
             return groups;
@@ -166,7 +171,7 @@ namespace com.avilance.Starrybound.Permissions
             using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 List<Group> file = Read(fs);
-                StarryboundServer.logInfo("Starrybound config loaded successfully.");
+                StarryboundServer.logInfo("Starrybound groups loaded successfully.");
                 return file;
             }
         }

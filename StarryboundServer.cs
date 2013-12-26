@@ -97,6 +97,7 @@ namespace com.avilance.Starrybound
             Config.SetupConfig();
             ServerConfig.SetupConfig();
             Groups.SetupGroups();
+            Users.SetupUsers();
 
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
