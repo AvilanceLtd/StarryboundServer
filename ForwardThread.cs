@@ -206,7 +206,7 @@ namespace com.avilance.Starrybound
 
                             if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
 
-                            if ((planetCheck == spawnPlanet || planetCheck == ":0:0:0:0:0") && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            if ((planetCheck == spawnPlanet) && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
                             {
                                 continue;
                             }
