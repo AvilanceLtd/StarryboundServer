@@ -25,7 +25,13 @@ namespace com.avilance.Starrybound.Commands
         public Home(ClientThread client)
         {
             this.name = "home";
+<<<<<<< HEAD
+            this.HelpText = ": Allows you to teleport to your home planet.";
+=======
             this.HelpText = "Allows you to teleport to your home planet.";
+            this.Permission = new List<string>();
+            this.Permission.Add("client.home");
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 
             this.client = client;
             this.player = client.playerData;
@@ -33,6 +39,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (!hasPermission()) { permissionError(); return false; }
+
             this.client.sendCommandMessage("Teleporting to your home planet.");
 
             MemoryStream packetWarp = new MemoryStream();

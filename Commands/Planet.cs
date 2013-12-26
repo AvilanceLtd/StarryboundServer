@@ -25,7 +25,13 @@ namespace com.avilance.Starrybound.Commands
         public Planet(ClientThread client)
         {
             this.name = "planet";
+<<<<<<< HEAD
+            this.HelpText = ": Teleports you to the planet your ship is orbiting.";
+=======
             this.HelpText = "Woot";
+            this.Permission = new List<string>();
+            this.Permission.Add("client.planet");
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 
             this.client = client;
             this.player = client.playerData;
@@ -33,6 +39,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (!hasPermission()) { permissionError(); return false; }
+
             this.client.sendCommandMessage("Teleporting to orbited planet.");
 
             MemoryStream packetWarp = new MemoryStream();

@@ -21,8 +21,9 @@ namespace com.avilance.Starrybound.Commands
     {
         public Players(ClientThread client)
         {
-            this.name = "players, /list, /who";
-            this.HelpText = "Lists all of the players connected to the server.";
+            this.name = "players";
+            this.HelpText = ": Lists all of the players connected to the server.";
+            this.aliases = new string[] {"list","who"};
 
             this.client = client;
             this.player = client.playerData;

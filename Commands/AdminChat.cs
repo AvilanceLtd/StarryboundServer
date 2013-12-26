@@ -16,14 +16,16 @@ using System.Text;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class Broadcast : CommandBase
+    class AdminChat : CommandBase
     {
-        public Broadcast(ClientThread client)
+        public AdminChat(ClientThread client)
         {
-            this.name = "broadcast";
-            this.HelpText = " <message>: Sends a server-wide message to all clients.";
+            this.name = "admin";
+            this.HelpText = "<message>: Sends a message to all online admins.";
+            this.aliases = new string[] {"#<message>"};
             this.Permission = new List<string>();
-            this.Permission.Add("admin.broadcast");
+            this.Permission.Add("chat.admin");
+            this.Permission.Add("e:admin.chat");
 
             this.client = client;
             this.player = client.playerData;
@@ -37,9 +39,19 @@ namespace com.avilance.Starrybound.Commands
 
             if (message == null || message.Length < 1) { showHelpText(); return false; }
 
-            message = "[Broadcast]: " + message;
+            if (this.player.group.hasPermission("admin.chat"))
+            {
+                message = "^#f75d5d;[ADMIN] " + this.player.name + ": " + message;
+            }
+            else
+            {
+                message = "^#ff00c7;Message to admins from " + this.player.name + ": " + message;
+            }
 
-            StarryboundServer.sendGlobalMessage(message);
+            foreach (ClientThread client in StarryboundServer.clients.Values)
+            {
+                if (client.playerData.group.hasPermission("admin.chat") || client == this.client) client.sendChatMessage(message);
+            }
 
             return true;
         }

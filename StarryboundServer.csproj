@@ -74,11 +74,13 @@
   <ItemGroup>
     <Compile Include="Bans.cs" />
     <Compile Include="ClientThread.cs" />
+    <Compile Include="Commands\AdminChat.cs" />
     <Compile Include="Commands\Broadcast.cs" />
     <Compile Include="Commands\Build.cs" />
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\BanCommand.cs" />
     <Compile Include="Commands\Find.cs" />
+    <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\Item.cs" />
     <Compile Include="Commands\MeCommand.cs" />
     <Compile Include="Commands\Planet.cs" />
@@ -100,6 +102,8 @@
     <Compile Include="Packets\Packet5ChatReceive.cs" />
     <Compile Include="Packets\Packet7ClientConnect.cs" />
     <Compile Include="Packets\PacketBase.cs" />
+    <Compile Include="Permissions\Groups.cs" />
+    <Compile Include="Permissions\Users.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="ServerConfig.cs" />
     <Compile Include="ServerThread.cs" />

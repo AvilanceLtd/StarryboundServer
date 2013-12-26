@@ -102,7 +102,7 @@ namespace com.avilance.Starrybound
         public int maxFrameskip = 5;
 
         [DataMember]
-        public int maxPlayers = 20;
+        public int maxPlayers = 40;
 
         [DataMember]
         public bool maximized = true;

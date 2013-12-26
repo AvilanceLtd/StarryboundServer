@@ -43,7 +43,15 @@ namespace com.avilance.Starrybound.Packets
             byte context = packetData.ReadByte();
 
             #region Command Processor
-            if (message.StartsWith("/"))
+            if (message.StartsWith("#"))
+            {
+                StarryboundServer.logInfo("[Admin Chat] [" + this.mClient.playerData.name + "]: " + message);
+
+                bool aChat = new AdminChat(this.mClient).doProcess(new string[] { message.Remove(0, 1) });
+
+                return false;
+            }
+            else if (message.StartsWith("/"))
             {
                 try
                 {
@@ -60,6 +68,10 @@ namespace com.avilance.Starrybound.Packets
 
                         case "kick":
                             new Kick(this.mClient).doProcess(args);
+                            break;
+
+                        case "admin":
+                            new AdminChat(this.mClient).doProcess(args);
                             break;
 
                         case "me":
@@ -117,6 +129,10 @@ namespace com.avilance.Starrybound.Packets
                             new Shutdown(this.mClient).doProcess(args);
                             break;
 
+                        case "restart":
+                            new Restart(this.mClient).doProcess(args);
+                            break;
+
                         case "build":
                             new Build(this.mClient).doProcess(args);
                             break;
@@ -130,6 +146,13 @@ namespace com.avilance.Starrybound.Packets
                             new WarpShip(this.mClient).doProcess(args);
                             break;
 
+                        case "help":
+                        case "commands":
+                        case "commandlist":
+                        case "?":
+                            new Help(this.mClient).doProcess(args);
+                            break;
+
                         default:
                             this.mClient.sendCommandMessage("Command " + cmd + " not found.");
                             break;
@@ -139,6 +162,7 @@ namespace com.avilance.Starrybound.Packets
                 catch (Exception e)
                 {
                     this.mClient.sendCommandMessage("Command failed: " + e.Message);
+                    //Console.WriteLine(e.ToString());
                 }
             }
             #endregion

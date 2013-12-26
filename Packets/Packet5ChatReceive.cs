@@ -38,6 +38,17 @@ namespace com.avilance.Starrybound.Packets
             string name = packetData.ReadStarString();
             string message = packetData.ReadStarString();
 
+            string formatName = this.mClient.playerData.formatName;
+
+            if (formatName != null)
+            {
+                foreach (ClientThread client in StarryboundServer.clients.Values)
+                {
+                    client.sendChatMessage((ChatReceiveContext)context, world, clientID, formatName, message);
+                }
+                return false;
+            }
+
             return null;
         }
 

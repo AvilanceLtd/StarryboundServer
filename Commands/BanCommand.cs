@@ -23,7 +23,7 @@ namespace com.avilance.Starrybound.Commands
         public BanCommand(ClientThread client)
         {
             this.name = "ban";
-            this.HelpText = "<username> <length (mins)> <reason>; Bans the user from the server for the specified time (in minutes) and reason.";
+            this.HelpText = " <username> <length (mins)> <reason>: Bans the user from the server for the specified time (in minutes) and reason.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.ban");
 
@@ -35,13 +35,12 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            if (args.Length > 3) { showHelpText(); return false; }
+            if (args.Length < 3) { showHelpText(); return false; }
 
-            string player = args[0].Trim();
-            string expiry = args[1].Trim();
-            string reason = string.Join(" ", args.Skip(2).Take(args.Length - 2)).Trim();
-
-            if (player == null || player.Length < 1 || expiry == null || expiry.Length < 1 || reason == null || reason.Length < 1) { showHelpText(); return false; }
+            string player = args[1].Trim();
+            string expiry = args[2].Trim();
+            int remainStuff = player.Length + expiry.Length;
+            string reason = string.Join(" ", args).Substring(remainStuff + 2).Trim();
 
             if (StarryboundServer.clients.ContainsKey(player))
             {
@@ -68,7 +67,7 @@ namespace com.avilance.Starrybound.Commands
                 catch (Exception e)
                 {
                     this.client.sendCommandMessage("An exception occured while attempting to ban " + player);
-                    StarryboundServer.logException("Error occured while banning player " + player + ": " + e.ToString());
+                    StarryboundServer.logException("Error occured while banning player " + player + ": " + e.StackTrace);
                     return false;
                 }
             }
@@ -85,9 +84,9 @@ namespace com.avilance.Starrybound.Commands
         public BanReloadCommand(ClientThread client)
         {
             this.name = "banreload";
-            this.HelpText = "Reloads the banned-players.txt file";
+            this.HelpText = ": Reloads the banned-players.txt file";
             this.Permission = new List<string>();
-            this.Permission.Add("admin.ban.reload");
+            this.Permission.Add("admin.reload");
 
             this.client = client;
             this.player = client.playerData;

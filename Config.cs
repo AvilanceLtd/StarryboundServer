@@ -63,7 +63,7 @@ namespace com.avilance.Starrybound
         public string proxyPass = "";
         public int passwordRounds = 5000;
 
-        public int maxClients = 40;
+        public int maxClients = 25;
 
         public string logFile = "proxy.log";
 

@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
         public Mute(ClientThread client)
         {
             this.name = "mute";
-            this.HelpText = "<username>; Allows you to mute/unmute a player, this command is toggled.";
+            this.HelpText = " <username>: Allows you to mute/unmute a player, this command is toggled.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.mute");
 

@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using com.avilance.Starrybound.Util;
 using com.avilance.Starrybound.Extensions;
 using com.avilance.Starrybound.Packets;
+using com.avilance.Starrybound.Permissions;
 
 namespace com.avilance.Starrybound
 {
@@ -66,6 +67,26 @@ namespace com.avilance.Starrybound
                 this.sIn = new BinaryReader(this.sSocket.GetStream());
                 this.sOut = new BinaryWriter(this.sSocket.GetStream());
 
+                Group defGroup;
+                try
+                {
+                    object groupObj = GroupFile.getGroup(StarryboundServer.defaultGroup);
+                    defGroup = (Group)groupObj;
+                }
+                catch (Exception)
+                {
+                    MemoryStream packet = new MemoryStream();
+                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                    this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+
+                    rejectPreConnected("The server is not able to accept your connection at the moment.");
+                    StarryboundServer.logError("Unable to find default user group - Unable to continue");
+                    return;
+                }
+
+                this.playerData.group = defGroup;
+
                 if (!sSocket.Connected)
                 {
                     MemoryStream packet = new MemoryStream();
@@ -91,6 +112,7 @@ namespace com.avilance.Starrybound
 
         public void sendClientPacket(Packet packetID, byte[] packetData)
         {
+            if (this.kickTargetTimestamp != 0) return;
             try
             {
                 this.cOut.WriteVarUInt32((uint)packetID);
@@ -142,6 +164,14 @@ namespace com.avilance.Starrybound
             packet.onSend();
         }
 
+        public void sendChatMessage(ChatReceiveContext context, string world, uint clientID, string name, string message)
+        {
+            if (clientState != ClientState.Connected) return;
+            Packet11ChatSend packet = new Packet11ChatSend(this, false, Util.Direction.Client);
+            packet.prepare(context, world, clientID, name, message);
+            packet.onSend();
+        }
+
         public void banClient(string reason)
         {
             sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
@@ -165,7 +195,7 @@ namespace com.avilance.Starrybound
                 if (StarryboundServer.clients.ContainsKey(this.playerData.name))
                 {
                     StarryboundServer.clients.Remove(this.playerData.name);
-                    StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    if(this.kickTargetTimestamp != 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                     if(!log)
                         StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
                 }

@@ -9,6 +9,7 @@
  * You should have received a copy of the GNU General Public License along with Starrybound Server. If not, see http://www.gnu.org/licenses/.
 */
 
+using com.avilance.Starrybound.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,8 @@ namespace com.avilance.Starrybound
         public uint id;
         public string uuid;
 
+        public Group group;
+
         public string sector;
         public int x;
         public int y;
@@ -40,6 +43,12 @@ namespace com.avilance.Starrybound
 
         public bool isMuted = false;
         public bool canBuild = true;
+
+        public string formatName 
+        {
+            get { return ((group.prefix == null && group.nameColor == null) ? null : (group.prefix + " " + ((group.nameColor != null) ? "^" + group.nameColor + ";" : "") + this.name)); }
+            set { return; }
+        }
 
         public bool hasPermission(string node)
         {
