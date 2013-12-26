@@ -57,6 +57,9 @@ namespace com.avilance.Starrybound
 
         public static string defaultGroup = null;
 
+        public static string motdData = "";
+        public static string rulesData = "";
+
         public static List<byte[]> sectors = new List<byte[]>();
 
         private static void ProcessExit(object sender, EventArgs e)

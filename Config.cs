@@ -34,6 +34,25 @@ namespace com.avilance.Starrybound
             }
         }
 
+        public static string ReadConfigFile(string file)
+        {
+            return File.ReadAllText(file);
+        }
+
+        public static string GetMotd()
+        {
+            string returnString = StarryboundServer.motdData;
+
+            returnString = returnString.Replace("%players%", StarryboundServer.clientCount.ToString());
+
+            return returnString;
+        }
+
+        public static string GetRules()
+        {
+            return StarryboundServer.rulesData;
+        }
+
         public static void SetupConfig()
         {
             if (!Directory.Exists(StarryboundServer.SavePath))
@@ -42,7 +61,11 @@ namespace com.avilance.Starrybound
             }
 
             CreateIfNot(RulesPath, "1) Respect all players 2) No griefing/hacking 3) Have fun!");
-            CreateIfNot(MotdPath, "This server is running Starrybound Server.\nType /help for a list of commands.\nThere are currently %players% player(s) online.");
+            CreateIfNot(MotdPath, "This server is running Starrybound Server. Type /help for a list of commands. There are currently %players% player(s) online.");
+
+            StarryboundServer.motdData = ReadConfigFile(MotdPath);
+            StarryboundServer.rulesData = ReadConfigFile(RulesPath);
+            
             if (File.Exists(ConfigPath))
             {
                 StarryboundServer.config = ConfigFile.Read(ConfigPath);

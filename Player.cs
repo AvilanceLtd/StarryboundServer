@@ -27,6 +27,8 @@ namespace com.avilance.Starrybound
         public uint id;
         public string uuid;
 
+        public bool sentMotd = false;
+
         public Group group;
 
         public string sector;

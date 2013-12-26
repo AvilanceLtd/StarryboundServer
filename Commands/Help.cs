@@ -44,7 +44,8 @@ namespace com.avilance.Starrybound.Commands
                 new Ship(client), 
                 new Shutdown(client), 
                 new Uptime(client),
-                new WarpShip(client)
+                new WarpShip(client),
+                new Rules(client),
             };
         }
 

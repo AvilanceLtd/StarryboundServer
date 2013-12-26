@@ -74,6 +74,10 @@ namespace com.avilance.Starrybound.Packets
                             new AdminChat(this.mClient).doProcess(args);
                             break;
 
+                        case "rules":
+                            new Rules(this.mClient).doProcess(args);
+                            break;
+
                         case "me":
                             new MeCommand(this.mClient).doProcess(args);
                             break;

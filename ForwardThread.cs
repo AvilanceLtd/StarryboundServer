@@ -295,6 +295,12 @@ namespace com.avilance.Starrybound
                         }
                         else if (packetID == Packet.WorldStart)
                         {
+                            if (!this.mParent.playerData.sentMotd)
+                            {
+                                this.mParent.sendChatMessage(Config.GetMotd());
+                                this.mParent.playerData.sentMotd = true;
+                            }
+
                             byte[] data1 = packetData.ReadStarByteArray();
                             byte[] data2 = packetData.ReadStarByteArray();
                             byte[] data3 = packetData.ReadStarByteArray();
