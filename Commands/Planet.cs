@@ -25,16 +25,9 @@ namespace com.avilance.Starrybound.Commands
         public Planet(ClientThread client)
         {
             this.name = "planet";
-<<<<<<< HEAD
             this.HelpText = ": Teleports you to the planet your ship is orbiting.";
-=======
-            this.HelpText = "Woot";
             this.Permission = new List<string>();
             this.Permission.Add("client.planet");
-<<<<<<< HEAD
->>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
-=======
->>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 
             this.client = client;
             this.player = client.playerData;

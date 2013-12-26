@@ -20,14 +20,9 @@ namespace com.avilance.Starrybound.Commands
     {
         public AdminChat(ClientThread client)
         {
-<<<<<<< HEAD
             this.name = "admin";
             this.HelpText = "<message>: Sends a message to all online admins.";
             this.aliases = new string[] {"#<message>"};
-=======
-            this.name = "admin, #";
-            this.HelpText = "<message>; Sends a message to all online admins.";
->>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
             this.Permission = new List<string>();
             this.Permission.Add("chat.admin");
             this.Permission.Add("e:admin.chat");
