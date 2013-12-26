@@ -195,16 +195,20 @@ namespace com.avilance.Starrybound
                                 this.mParent.playerData.inPlayerShip = player;
                             }
 
-                            Player pData = this.mParent.playerData;
-                            pData.sector = sector;
-                            pData.x = x;
-                            pData.y = y;
-                            pData.z = z;
-                            pData.planet = planet;
-                            pData.satellite = satellite;
+                            string planetCheck = sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite;
+
+                            if (planetCheck != ":0:0:0:0:0")
+                            {
+                                Player pData = this.mParent.playerData;
+                                pData.sector = sector;
+                                pData.x = x;
+                                pData.y = y;
+                                pData.z = z;
+                                pData.planet = planet;
+                                pData.satellite = satellite;
+                            }
 
                             // alpha:32145151:-15460793:-13973833:6
-                            string planetCheck = sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite;
                             string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
 
                             if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
