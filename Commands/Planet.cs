@@ -31,6 +31,9 @@ namespace com.avilance.Starrybound.Commands
             this.HelpText = "Woot";
             this.Permission = new List<string>();
             this.Permission.Add("client.planet");
+<<<<<<< HEAD
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
+=======
 >>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 
             this.client = client;

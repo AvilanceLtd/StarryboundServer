@@ -24,14 +24,20 @@ namespace com.avilance.Starrybound.Commands
         public Item(ClientThread client)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             this.name = "item";
             this.HelpText = " <item name> <amount>: gives you an item.";
             this.aliases = new string[] { "give" };
 =======
+=======
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
             this.name = "item, /give";
             this.HelpText = "<item> <amount>; Allows you to give items to yourself.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.give");
+<<<<<<< HEAD
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
+=======
 >>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 
             this.client = client;

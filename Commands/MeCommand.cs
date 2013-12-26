@@ -16,6 +16,9 @@ namespace com.avilance.Starrybound.Commands
             this.HelpText = "<message>; Sends a emote message.";
             this.Permission = new List<string>();
             this.Permission.Add("chat.emote");
+<<<<<<< HEAD
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
+=======
 >>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 
             this.client = client;

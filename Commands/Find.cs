@@ -22,8 +22,12 @@ namespace com.avilance.Starrybound.Commands
         {
             this.name = "find";
 <<<<<<< HEAD
+<<<<<<< HEAD
             this.HelpText = " <name>: Shows you the location of a player or yourself.";
             this.aliases = new string[] { "where" };
+=======
+            this.HelpText = "<player (optional)>; Find your world co-ordinates or those of a specified player.";
+>>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
 =======
             this.HelpText = "<player (optional)>; Find your world co-ordinates or those of a specified player.";
 >>>>>>> 05237e4719208a518f0474f7007c03d021d61d51
