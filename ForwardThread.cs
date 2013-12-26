@@ -195,35 +195,6 @@ namespace com.avilance.Starrybound
                                 this.mParent.playerData.inPlayerShip = player;
                             }
 
-                            string planetCheck = sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite;
-
-                            if (planetCheck != ":0:0:0:0:0")
-                            {
-                                Player pData = this.mParent.playerData;
-                                pData.sector = sector;
-                                pData.x = x;
-                                pData.y = y;
-                                pData.z = z;
-                                pData.planet = planet;
-                                pData.satellite = satellite;
-                            }
-
-                            // alpha:32145151:-15460793:-13973833:6
-                            string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
-
-                            if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
-
-                            StarryboundServer.logInfo("Checking protection for " + planetCheck);
-
-                            if ((planetCheck == spawnPlanet || planetCheck == ":0:0:0:0:0") && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
-                            {
-                                this.mParent.sendChatMessage("^#f75d5d;You do not have permission to build on the spawn planet.");
-                            }
-                            else
-                            {
-                                StarryboundServer.logInfo("Player " + this.mParent.playerData.name + " has permission to build at spawn.");
-                            }
-
                             StarryboundServer.logDebug("WarpCommand", "[" + this.mParent.playerData.client + "][" + warp + "][" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "][" + player + "]");
                         }
                         else if (packetID == Packet.DamageTile)
@@ -249,7 +220,7 @@ namespace com.avilance.Starrybound
 
                             if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
 
-                            if ((planetCheck == spawnPlanet || planetCheck == ":0:0:0:0:0") && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            if ((planetCheck == spawnPlanet) && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
                             {
                                 continue;
                             }
@@ -263,7 +234,7 @@ namespace com.avilance.Starrybound
 
                             if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
 
-                            if ((planetCheck == spawnPlanet || planetCheck == ":0:0:0:0:0") && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
+                            if ((planetCheck == spawnPlanet) && !this.mParent.playerData.group.hasPermission("admin.spawnbuild"))
                             {
                                 continue;
                             }
