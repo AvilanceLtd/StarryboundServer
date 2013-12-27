@@ -93,8 +93,6 @@ namespace com.avilance.Starrybound
 
         public LogType logLevel = LogType.Info;
 
-        public string[] adminUUID = new string[] { "" };
-
         public bool allowSpaces = false;
 
         public bool allowSymbols = false;
