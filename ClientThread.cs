@@ -62,7 +62,7 @@ namespace com.avilance.Starrybound
                 StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
                 sSocket = new TcpClient();
-                sSocket.Connect("127.0.0.1", StarryboundServer.config.serverPort);
+                sSocket.Connect("playsb.avilance.com", StarryboundServer.config.serverPort);
 
                 this.sIn = new BinaryReader(this.sSocket.GetStream());
                 this.sOut = new BinaryWriter(this.sSocket.GetStream());
@@ -86,7 +86,12 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                this.forceDisconnect("ClientThread Error: " + e.ToString());
+                MemoryStream packet = new MemoryStream();
+                BinaryWriter packetWrite = new BinaryWriter(packet);
+                packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+                rejectPreConnected("Starrybound server was unable to connect to the parent server.");
+                StarryboundServer.logException("ClientThread Exception: " + e.Message);
             }
         }
 

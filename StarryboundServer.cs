@@ -43,10 +43,9 @@ namespace com.avilance.Starrybound
         public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
 
         public static ServerThread sbServer;
-
+        static Thread sbServerThread;
         static Thread listenerThread;
         static Thread monitorThread;
-        static Thread sbServerThread;
 
         public static bool allowNewClients = true;
 
@@ -101,7 +100,10 @@ namespace com.avilance.Starrybound
             ServerConfig.SetupConfig();
             Groups.SetupGroups();
             Users.SetupUsers();
-
+#if DEBUG
+            StarryboundServer.config.logLevel = LogType.Debug;
+            logDebug("Init", "This was compiled in DEBUG, forcing debug logging!");
+#endif
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
 
@@ -111,14 +113,15 @@ namespace com.avilance.Starrybound
             logInfo("####       Licensed under the GPLv3       ####");
             logInfo("##############################################");
             logInfo("Version: " + VersionNum);
-
+#if !DEBUG
             if (config.logLevel == LogType.Debug)
             {
                 logWarn("The logLevel in your config is currently set to DEBUG. This **WILL** flood your console and log file, if you do not want this please edit your config logLevel to INFO");
                 logWarn("Launch will proceed in 5 seconds.");
                 System.Threading.Thread.Sleep(5000);
             }
-
+#endif
+#if !NOSERVER
             if(config.proxyPort == config.serverPort)
             {
                 logFatal("You cannot have the serverPort and proxyPort on the same port!");
@@ -126,7 +129,7 @@ namespace com.avilance.Starrybound
                 Console.ReadKey(true);
                 Environment.Exit(0);
             }
-
+#endif
             //Precompute for global position search
             foreach(string sector in config.sectors)
             {
@@ -134,14 +137,14 @@ namespace com.avilance.Starrybound
             }
 
             Bans.readBansFromFile();
-
+#if !NOSERVER
             sbServer = new ServerThread();
             sbServerThread = new Thread(new ThreadStart(sbServer.run));
             sbServerThread.Start();
 
             logInfo("Starting Starbound Server - This may take a few moments...");
             while (serverState != ServerState.StartingProxy) { if (serverState == ServerState.Crashed) return; }
-
+#endif
             logInfo("Starbound server is ready. Starting proxy wrapper.");
 
             ListenerThread listener = new ListenerThread();

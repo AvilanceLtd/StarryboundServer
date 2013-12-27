@@ -67,7 +67,7 @@ namespace com.avilance.Starrybound.Commands
                 catch (Exception e)
                 {
                     this.client.sendCommandMessage("An exception occured while attempting to ban " + player);
-                    StarryboundServer.logException("Error occured while banning player " + player + ": " + e.StackTrace);
+                    StarryboundServer.logException("Error occured while banning player " + player + ": " + e.Message);
                     return false;
                 }
             }

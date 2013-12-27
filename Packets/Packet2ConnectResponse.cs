@@ -43,7 +43,7 @@ namespace com.avilance.Starrybound.Packets
 
             if(!success)
             {
-                this.mClient.forceDisconnect("Rejected by parent server: " + rejectReason);
+                this.mClient.rejectPreConnected("Rejected by parent server: " + rejectReason);
                 return true;
             }
 

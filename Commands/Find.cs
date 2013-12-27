@@ -34,7 +34,7 @@ namespace com.avilance.Starrybound.Commands
 
             if (player == null || player.Length < 1)
             {
-                this.client.sendCommandMessage("You are located [" + this.player.sector + ":" + this.player.x + ":" + this.player.y + ":" + this.player.z + ":" + this.player.planet + ":" + this.player.satellite + "]");
+                this.client.sendCommandMessage("You are located [" + this.player.loc.ToString() + "]");
                 return true;
             }
             else
@@ -42,7 +42,7 @@ namespace com.avilance.Starrybound.Commands
                 if (StarryboundServer.clients.ContainsKey(player))
                 {
                     Player playerData = StarryboundServer.clients[player].playerData;
-                    this.client.sendCommandMessage(player + " located [" + playerData.sector + ":" + playerData.x + ":" + playerData.y + ":" + playerData.z + ":" + playerData.planet + ":" + playerData.satellite + "]");
+                    this.client.sendCommandMessage(player + " located [" + playerData.loc.ToString() + "]");
                     return true;
                 }
                 else

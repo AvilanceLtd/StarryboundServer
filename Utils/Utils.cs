@@ -16,6 +16,7 @@ using System.IO;
 using System.Text;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound.Util
 {
@@ -78,11 +79,11 @@ namespace com.avilance.Starrybound.Util
             return unixTimeStamp;
         }
 
-        public static byte[] findGlobalCoords(byte[] input)
+        public static WorldCoordinate findGlobalCoords(byte[] input)
         {
             try
             {
-                for (int i = 0; i < input.Length - 10; i++)
+                for (int i = 0; i < input.Length - 26; i++)
                 {
                     foreach (byte[] sector in StarryboundServer.sectors)
                     {
@@ -92,14 +93,16 @@ namespace com.avilance.Starrybound.Util
                         {
                             byte[] returnBytes = new byte[sector.Length + 21];
                             Buffer.BlockCopy(input, i - 1, returnBytes, 0, sector.Length + 21);
-                            return returnBytes;
+                            BinaryReader coords = new BinaryReader(new MemoryStream(returnBytes));
+                            return coords.ReadStarWorldCoordinate();
                         }
                     }
                 }
                 return null;
             }
-            catch(Exception)
+            catch(Exception e)
             {
+                StarryboundServer.logException("findGlobalCoords Exception: " + e.ToString());
                 return null;
             }
         }

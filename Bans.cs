@@ -139,8 +139,8 @@ namespace com.avilance.Starrybound
 
                 nextBanID++;
             }
-            catch (Exception) {
-                StarryboundServer.logException("Unable to write ban to banned-players.txt: Permission error while accessing file?");
+            catch (Exception e) {
+                StarryboundServer.logException("Unable to write ban to banned-players.txt: " + e.Message);
                 return false; 
             }
 
@@ -207,9 +207,9 @@ namespace com.avilance.Starrybound
 
                 StarryboundServer.logInfo(banCount + " ban(s) have been loaded from file. " + removedCount + " ban(s) have expired and been removed.");
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                StarryboundServer.logWarn("Unable to read bans from banned-players.txt: File doesn't exist, permission error while accessing, or no bans were found.");
+                StarryboundServer.logWarn("Unable to read bans from banned-players.txt: " + e.Message);
             }
         }
     }

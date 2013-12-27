@@ -30,7 +30,10 @@ namespace com.avilance.Starrybound.Extensions
         public static string ReadStarString(this BinaryReader read)
         {
             ulong size = read.ReadVarUInt64();
-            return Encoding.UTF8.GetString(read.ReadBytes((int)size));
+            if (size > 0)
+                return Encoding.UTF8.GetString(read.ReadBytes((int)size));
+            else
+                return "";
         }
 
         public static byte[] ReadStarUUID(this BinaryReader read)
@@ -39,6 +42,67 @@ namespace com.avilance.Starrybound.Extensions
             if(exists)
                 return read.ReadBytes(16);
             return new byte[16];
+        }
+
+        public static WorldCoordinate ReadStarWorldCoordinate(this BinaryReader read)
+        {
+            string sector = read.ReadStarString();
+            if (sector != "")
+            {
+                int x = read.ReadInt32BE();
+                int y = read.ReadInt32BE();
+                int z = read.ReadInt32BE();
+                int planet = read.ReadInt32BE();
+                int satellite = read.ReadInt32BE();
+                return new WorldCoordinate(sector, x, y, z, planet, satellite);
+            }
+            else
+                return null;
+        }
+
+        public static SystemCoordinate ReadStarSystemCoordinate(this BinaryReader read)
+        {
+            string sector = read.ReadStarString();
+            if (sector != "")
+            {
+                int x = read.ReadInt32BE();
+                int y = read.ReadInt32BE();
+                int z = read.ReadInt32BE();
+                return new SystemCoordinate(sector, x, y, z);
+            }
+            else
+                return null;
+        }
+
+        public static Dictionary<string, WorldCoordinate> ReadStarCelestialLog(this BinaryReader read)
+        {
+            Dictionary<string, WorldCoordinate> returnList = new Dictionary<string, WorldCoordinate>();
+            byte[] celestialLog = read.ReadStarByteArray();
+            BinaryReader celestialRead = new BinaryReader(new MemoryStream(celestialLog));
+            uint numVisited = celestialRead.ReadVarUInt32();
+            for (int i = 0; i < numVisited; i++)
+            {
+                celestialRead.ReadStarSystemCoordinate();
+            }
+            uint numSectors = celestialRead.ReadVarUInt32();
+            for (int i = 0; i < numSectors; i++)
+            {
+                celestialRead.ReadStarString();
+                celestialRead.ReadBoolean();
+            }
+            byte unk = celestialRead.ReadByte();
+            SystemCoordinate coords = celestialRead.ReadStarSystemCoordinate(); //Seems to be the current system coords.
+            WorldCoordinate curLoc = celestialRead.ReadStarWorldCoordinate();
+            if (curLoc != null)
+            {
+                returnList.Add("loc", curLoc);
+            }
+            WorldCoordinate curHome = celestialRead.ReadStarWorldCoordinate();
+            if (curHome != null)
+            {
+                returnList.Add("home", curHome);
+            }
+            return returnList;
         }
 
         public static List<object> ReadStarVariant(this BinaryReader read)

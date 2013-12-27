@@ -28,6 +28,21 @@ namespace com.avilance.Starrybound.Extensions
             write.Write(buffer);
         }
 
+        public static void Write(this BinaryWriter write, WorldCoordinate coord)
+        {
+            write.Write(coord._syscoord);
+            write.WriteBE(coord._planet);
+            write.WriteBE(coord._satellite);
+        }
+
+        public static void Write(this BinaryWriter write, SystemCoordinate coord)
+        {
+            write.WriteStarString(coord._sector);
+            write.WriteBE(coord._x);
+            write.WriteBE(coord._y);
+            write.WriteBE(coord._z);
+        }
+
         public static void WriteVarByte(this BinaryWriter write, byte value)
         {
             WriteVarUInt64(write, value);

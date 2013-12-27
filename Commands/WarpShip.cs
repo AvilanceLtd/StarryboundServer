@@ -36,12 +36,7 @@ namespace com.avilance.Starrybound.Commands
 
             string player = string.Join(" ", args).Trim();
 
-            string sector;
-            int x;
-            int y;
-            int z;
-            int planet;
-            int satellite;
+            WorldCoordinate loc = this.player.loc;
 
             if (player == null || player.Length < 1)
             {
@@ -52,14 +47,8 @@ namespace com.avilance.Starrybound.Commands
             {
                 if (StarryboundServer.clients.ContainsKey(player))
                 {
-                    Player playerData = StarryboundServer.clients[player].playerData;
-                    sector = playerData.sector;
-                    x = playerData.x;
-                    y = playerData.y;
-                    z = playerData.z;
-                    planet = playerData.planet;
-                    satellite = playerData.satellite;
-                    this.client.sendCommandMessage("Warping ship to " + player + " [" + sector + ":" + x + ":" + y + ":" + z + ":" + planet + ":" + satellite + "]");
+                    loc = StarryboundServer.clients[player].playerData.loc;
+                    this.client.sendCommandMessage("Warping ship to " + player + " [" + loc.ToString() + "]");
                 }
                 else
                 {
@@ -72,12 +61,7 @@ namespace com.avilance.Starrybound.Commands
             BinaryWriter packetWrite = new BinaryWriter(packetWarp);
 
             packetWrite.WriteBE((uint)WarpType.MoveShip);
-            packetWrite.WriteStarString(sector);
-            packetWrite.WriteBE(x);
-            packetWrite.WriteBE(y);
-            packetWrite.WriteBE(z);
-            packetWrite.WriteBE(planet);
-            packetWrite.WriteBE(satellite);
+            packetWrite.Write(loc);
             packetWrite.WriteStarString("");
             client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
             return true;

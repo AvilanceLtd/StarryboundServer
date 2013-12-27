@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound
 {
@@ -31,17 +32,12 @@ namespace com.avilance.Starrybound
 
         public Group group;
 
-        public string sector;
-        public int x;
-        public int y;
-        public int z;
-        public int planet;
-        public int satellite;
+        public WorldCoordinate loc;
+        public WorldCoordinate home;
 
         public int lastOnline = 0;
 
-        public string inPlayerShip = "";
-        public string lastPlayerShip = "";
+        public bool inPlayerShip = true;
 
         public string client { get { if (String.IsNullOrEmpty(name)) return ip; else return name; } }
 
