@@ -85,7 +85,7 @@ namespace com.avilance.Starrybound.Packets
 
             if (!StarryboundServer.config.allowSymbols)
             {
-                Regex r = new Regex("^[a-zA-Z0-9_- ]*$");
+                Regex r = new Regex("^[a-zA-Z0-9_\\- ]*$");
                 if (!r.IsMatch(this.mClient.playerData.name))
                 {
                     this.mClient.rejectPreConnected("You may not have special characters in your name on this server.");
