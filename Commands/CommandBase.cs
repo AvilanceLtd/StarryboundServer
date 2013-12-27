@@ -40,7 +40,7 @@ namespace com.avilance.Starrybound.Commands
                 string checkNode = node;
                 if (checkNode.StartsWith("e:"))
                 {
-                    checkNode = checkNode.Substring(3, checkNode.Length - 2);
+                    checkNode = checkNode.Split(':')[1];
 
                     if (player.hasPermission(checkNode))
                         return true;
