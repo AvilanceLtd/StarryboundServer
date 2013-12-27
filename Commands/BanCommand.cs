@@ -96,7 +96,9 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
             this.client.sendChatMessage("Attempting to reload all server bans from banned-players.txt");
+            Bans.allBans = new Dictionary<int, Ban>();
             Bans.readBansFromFile();
+            this.client.sendChatMessage(Bans.allBans.Count + " ban(s) have been loaded.");
             return true;
         }
     }
