@@ -107,6 +107,9 @@ namespace com.avilance.Starrybound
             serverConfig.maxPlayers = config.maxClients + 10;
             serverConfig.Write(ServerConfig.ConfigPath);
 
+            serverConfig.maxPlayers = config.maxClients + 10;
+            serverConfig.Write(ServerConfig.ConfigPath);
+
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
 
