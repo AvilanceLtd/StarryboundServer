@@ -54,6 +54,9 @@ namespace com.avilance.Starrybound.Commands
 
             StarryboundServer.logInfo("All connections closed -- Shutting down gracefully.");
 
+            // Saves all groups, in case they were modified while running
+            Permissions.Groups.SaveGroups();
+
             System.Environment.Exit(0);
 
             return true;

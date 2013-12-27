@@ -64,5 +64,10 @@ namespace com.avilance.Starrybound
             if (this.group.hasPermission(node)) return true;
             else return false;
         }
+
+        public bool isInSameWorldAs(Player otherPlayer)
+        {
+            return loc.Equals(otherPlayer.loc);
+        }
     }
 }

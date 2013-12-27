@@ -74,6 +74,11 @@ namespace com.avilance.Starrybound.Permissions
                 GroupFile.ProcessGroups(GroupFile.Read(GroupsPath));
             }
         }
+
+        public static void SaveGroups()
+        {
+            GroupFile.Write(GroupsPath);
+        }
     }
 
     class GroupFile 

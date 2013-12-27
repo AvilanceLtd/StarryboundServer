@@ -34,6 +34,7 @@ namespace com.avilance.Starrybound.Commands
                 new Broadcast(client), 
                 new Build(client), 
                 new Find(client),
+                new GroupCommand(client),
                 new Home(client), 
                 new Item(client),
                 new Kick(client), 
@@ -41,11 +42,12 @@ namespace com.avilance.Starrybound.Commands
                 new Mute(client), 
                 new Planet(client), 
                 new Players(client), 
+                new Rules(client),
                 new Ship(client), 
                 new Shutdown(client), 
                 new Uptime(client),
                 new WarpShip(client),
-                new Rules(client),
+                new WhosThereCommand(client),
             };
         }
 
@@ -120,7 +122,7 @@ namespace com.avilance.Starrybound.Commands
                         {
                             this.client.sendChatMessage("^#5dc4f4;" + sb.ToString());
                             sb.Clear();
-                            sb.Append(command.name).Append(", ");
+                            sb.Append("/").Append(command.name).Append(", ");
                         }
                     }
                 }

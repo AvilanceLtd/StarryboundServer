@@ -105,6 +105,10 @@ namespace com.avilance.Starrybound.Packets
                             new Players(this.mClient).doProcess(args);
                             break;
 
+                        case "whosthere":
+                            new WhosThereCommand(this.mClient).doProcess(args);
+                            break;
+
                         case "broadcast":
                             new Broadcast(this.mClient).doProcess(args);
                             break;
@@ -155,6 +159,10 @@ namespace com.avilance.Starrybound.Packets
                             new WarpShip(this.mClient).doProcess(args);
                             break;
 
+                        case "group":
+                            new GroupCommand(this.mClient).doProcess(args);
+                            break;
+
                         case "help":
                         case "commands":
                         case "commandlist":
@@ -171,7 +179,7 @@ namespace com.avilance.Starrybound.Packets
                 catch (Exception e)
                 {
                     this.mClient.sendCommandMessage("Command failed: " + e.Message);
-                    //Console.WriteLine(e.ToString());
+                    Console.WriteLine(e.ToString());
                 }
             }
             #endregion
