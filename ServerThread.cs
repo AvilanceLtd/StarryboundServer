@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading;
 using com.avilance.Starrybound.Util;
@@ -26,21 +27,17 @@ namespace com.avilance.Starrybound
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
                 };
-
                 process = Process.Start(startInfo);
-
+                File.WriteAllText("starbound_server.pid", process.Id.ToString());
                 process.OutputDataReceived += (sender, e) => parseOutput(e.Data);
-
                 process.BeginOutputReadLine();
                 process.WaitForExit();
-
-                Thread.Sleep(5000);
-
+                StarryboundServer.serverState = ServerState.Crashed;
             }
             catch (Exception e)
             {
                 StarryboundServer.logException("Unable to start starbound_server.exe, is this file in the same directory? " + e.ToString());
-                StarryboundServer.serverState = Util.ServerState.Crashed;
+                StarryboundServer.serverState = ServerState.Crashed;
             }
         }
 
@@ -77,7 +74,7 @@ namespace com.avilance.Starrybound
                     StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
                     StarryboundServer.restartTime = Utils.getTimestamp() + 30;
 
-                    StarryboundServer.serverState = Util.ServerState.Restarting;
+                    StarryboundServer.serverState = Util.ServerState.ShuttingDown;
                 }
 
                 if (consoleLine.Contains("TcpServer listening on: "))

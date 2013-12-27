@@ -76,6 +76,11 @@ namespace com.avilance.Starrybound
                 StarryboundServer.config = new ConfigFile();
 
             StarryboundServer.config.Write(ConfigPath);
+
+#if DEBUG
+            StarryboundServer.config.logLevel = LogType.Debug;
+            StarryboundServer.logDebug("SetupConfig", "This was compiled in DEBUG, forcing debug logging!");
+#endif
         }
     }
 

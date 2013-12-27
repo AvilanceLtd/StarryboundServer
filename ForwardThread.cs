@@ -236,7 +236,7 @@ namespace com.avilance.Starrybound
 
                                 MemoryStream packet = new MemoryStream();
                                 BinaryWriter packetWrite = new BinaryWriter(packet);
-                                string passwordHash = Utils.StarHashPassword(StarryboundServer.privatePassword, "" + passwordSalt, passwordRounds);
+                                string passwordHash = Utils.StarHashPassword(StarryboundServer.privatePassword, passwordSalt, passwordRounds);
                                 packetWrite.WriteStarString("");
                                 packetWrite.WriteStarString(passwordHash);
                                 this.client.sendServerPacket(Packet.HandshakeResponse, packet.ToArray());

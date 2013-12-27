@@ -78,7 +78,7 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            if (StarryboundServer.serverState == ServerState.Restarting)
+            if (StarryboundServer.serverState == ServerState.ShuttingDown)
             {
                 StarryboundServer.sendGlobalMessage("^#f75d5d;The server restart has been aborted by " + this.player.name);
 
@@ -90,7 +90,7 @@ namespace com.avilance.Starrybound.Commands
             {
                 StarryboundServer.sendGlobalMessage("^#f75d5d;The server will restart in 30 seconds. We will be back shortly.");
 
-                StarryboundServer.serverState = ServerState.Restarting;
+                StarryboundServer.serverState = ServerState.ShuttingDown;
 
                 StarryboundServer.restartTime = Utils.getTimestamp() + 30;
             }

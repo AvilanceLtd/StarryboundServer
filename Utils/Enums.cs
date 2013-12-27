@@ -246,7 +246,7 @@ namespace com.avilance.Starrybound.Util
         Starting = 0,
         StartingProxy = 1,
         Running = 2,
-        Restarting = 3,
+        ShuttingDown = 3,
         Crashed = 4,
     }
 

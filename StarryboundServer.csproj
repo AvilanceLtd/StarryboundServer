@@ -131,6 +131,7 @@
     <Compile Include="Extensions\WorldCoordinate.cs" />
     <Compile Include="ForwardThread.cs" />
     <Compile Include="ListenerThread.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Packets\Packet11ChatSend.cs" />
     <Compile Include="Packets\Packet2ConnectResponse.cs" />
     <Compile Include="Packets\Packet5ChatReceive.cs" />
