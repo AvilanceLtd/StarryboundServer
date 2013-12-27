@@ -19,37 +19,138 @@ namespace com.avilance.Starrybound.Util
 {
     public enum Packet
     {
-        ProtocolVersion = 1,
-        ConnectResponse = 2,
-        ServerDisconnect = 3,
-        HandshakeChallenge = 4,
-        ChatReceive = 5,
-        UniverseTimeUpdate = 6,
-        ClientConnect = 7,
-        ClientDisconnect = 8,
-        HandshakeResponse = 9,
-        WarpCommand = 10,
-        ChatSend = 11,
-        ClientContextUpdate = 12,
-        WorldStart = 13,
-        WorldStop = 14,
+        ProtocolVersion = 1, //Done
+        ConnectResponse = 2, //Done
+        ServerDisconnect = 3, //Done
+        HandshakeChallenge = 4, //Done
+        ChatReceive = 5, //Done
+        UniverseTimeUpdate = 6, //Not Needed
+        ClientConnect = 7, //Done
+        ClientDisconnect = 8, //Done
+        HandshakeResponse = 9, //Done
+        WarpCommand = 10, //Done
+        ChatSend = 11, //Done
+        ClientContextUpdate = 12, //In Progress - NetStateDelta
+        WorldStart = 13, //Done
+        WorldStop = 14, //Done
         TileArrayUpdate = 15,
+        /*
+         * VLQI
+         * VLQI
+         * VLQU
+         * VLQU
+         * {
+         * Star::NetTile
+         * }
+         */
         TileUpdate = 16,
+        /*
+         * int
+         * int
+         * Star::NetTile
+         */
         TileLiquidUpdate = 17,
+        /*
+         * VLQI
+         * VLQI
+         * uchar
+         * uchar
+         */
         TileDamageUpdate = 18,
+        /*
+         * int
+         * int
+         * uchar
+         * Star::TileDamageStatus
+         * {
+         * float
+         * float
+         * float
+         * float
+         * float
+         * }
+         */
         TileModificationFailure = 19,
-        GiveItem = 20,
+        /*
+         * VLQU
+         * {
+         * ???
+         * }
+         */
+        GiveItem = 20, //Done
         SwapInContainerResult = 22,
         EnvironmentUpdate = 23,
+        /*
+         * ByteArray
+         * ByteArray
+         */
         EntityInteractResult = 24,
+        /*
+         * uint
+         * int
+         * Star::Variant
+         */
         ModifyTileList = 25,
+        /*
+         * VLQU
+         * {
+         * ???
+         * }
+         * bool
+         */
         DamageTile = 26,
+        /*
+         * [int, int]
+         * uchar
+         * [float, float]
+         * uchar
+         * float
+         */
         DamageTileGroup = 27,
+        /*
+         * VLQU
+         * {
+         * [int, int]
+         * ???
+         * }
+         * uchar
+         * [float, float]
+         * uchar
+         * float
+         */
         RequestDrop = 28,
+        /*
+         * VLQI
+         */
         SpawnEntity = 29,
+        /*
+         * uchar
+         * ByteArray
+         */
         EntityInteract = 30,
+        /*
+         * int
+         * float, float
+         * float, float
+         */
         ConnectWire = 31,
+        /*
+         * VLQI
+         * VLQI
+         * VLQI
+         * VLQI
+         * VLQI
+         * VLQI
+         * VLQI
+         * VLQI
+         */
         DisconnectAllWires = 32,
+        /*
+         * VLQI
+         * VLQI
+         * VLQI
+         * VLQI
+         */
         OpenContainer = 33,
         CloseContainer = 34,
         SwapInContainer = 35,
@@ -58,14 +159,42 @@ namespace com.avilance.Starrybound.Util
         StopCraftingInContainer = 38,
         BurnContainer = 39,
         ClearContainer = 40,
-        WorldClientStateUpdate = 41,
+        WorldClientStateUpdate = 41,  //In Progress - NetStateDelta
         EntityCreate = 42,
+        /*
+         * uchar
+         * ByteArray
+         * VLQI
+         */
         EntityUpdate = 43,
+        /*
+         * VLQI
+         * ByteArray
+         */
         EntityDestroy = 44,
+        /*
+         * VLQI
+         * bool
+         */
         DamageNotification = 45,
+        /*
+         * Star::DamageNotification
+         * [
+         * ]
+         */
         StatusEffectRequest = 46,
+        /*
+         * Star::StatusEffectRequest
+         */
         UpdateWorldProperties = 47,
-        Heartbeat = 48,
+        /*
+         * VLQU
+         * {
+         * string
+         * Star::Variant
+         * }
+         */
+        Heartbeat = 48, //Not Needed
     }
 
     public enum Direction

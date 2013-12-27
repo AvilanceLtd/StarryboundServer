@@ -134,8 +134,9 @@ namespace com.avilance.Starrybound.Extensions
                     uint size2 = read.ReadVarUInt32();
                     for(int i=0; i < size2; i++)
                     {
-                        result.Add(read.ReadStarString());
-                        result.Add(read.ReadStarVariant());
+                        Dictionary<string, object> VariantMap = new Dictionary<string,object>();
+                        VariantMap.Add(read.ReadStarString(), read.ReadStarVariant());
+                        result.Add(VariantMap);
                     }
                     break;
             }

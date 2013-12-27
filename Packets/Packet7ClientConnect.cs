@@ -52,7 +52,7 @@ namespace com.avilance.Starrybound.Packets
             StarryboundServer.logDebug("AssetDigest", "[" + this.mClient.playerData.client + "] [" + sAssetDigest + "]");
             if(StarryboundServer.config.useAssetDigest)
             {
-                if(sAssetDigest == StarryboundServer.config.assetDigest)
+                if(sAssetDigest != StarryboundServer.config.assetDigest)
                 {
                     this.mClient.rejectPreConnected("Please reinstall Starbound to connect to this server.");
                     return false;
