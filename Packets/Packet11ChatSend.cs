@@ -67,6 +67,10 @@ namespace com.avilance.Starrybound.Packets
                             new BanCommand(this.mClient).doProcess(args);
                             break;
 
+                        case "banreload":
+                            new BanReloadCommand(this.mClient).doProcess(args);
+                            break;
+
                         case "kick":
                             new Kick(this.mClient).doProcess(args);
                             break;
