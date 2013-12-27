@@ -180,8 +180,15 @@ namespace com.avilance.Starrybound
 
             foreach (ClientThread client in clients.Values)
             {
-                client.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
-                client.forceDisconnect("Server Restarting");
+                client.sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
+                client.sendChatMessage("^#f75d5d;You have been disconnected.");
+                client.clientState = ClientState.Disposing;
+                client.kickTargetTimestamp = Utils.getTimestamp() + 7;
+            }
+
+            while (clients.Count > 0)
+            {
+                // Waiting
             }
 
             if (listenerThread != null) listenerThread.Abort();
@@ -193,6 +200,7 @@ namespace com.avilance.Starrybound
 
             sbServerThread.Abort();
 
+            logInfo("Graceful shutdown complete, now restarting...");
             System.Threading.Thread.Sleep(3000);
 
             Process.Start(Environment.CurrentDirectory + "\\StarryboundServer.exe");
