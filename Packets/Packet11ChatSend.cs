@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Starrybound Server
  * Copyright 2013, Avilance Ltd
  * Created by Zidonuke (zidonuke@gmail.com) and Crashdoom (crashdoom@avilance.com)
@@ -58,7 +58,8 @@ namespace com.avilance.Starrybound.Packets
                     StarryboundServer.logInfo("[Command] [" + this.mClient.playerData.name + "]: " + message);
                     string[] args = message.Remove(0, 1).Split(' ');
                     string cmd = args[0].ToLower();
-                    args = message.Remove(0, cmd.Length + 1).Split(' ');
+
+                    args = parseArgs(message.Remove(0, cmd.Length + 1));
 
                     switch (cmd)
                     {
@@ -191,6 +192,51 @@ namespace com.avilance.Starrybound.Packets
             }
             
             return true;
+        }
+
+        // Test with http://gskinner.com/RegExr/
+        // Current expression courtesy of http://stackoverflow.com/a/20303808
+        /// <summary>
+        /// The regular expression used when splitting arguments.
+        /// Compiled as a static variable to speed up argument checking
+        /// </summary>
+        static System.Text.RegularExpressions.Regex argRegex = new System.Text.RegularExpressions.Regex(
+            @"(?:^[ \t]*((?>[^ \t""\r\n]+|""[^""]+(?:""|$))+)|(?!^)[ \t]+((?>[^ \t""\\\r\n]+|(?<!\\)(?:\\\\)*""[^""\\\r\n]*(?:\\.[^""\\\r\n]*)*""{1,2}|(?:\\(?:\\\\)*"")+|\\+(?!""))+)|([^ \t\r\n]))", 
+            System.Text.RegularExpressions.RegexOptions.Compiled);
+        
+        /// <summary>
+        /// Parses the args into an array, taking quotes and brackets into account
+        /// </summary>
+        /// <param name="args">The string to parse</param>
+        /// <returns></returns>
+        private static string[] parseArgs(string args)
+        {
+            List<string> parsed;
+            System.Text.RegularExpressions.MatchCollection matches;
+
+            parsed = new List<string>();
+
+            matches = argRegex.Matches(args);
+
+            // Loop through matches (there should only ever be one if we're successful);
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                foreach (System.Text.RegularExpressions.Capture capture in match.Captures)
+                {
+                    string val;
+
+                    // The value of the capture is our value
+                    val = capture.Value;
+                    // Trim out any trailing spaces
+                    val = val.Trim();
+                    // Trim out any characters used for sectioning off the argument
+                    val = val.Trim('"', '(', ')', '\'');
+
+                    parsed.Add(val);
+                }
+            }
+
+            return parsed.ToArray();
         }
 
         public void prepare(ChatReceiveContext context, string message)
