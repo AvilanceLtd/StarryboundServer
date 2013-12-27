@@ -39,8 +39,8 @@ namespace com.avilance.Starrybound.Commands
 
             if (args.Length < 2) { showHelpText(); return false; }
 
-            string item = args[1];
-            uint count = Convert.ToUInt32(args[2]) + 1;
+            string item = args[0];
+            uint count = Convert.ToUInt32(args[1]) + 1;
             if (String.IsNullOrEmpty(item) || count < 1) { showHelpText(); return false; }
 
             MemoryStream packet = new MemoryStream();
