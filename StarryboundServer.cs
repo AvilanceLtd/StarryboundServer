@@ -168,6 +168,8 @@ namespace com.avilance.Starrybound
                     break;
                 }
             }
+            
+            System.Threading.Thread.Sleep(2000);
         }
 
         public static void doRestart()
