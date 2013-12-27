@@ -35,31 +35,31 @@ namespace com.avilance.Starrybound.Util
         WorldStop = 14, //Done
         TileArrayUpdate = 15,
         /*
-         * VLQI
-         * VLQI
-         * VLQU
-         * VLQU
+         * VLQI X
+         * VLQI T
+         * VLQU SizeX
+         * VLQU SizeY
          * {
          * Star::NetTile
          * }
          */
         TileUpdate = 16,
         /*
-         * int
-         * int
+         * int X
+         * int Y
          * Star::NetTile
          */
         TileLiquidUpdate = 17,
         /*
-         * VLQI
-         * VLQI
+         * VLQI X
+         * VLQI Y
          * uchar
          * uchar
          */
         TileDamageUpdate = 18,
         /*
-         * int
-         * int
+         * int X
+         * int Y
          * uchar
          * Star::TileDamageStatus
          * {
@@ -72,7 +72,7 @@ namespace com.avilance.Starrybound.Util
          */
         TileModificationFailure = 19,
         /*
-         * VLQU
+         * VLQU Size
          * {
          * ???
          * }
@@ -86,13 +86,13 @@ namespace com.avilance.Starrybound.Util
          */
         EntityInteractResult = 24,
         /*
-         * uint
-         * int
+         * uint ClientId
+         * int EntityId
          * Star::Variant
          */
         ModifyTileList = 25,
         /*
-         * VLQU
+         * VLQU Size
          * {
          * ???
          * }
@@ -100,7 +100,8 @@ namespace com.avilance.Starrybound.Util
          */
         DamageTile = 26,
         /*
-         * [int, int]
+         * int X
+         * int Y
          * uchar
          * [float, float]
          * uchar
@@ -110,7 +111,8 @@ namespace com.avilance.Starrybound.Util
         /*
          * VLQU
          * {
-         * [int, int]
+         * int X
+         * int Y
          * ???
          * }
          * uchar
@@ -120,16 +122,16 @@ namespace com.avilance.Starrybound.Util
          */
         RequestDrop = 28,
         /*
-         * VLQI
+         * VLQI SlotId?
          */
         SpawnEntity = 29,
         /*
-         * uchar
-         * ByteArray
+         * uchar Type
+         * ByteArray loadArray
          */
         EntityInteract = 30,
         /*
-         * int
+         * int EntityId
          * float, float
          * float, float
          */
@@ -162,18 +164,18 @@ namespace com.avilance.Starrybound.Util
         WorldClientStateUpdate = 41,  //In Progress - NetStateDelta
         EntityCreate = 42,
         /*
-         * uchar
-         * ByteArray
-         * VLQI
+         * uchar Type
+         * ByteArray loadArray
+         * VLQI EntityId
          */
         EntityUpdate = 43,
         /*
-         * VLQI
-         * ByteArray
+         * VLQI EntityId
+         * ByteArray loadDeltaArray
          */
         EntityDestroy = 44,
         /*
-         * VLQI
+         * VLQI EntityId
          * bool
          */
         DamageNotification = 45,
@@ -255,5 +257,17 @@ namespace com.avilance.Starrybound.Util
         WarpToPlayerShip = 3,
         WarpToOrbitedPlanet = 4,
         WarpToHomePlanet = 5,
+    }
+
+    public enum EntityType
+    {
+        Player = 1,
+        Monster = 2,
+        Object = 3,
+        ItemDrop = 4,
+        Projectile = 5,
+        Planet = 6,
+        PlantDrop = 7,
+        Effect = 8,
     }
 }
