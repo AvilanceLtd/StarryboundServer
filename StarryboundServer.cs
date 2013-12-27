@@ -169,9 +169,9 @@ namespace com.avilance.Starrybound
                     doRestart();
                     break;
                 }
+
+                System.Threading.Thread.Sleep(2000);
             }
-            
-            System.Threading.Thread.Sleep(2000);
         }
 
         public static void doRestart()
