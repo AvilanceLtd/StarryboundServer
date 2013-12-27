@@ -47,11 +47,7 @@ namespace com.avilance.Starrybound.Packets
             this.mClient.playerData.name = name;
             this.mClient.playerData.account = account;
 
-            User userPData;
-            userPData = Users.GetUser(name, Utils.ByteArrayToString(UUID).ToLower());
-
-            User userPData;
-            userPData = Users.GetUser(name, Utils.ByteArrayToString(UUID).ToLower());
+            User userPData = Users.GetUser(name, this.mClient.playerData.uuid);
 
             string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.mClient.playerData.uuid, this.mClient.playerData.ip });
 

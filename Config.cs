@@ -79,7 +79,7 @@ namespace com.avilance.Starrybound
         [Description("")]
         public string serverAccount = "";
         public string serverPass = "";
-        public short serverPort = 21025;
+        public short serverPort = 21024;
 
         public string proxyIP = "0.0.0.0";
         public short proxyPort = 21025;
@@ -90,7 +90,7 @@ namespace com.avilance.Starrybound
 
         public string logFile = "proxy.log";
 
-        public LogType logLevel = LogType.Debug;
+        public LogType logLevel = LogType.Info;
 
         public string[] adminUUID = new string[] { "" };
 
