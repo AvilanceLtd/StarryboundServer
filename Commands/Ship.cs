@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Ship : CommandBase
     {
-        public Ship(ClientThread client)
+        public Ship(Client client)
         {
             this.name = "ship";
             this.HelpText = ": Teleports you to your or another player's ship.";

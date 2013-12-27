@@ -18,7 +18,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class AdminChat : CommandBase
     {
-        public AdminChat(ClientThread client)
+        public AdminChat(Client client)
         {
             this.name = "admin";
             this.HelpText = "<message>: Sends a message to all online admins.";
@@ -48,7 +48,7 @@ namespace com.avilance.Starrybound.Commands
                 message = "^#ff00c7;Message to admins from " + this.player.name + ": " + message;
             }
 
-            foreach (ClientThread client in StarryboundServer.clients.Values)
+            foreach (Client client in StarryboundServer.clients.Values)
             {
                 if (client.playerData.group.hasPermission("admin.chat") || client == this.client) client.sendChatMessage(message);
             }

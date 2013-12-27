@@ -19,7 +19,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Kick : CommandBase
     {
-        public Kick(ClientThread client)
+        public Kick(Client client)
         {
             this.name = "kick";
             this.HelpText = " <username>: Kicks the user from the server.";

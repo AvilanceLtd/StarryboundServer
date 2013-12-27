@@ -18,7 +18,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Find : CommandBase
     {
-        public Find(ClientThread client)
+        public Find(Client client)
         {
             this.name = "find";
             this.HelpText = " <player (optional)>; Find your world co-ordinates or those of a specified player.";
@@ -41,7 +41,7 @@ namespace com.avilance.Starrybound.Commands
             {
                 if (StarryboundServer.clients.ContainsKey(player))
                 {
-                    Player playerData = StarryboundServer.clients[player].playerData;
+                    PlayerData playerData = StarryboundServer.clients[player].playerData;
                     this.client.sendCommandMessage(player + " located [" + playerData.loc.ToString() + "]");
                     return true;
                 }

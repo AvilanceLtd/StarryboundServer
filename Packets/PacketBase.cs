@@ -20,9 +20,9 @@ namespace com.avilance.Starrybound.Packets
 {
     abstract class PacketBase
     {
-        protected Object mStream;
-        protected ClientThread mClient;
-        protected Direction mDirection;
+        protected BinaryReader stream;
+        protected Client client;
+        protected Direction direction;
 
         public abstract Object onReceive();
   

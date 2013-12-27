@@ -37,7 +37,7 @@ namespace com.avilance.Starrybound
         // Dictionary<string, ClientThread>
         // string           Username        Unique username for client, MUST be lowercase
         // ClientThread     ClientThread    Invidivual thread for client, used to access client specific functions
-        public static Dictionary<string, ClientThread> clients = new Dictionary<string, ClientThread>();
+        public static Dictionary<string, Client> clients = new Dictionary<string, Client>();
         public static int clientCount { get { return clients.Count; } set { return; } }
 
         public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
@@ -189,12 +189,10 @@ namespace com.avilance.Starrybound
         {
             serverState = ServerState.Restarting;
 
-            foreach (ClientThread client in clients.Values)
+            foreach (Client client in clients.Values)
             {
-                client.sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-                client.sendChatMessage("^#f75d5d;You have been disconnected.");
-                client.clientState = ClientState.Disposing;
-                client.kickTargetTimestamp = Utils.getTimestamp() + 7;
+                client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                client.state = ClientState.Disposing;
             }
 
             while (clients.Count > 0)
@@ -285,7 +283,7 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage (string message) 
         {
-            foreach (ClientThread client in clients.Values)
+            foreach (Client client in clients.Values)
             {
                 client.sendChatMessage("^#5dc4f4;" + message);
             }
@@ -293,7 +291,7 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage(string message, string color)
         {
-            foreach (ClientThread client in clients.Values)
+            foreach (Client client in clients.Values)
             {
                 client.sendChatMessage("^"+color+";" + message);
             }

@@ -20,7 +20,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Shutdown : CommandBase
     {
-        public Shutdown(ClientThread client)
+        public Shutdown(Client client)
         {
             this.name = "shutdown";
             this.HelpText = ": Gracefully closes all connections";
@@ -39,12 +39,10 @@ namespace com.avilance.Starrybound.Commands
 
             StarryboundServer.allowNewClients = false;
 
-            foreach (ClientThread client in StarryboundServer.clients.Values)
+            foreach (Client client in StarryboundServer.clients.Values)
             {
-                client.sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-                client.sendChatMessage("^#f75d5d;You have been disconnected.");
-                client.clientState = ClientState.Disposing;
-                client.kickTargetTimestamp = Utils.getTimestamp() + 7;
+                client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                client.state = ClientState.Disposing;
             }
 
             while (StarryboundServer.clients.Count > 0)
@@ -65,7 +63,7 @@ namespace com.avilance.Starrybound.Commands
 
     class Restart : CommandBase
     {
-        public Restart(ClientThread client)
+        public Restart(Client client)
         {
             this.name = "restart";
             this.HelpText = "Initiate a restart of the server, 30 second delay.";

@@ -21,42 +21,44 @@ namespace com.avilance.Starrybound.Packets
 {
     class Packet2ConnectResponse : PacketBase
     {
-        Dictionary<string, object> tmpArray = new Dictionary<string, object>();
+        string rejectReason;
 
-        public Packet2ConnectResponse(ClientThread clientThread, Object stream, Direction direction)
+        public Packet2ConnectResponse(Client clientThread, BinaryReader stream, Direction direction)
         {
-            this.mClient = clientThread;
-            this.mStream = stream;
-            this.mDirection = direction;
+            this.client = clientThread;
+            this.stream = stream;
+            this.direction = direction;
+        }
+
+        public Packet2ConnectResponse(Client clientThread, Direction direction, string rejectReason)
+        {
+            this.client = clientThread;
+            this.direction = direction;
+            this.rejectReason = rejectReason;
         }
 
         public override object onReceive()
         {
-            BinaryReader packetData = (BinaryReader)this.mStream;
+            BinaryReader packetData = (BinaryReader)this.stream;
 
             bool success = packetData.ReadBoolean();
             uint clientID = packetData.ReadVarUInt32();
             string rejectReason = packetData.ReadStarString();
 
-            this.mClient.playerData.id = clientID;
-            Player player = this.mClient.playerData;
+            this.client.playerData.id = clientID;
+            PlayerData player = this.client.playerData;
 
             if(!success)
             {
-                this.mClient.rejectPreConnected("Rejected by parent server: " + rejectReason);
+                this.client.rejectPreConnected("Rejected by parent server: " + rejectReason);
                 return true;
             }
 
-            StarryboundServer.clients.Add(player.name, this.mClient);
+            StarryboundServer.clients.Add(player.name, this.client);
             StarryboundServer.sendGlobalMessage(player.name + " has joined the server!");
-            this.mClient.clientState = ClientState.Connected;
-            StarryboundServer.logInfo("[" + this.mClient.playerData.client + "][" + this.mClient.playerData.id + "] joined with UUID " + player.uuid);
+            this.client.state = ClientState.Connected;
+            StarryboundServer.logInfo("[" + this.client.playerData.client + "][" + this.client.playerData.id + "] joined with UUID " + player.uuid);
             return true;
-        }
-
-        public void prepare(string rejectReason)
-        {
-            tmpArray.Add("rejectReason", rejectReason);
         }
 
         public override void onSend()
@@ -66,9 +68,9 @@ namespace com.avilance.Starrybound.Packets
 
             packetWrite.Write(false);
             packetWrite.WriteVarUInt32(0);
-            packetWrite.WriteStarString((string)tmpArray["rejectReason"]);
+            packetWrite.WriteStarString(rejectReason);
 
-            this.mClient.sendClientPacket(Packet.ConnectResponse, packet.ToArray());
+            this.client.sendClientPacket(Packet.ConnectResponse, packet.ToArray());
         }
 
         public override int getPacketID()

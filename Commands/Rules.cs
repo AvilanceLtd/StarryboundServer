@@ -18,7 +18,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Rules : CommandBase
     {
-        public Rules(ClientThread client)
+        public Rules(Client client)
         {
             this.name = "rules";
             this.HelpText = "Shows the list of all rules on the server.";

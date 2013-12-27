@@ -37,7 +37,7 @@ namespace com.avilance.Starrybound
                 while (true)
                 {
                     TcpClient clientSocket = serversocket.AcceptTcpClient();
-                    new Thread(new ThreadStart(new ClientThread(clientSocket).run)).Start();
+                    new Thread(new ThreadStart(new Client(clientSocket).run)).Start();
                 }
             }
             catch (Exception e)

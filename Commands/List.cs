@@ -17,9 +17,9 @@ using System.Text;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class Players : CommandBase
+    class List : CommandBase
     {
-        public Players(ClientThread client)
+        public List(Client client)
         {
             this.name = "players";
             this.HelpText = ": Lists all of the players connected to the server.";

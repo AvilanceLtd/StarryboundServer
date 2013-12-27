@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Planet : CommandBase
     {
-        public Planet(ClientThread client)
+        public Planet(Client client)
         {
             this.name = "planet";
             this.HelpText = ": Teleports you to the planet your ship is orbiting.";

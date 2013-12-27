@@ -19,7 +19,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Mute : CommandBase
     {
-        public Mute(ClientThread client)
+        public Mute(Client client)
         {
             this.name = "mute";
             this.HelpText = " <username>: Allows you to mute/unmute a player, this command is toggled.";
@@ -40,7 +40,7 @@ namespace com.avilance.Starrybound.Commands
 
             if (StarryboundServer.clients.ContainsKey(player))
             {
-                Player pData = StarryboundServer.clients[player].playerData;
+                PlayerData pData = StarryboundServer.clients[player].playerData;
 
                 pData.isMuted = !pData.isMuted;
 

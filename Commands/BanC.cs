@@ -18,9 +18,9 @@ using System.Text;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class BanCommand : CommandBase
+    class BanC : CommandBase
     {
-        public BanCommand(ClientThread client)
+        public BanC(Client client)
         {
             this.name = "ban";
             this.HelpText = " <username> <length (mins)> <reason>: Bans the user from the server for the specified time (in minutes) and reason.";
@@ -44,7 +44,7 @@ namespace com.avilance.Starrybound.Commands
 
             if (StarryboundServer.clients.ContainsKey(player))
             {
-                ClientThread target = StarryboundServer.clients[player];
+                Client target = StarryboundServer.clients[player];
 
                 string uuid = target.playerData.uuid;
                 string name = target.playerData.name;
@@ -81,7 +81,7 @@ namespace com.avilance.Starrybound.Commands
 
     class BanReloadCommand : CommandBase
     {
-        public BanReloadCommand(ClientThread client)
+        public BanReloadCommand(Client client)
         {
             this.name = "banreload";
             this.HelpText = ": Reloads the banned-players.txt file";

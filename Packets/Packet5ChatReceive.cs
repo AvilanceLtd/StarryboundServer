@@ -21,22 +21,20 @@ namespace com.avilance.Starrybound.Packets
 {
     class Packet5ChatReceive : PacketBase
     {
-        public Packet5ChatReceive(ClientThread clientThread, Object stream, Direction direction)
+        public Packet5ChatReceive(Client clientThread, BinaryReader stream, Direction direction)
         {
-            this.mClient = clientThread;
-            this.mStream = stream;
-            this.mDirection = direction;
+            this.client = clientThread;
+            this.stream = stream;
+            this.direction = direction;
         }
 
         public override Object onReceive()
         {
-            BinaryReader packetData = (BinaryReader)this.mStream;
-
-            byte context = packetData.ReadByte();
-            string world = packetData.ReadStarString();
-            uint clientID = packetData.ReadUInt32BE();
-            string name = packetData.ReadStarString();
-            string message = packetData.ReadStarString();
+            byte context = stream.ReadByte();
+            string world = stream.ReadStarString();
+            uint clientID = stream.ReadUInt32BE();
+            string name = stream.ReadStarString();
+            string message = stream.ReadStarString();
 
             return null;
         }

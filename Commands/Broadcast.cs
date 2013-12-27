@@ -18,7 +18,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Broadcast : CommandBase
     {
-        public Broadcast(ClientThread client)
+        public Broadcast(Client client)
         {
             this.name = "broadcast";
             this.HelpText = " <message>: Sends a server-wide message to all clients.";

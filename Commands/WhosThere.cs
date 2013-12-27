@@ -5,9 +5,9 @@ using System.Text;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class WhosThereCommand : CommandBase
+    class WhosThere : CommandBase
     {
-        public WhosThereCommand(ClientThread client)
+        public WhosThere(Client client)
         {
             this.name = "whosthere";
             this.HelpText = ": shows a list of all players in this world.";
@@ -22,9 +22,9 @@ namespace com.avilance.Starrybound.Commands
         public override bool doProcess(string[] args)
         {
             string list = "";
-            foreach (ClientThread otherClient in StarryboundServer.clients.Values)
+            foreach (Client otherClient in StarryboundServer.clients.Values)
             {
-                Player otherPlayer = otherClient.playerData;
+                PlayerData otherPlayer = otherClient.playerData;
                 if (this.player.isInSameWorldAs(otherPlayer) && this.player.name != otherPlayer.name)
                 {
                     list += otherPlayer.name + ", ";

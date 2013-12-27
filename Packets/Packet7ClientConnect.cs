@@ -23,55 +23,53 @@ namespace com.avilance.Starrybound.Packets
 {
     class Packet7ClientConnect : PacketBase
     {
-        public Packet7ClientConnect(ClientThread clientThread, Object stream, Direction direction)
+        public Packet7ClientConnect(Client clientThread, BinaryReader stream, Direction direction)
         {
-            this.mClient = clientThread;
-            this.mStream = stream;
-            this.mDirection = direction;
+            this.client = clientThread;
+            this.stream = stream;
+            this.direction = direction;
         }
 
         public override Object onReceive()
         {
-            BinaryReader packetData = (BinaryReader)this.mStream;
+            byte[] assetDigest = stream.ReadStarByteArray();
 
-            byte[] assetDigest = packetData.ReadStarByteArray();
-
-            List<object> claim = packetData.ReadStarVariant();
-            byte[] UUID = packetData.ReadStarUUID();
-            string name = packetData.ReadStarString();
-            string species = packetData.ReadStarString();
-            byte[] shipWorld = packetData.ReadStarByteArray();
-            string account = packetData.ReadStarString();
+            List<object> claim = stream.ReadStarVariant();
+            byte[] UUID = stream.ReadStarUUID();
+            string name = stream.ReadStarString();
+            string species = stream.ReadStarString();
+            byte[] shipWorld = stream.ReadStarByteArray();
+            string account = stream.ReadStarString();
 
             // Identify player to server
-            this.mClient.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
-            this.mClient.playerData.name = name;
-            this.mClient.playerData.account = account;
+            this.client.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
+            this.client.playerData.name = name;
+            this.client.playerData.account = account;
 
             string sAssetDigest = Utils.ByteArrayToString(assetDigest);
-            StarryboundServer.logDebug("AssetDigest", "[" + this.mClient.playerData.client + "] [" + sAssetDigest + "]");
+            StarryboundServer.logDebug("AssetDigest", "[" + this.client.playerData.client + "] [" + sAssetDigest + "]");
             if(StarryboundServer.config.useAssetDigest)
             {
                 if(sAssetDigest != StarryboundServer.config.assetDigest)
                 {
-                    this.mClient.rejectPreConnected("Please reinstall Starbound to connect to this server.");
+                    this.client.rejectPreConnected("Please reinstall Starbound to connect to this server.");
                     return false;
                 }
             }
 
-            User userPData = Users.GetUser(name, this.mClient.playerData.uuid);
+            User userPData = Users.GetUser(name, this.client.playerData.uuid);
 
-            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.mClient.playerData.uuid, this.mClient.playerData.ip });
+            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
 
             if (reasonExpiry.Length == 2)
             {
-                this.mClient.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
+                this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
                 return false;
             }
 
             if (StarryboundServer.clients.ContainsKey(name))
             {
-                this.mClient.rejectPreConnected("This username is already in use.");
+                this.client.rejectPreConnected("This username is already in use.");
                 return false;
             }
 
@@ -79,16 +77,22 @@ namespace com.avilance.Starrybound.Packets
             {
                 if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
                 {
-                    this.mClient.rejectPreConnected("The server is full. Please try again later.");
+                    this.client.rejectPreConnected("The server is full. Please try again later.");
                     return false;
                 }
             }
 
+            if (String.IsNullOrWhiteSpace(this.client.playerData.name))
+            {
+                this.client.rejectPreConnected("You may not have a blank name.");
+                return false;
+            }
+
             if (!StarryboundServer.config.allowSpaces)
             {
-                if (this.mClient.playerData.name.Contains(" ") || String.IsNullOrWhiteSpace(this.mClient.playerData.name))
+                if (this.client.playerData.name.Contains(" "))
                 {
-                    this.mClient.rejectPreConnected("You may not have spaces in your name on this server.");
+                    this.client.rejectPreConnected("You may not have spaces in your name on this server.");
                     return false;
                 }
             }
@@ -96,17 +100,16 @@ namespace com.avilance.Starrybound.Packets
             if (!StarryboundServer.config.allowSymbols)
             {
                 Regex r = new Regex("^[a-zA-Z0-9_\\- ]*$");
-                if (!r.IsMatch(this.mClient.playerData.name))
+                if (!r.IsMatch(this.client.playerData.name))
                 {
-                    this.mClient.rejectPreConnected("You may not have special characters in your name on this server.");
+                    this.client.rejectPreConnected("You may not have special characters in your name on this server.");
                     return false;
                 }
             }
 
-            com.avilance.Starrybound.Permissions.Group userGroup;
             try
             {
-                Player pData = this.mClient.playerData;
+                PlayerData pData = this.client.playerData;
 
                 pData.isMuted = userPData.isMuted;
                 pData.canBuild = userPData.canBuild;
@@ -115,13 +118,13 @@ namespace com.avilance.Starrybound.Packets
 
                 if (userPData.name != pData.name)
                 {
-                    this.mClient.rejectPreConnected("Your character data is corrupt. Unable to connect to server.");
+                    this.client.rejectPreConnected("Your character data is corrupt. Unable to connect to server.");
                     return false;
                 }
             }
             catch (Exception)
             {
-                this.mClient.rejectPreConnected("The server was unable to accept your connection at this time.\nPlease try again later.");
+                this.client.rejectPreConnected("The server was unable to accept your connection at this time.\nPlease try again later.");
                 return false;
             }
 

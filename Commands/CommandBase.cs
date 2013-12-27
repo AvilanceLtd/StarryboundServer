@@ -25,8 +25,8 @@ namespace com.avilance.Starrybound.Commands
         public string[] aliases { get; set; }
         public List<string> Permission;
 
-        public Player player;
-        public ClientThread client;
+        public PlayerData player;
+        public Client client;
 
         public abstract bool doProcess(string[] args);
 

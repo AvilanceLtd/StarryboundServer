@@ -20,7 +20,7 @@ namespace com.avilance.Starrybound.Commands
     {
         CommandBase[] commands;
                                      
-        public Help(ClientThread client)
+        public Help(Client client)
         {
             this.name = "Help";
             this.HelpText = ": Provides help for using commands.";
@@ -29,25 +29,25 @@ namespace com.avilance.Starrybound.Commands
             this.client = client;
             this.player = client.playerData;
             commands =  new CommandBase[] {
-                new BanCommand(client),
+                new BanC(client),
                 new BanReloadCommand(client),
                 new Broadcast(client), 
                 new Build(client), 
                 new Find(client),
-                new GroupCommand(client),
+                new GroupC(client),
                 new Home(client), 
                 new Item(client),
                 new Kick(client), 
-                new MeCommand(client), 
+                new Me(client), 
                 new Mute(client), 
                 new Planet(client), 
-                new Players(client), 
+                new List(client), 
                 new Rules(client),
                 new Ship(client), 
                 new Shutdown(client), 
                 new Uptime(client),
                 new WarpShip(client),
-                new WhosThereCommand(client),
+                new WhosThere(client),
             };
         }
 

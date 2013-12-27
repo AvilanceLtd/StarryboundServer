@@ -21,7 +21,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Item : CommandBase
     {
-        public Item(ClientThread client)
+        public Item(Client client)
         {
             this.name = "item";
             this.HelpText = "<item> <amount>; Allows you to give items to yourself.";

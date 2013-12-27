@@ -26,10 +26,10 @@ using com.avilance.Starrybound.Permissions;
 namespace com.avilance.Starrybound
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    class ClientThread
+    class Client
     {
-        public Player playerData = new Player();
-        public ClientState clientState = ClientState.PendingConnect;
+        public PlayerData playerData = new PlayerData();
+        public ClientState state = ClientState.PendingConnect;
 
         private TcpClient cSocket;
         private BinaryReader cIn;
@@ -40,9 +40,9 @@ namespace com.avilance.Starrybound
         private BinaryWriter sOut;
 
         public int kickTargetTimestamp = 0;
-        public bool connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected && this.clientState != ClientState.Disposing) return true; else return false; } }
+        public bool connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected && this.state != ClientState.Disposing) return true; else return false; } }
 
-        public ClientThread(TcpClient aClient)
+        public Client(TcpClient aClient)
         {
             this.cSocket = aClient;
         }
@@ -143,34 +143,33 @@ namespace com.avilance.Starrybound
 
         public void sendChatMessage(ChatReceiveContext context, string name, string message)
         {
-            if (clientState != ClientState.Connected) return;
-            Packet11ChatSend packet = new Packet11ChatSend(this, false, Util.Direction.Client);
+            if (state != ClientState.Connected) return;
+            Packet11ChatSend packet = new Packet11ChatSend(this, Util.Direction.Client);
             packet.prepare(context, "", 0, name, message);
             packet.onSend();
         }
 
         public void sendChatMessage(ChatReceiveContext context, string world, uint clientID, string name, string message)
         {
-            if (clientState != ClientState.Connected) return;
-            Packet11ChatSend packet = new Packet11ChatSend(this, false, Util.Direction.Client);
+            if (state != ClientState.Connected) return;
+            Packet11ChatSend packet = new Packet11ChatSend(this, Util.Direction.Client);
             packet.prepare(context, world, clientID, name, message);
             packet.onSend();
         }
 
         public void banClient(string reason)
         {
-            sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-            sendChatMessage("^#f75d5d;You have been banned from the server for " + reason + ".");
-            StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been banned from the server for " + reason + "!");
-            kickTargetTimestamp = Utils.getTimestamp() + 7;
+            delayDisconnect("You have been banned from the server for " + reason + ".", this.playerData.name + " has been banned from the server for " + reason + "!");
         }
 
         public void kickClient(string reason)
         {
-            sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-            sendChatMessage("^#f75d5d;You have been kicked from the server by an administrator.");
-            StarryboundServer.sendGlobalMessage("^#f75d5d;" + this.playerData.name + " has been kicked from the server!");
-            kickTargetTimestamp = Utils.getTimestamp() + 7;
+            delayDisconnect("You have been kicked from the server for " + reason + ".", this.playerData.name + " has been kicked from the server!");
+        }
+
+        public void kickClient()
+        {
+            delayDisconnect("You have been kicked from the server.", this.playerData.name + " has been kicked from the server!");
         }
 
         private void doDisconnect(bool log)
@@ -186,9 +185,9 @@ namespace com.avilance.Starrybound
                         StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
                 }
             }
-            if (this.clientState != ClientState.Disposing)
+            if (this.state != ClientState.Disposing)
             {
-                this.clientState = ClientState.Disposing;
+                this.state = ClientState.Disposing;
                 try
                 {
                     this.cSocket.Close();
@@ -198,24 +197,38 @@ namespace com.avilance.Starrybound
             }
         }
 
+        public void delayDisconnect(string reason)
+        {
+            sendServerPacket(Packet.ClientDisconnect, new byte[1]);
+            sendChatMessage("^#f75d5d;" + reason);
+            kickTargetTimestamp = Utils.getTimestamp() + 7;
+        }
+
+        public void delayDisconnect(string reason, string message)
+        {
+            sendServerPacket(Packet.ClientDisconnect, new byte[1]);
+            sendChatMessage("^#f75d5d;" + reason);
+            kickTargetTimestamp = Utils.getTimestamp() + 7;
+            StarryboundServer.sendGlobalMessage("^#f75d5d;" + message);
+        }
+
         public void rejectPreConnected(string reason)
         {
-            Packet2ConnectResponse packet = new Packet2ConnectResponse(this, false, Util.Direction.Client);
-            packet.prepare(reason);
+            Packet2ConnectResponse packet = new Packet2ConnectResponse(this, Util.Direction.Client, reason);
             packet.onSend();
             forceDisconnect(reason);
         }
 
         public void forceDisconnect(string reason)
         {
-            if (this.clientState != ClientState.Disposing)
+            if (this.state != ClientState.Disposing)
                 StarryboundServer.logWarn("[" + playerData.client + "] Dropped for " + reason);
             doDisconnect(true);
         }
 
         public void errorDisconnect(Direction direction, string reason)
         {
-            if (this.clientState != ClientState.Disposing)
+            if (this.state != ClientState.Disposing)
                 StarryboundServer.logError("[" + playerData.client + "] Dropped by parent " + direction.ToString() + " for " + reason);
             doDisconnect(true);
         }

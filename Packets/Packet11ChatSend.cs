@@ -24,11 +24,17 @@ namespace com.avilance.Starrybound.Packets
     {
         Dictionary<string, object> tmpArray = new Dictionary<string, object>();
 
-        public Packet11ChatSend(ClientThread clientThread, Object stream, Direction direction)
+        public Packet11ChatSend(Client clientThread, BinaryReader stream, Direction direction)
         {
-            this.mClient = clientThread;
-            this.mStream = stream;
-            this.mDirection = direction;
+            this.client = clientThread;
+            this.stream = stream;
+            this.direction = direction;
+        }
+
+        public Packet11ChatSend(Client clientThread, Direction direction)
+        {
+            this.client = clientThread;
+            this.direction = direction;
         }
 
         /// <summary>
@@ -37,7 +43,7 @@ namespace com.avilance.Starrybound.Packets
         /// <returns>true to maintain packet and send to client, false to drop packet, -1 will boot the client</returns>
         public override Object onReceive()
         {
-            BinaryReader packetData = (BinaryReader)this.mStream;
+            BinaryReader packetData = (BinaryReader)this.stream;
 
             string message = packetData.ReadStarString();
             byte context = packetData.ReadByte();
@@ -45,9 +51,9 @@ namespace com.avilance.Starrybound.Packets
             #region Command Processor
             if (message.StartsWith("#"))
             {
-                StarryboundServer.logInfo("[Admin Chat] [" + this.mClient.playerData.name + "]: " + message);
+                StarryboundServer.logInfo("[Admin Chat] [" + this.client.playerData.name + "]: " + message);
 
-                bool aChat = new AdminChat(this.mClient).doProcess(new string[] { message.Remove(0, 1) });
+                bool aChat = new AdminChat(this.client).doProcess(new string[] { message.Remove(0, 1) });
 
                 return false;
             }
@@ -55,7 +61,7 @@ namespace com.avilance.Starrybound.Packets
             {
                 try
                 {
-                    StarryboundServer.logInfo("[Command] [" + this.mClient.playerData.name + "]: " + message);
+                    StarryboundServer.logInfo("[Command] [" + this.client.playerData.name + "]: " + message);
                     string[] args = message.Remove(0, 1).Split(' ');
                     string cmd = args[0].ToLower();
 
@@ -64,27 +70,27 @@ namespace com.avilance.Starrybound.Packets
                     switch (cmd)
                     {
                         case "ban":
-                            new BanCommand(this.mClient).doProcess(args);
+                            new BanC(this.client).doProcess(args);
                             break;
 
                         case "banreload":
-                            new BanReloadCommand(this.mClient).doProcess(args);
+                            new BanReloadCommand(this.client).doProcess(args);
                             break;
 
                         case "kick":
-                            new Kick(this.mClient).doProcess(args);
+                            new Kick(this.client).doProcess(args);
                             break;
 
                         case "admin":
-                            new AdminChat(this.mClient).doProcess(args);
+                            new AdminChat(this.client).doProcess(args);
                             break;
 
                         case "rules":
-                            new Rules(this.mClient).doProcess(args);
+                            new Rules(this.client).doProcess(args);
                             break;
 
                         case "me":
-                            new MeCommand(this.mClient).doProcess(args);
+                            new Me(this.client).doProcess(args);
                             break;
 
                         case "pvp":
@@ -92,113 +98,113 @@ namespace com.avilance.Starrybound.Packets
                             return true;
 
                         case "nick":
-                            if (this.mClient.playerData.hasPermission("cmd.nick")) return true;
+                            if (this.client.playerData.hasPermission("cmd.nick")) return true;
                             else
                             {
-                                this.mClient.sendChatMessage(ChatReceiveContext.Whisper, "", "You do not have permission to use this command.");
+                                this.client.sendChatMessage(ChatReceiveContext.Whisper, "", "You do not have permission to use this command.");
                             }
                             break;
 
                         case "who":
                         case "online":
                         case "players":
-                            new Players(this.mClient).doProcess(args);
+                            new List(this.client).doProcess(args);
                             break;
 
                         case "whosthere":
-                            new WhosThereCommand(this.mClient).doProcess(args);
+                            new WhosThere(this.client).doProcess(args);
                             break;
 
                         case "broadcast":
-                            new Broadcast(this.mClient).doProcess(args);
+                            new Broadcast(this.client).doProcess(args);
                             break;
 
                         case "ship":
-                            new Ship(this.mClient).doProcess(args);
+                            new Ship(this.client).doProcess(args);
                             break;
 
                         case "planet":
-                            new Planet(this.mClient).doProcess(args);
+                            new Planet(this.client).doProcess(args);
                             break;
 
                         case "home":
-                            new Home(this.mClient).doProcess(args);
+                            new Home(this.client).doProcess(args);
                             break;
 
                         case "item":
                         case "give":
-                            new Item(this.mClient).doProcess(args);
+                            new Item(this.client).doProcess(args);
                             break;
 
                         case "mute":
-                            new Mute(this.mClient).doProcess(args);
+                            new Mute(this.client).doProcess(args);
                             break;
 
                         case "uptime":
-                            new Uptime(this.mClient).doProcess(args);
+                            new Uptime(this.client).doProcess(args);
                             break;
 
                         case "shutdown":
-                            new Shutdown(this.mClient).doProcess(args);
+                            new Shutdown(this.client).doProcess(args);
                             break;
 
                         case "restart":
-                            new Restart(this.mClient).doProcess(args);
+                            new Restart(this.client).doProcess(args);
                             break;
 
                         case "build":
-                            new Build(this.mClient).doProcess(args);
+                            new Build(this.client).doProcess(args);
                             break;
 
                         case "where":
                         case "find":
-                            new Find(this.mClient).doProcess(args);
+                            new Find(this.client).doProcess(args);
                             break;
 
                         case "warpship":
-                            new WarpShip(this.mClient).doProcess(args);
+                            new WarpShip(this.client).doProcess(args);
                             break;
 
                         case "group":
-                            new GroupCommand(this.mClient).doProcess(args);
+                            new GroupC(this.client).doProcess(args);
                             break;
 
                         case "help":
                         case "commands":
                         case "commandlist":
                         case "?":
-                            new Help(this.mClient).doProcess(args);
+                            new Help(this.client).doProcess(args);
                             break;
 
                         default:
-                            this.mClient.sendCommandMessage("Command " + cmd + " not found.");
+                            this.client.sendCommandMessage("Command " + cmd + " not found.");
                             break;
                     }
                     return false;
                 }
                 catch (Exception e)
                 {
-                    this.mClient.sendCommandMessage("Command failed: " + e.Message);
+                    this.client.sendCommandMessage("Command failed: " + e.Message);
                     Console.WriteLine(e.ToString());
                 }
             }
             #endregion
 
-            if (this.mClient.playerData.isMuted)
+            if (this.client.playerData.isMuted)
             {
-                this.mClient.sendCommandMessage("^#f75d5d;You try to speak, but nothing comes out... You have been muted.");
+                this.client.sendCommandMessage("^#f75d5d;You try to speak, but nothing comes out... You have been muted.");
                 return false;
             }
 
-            StarryboundServer.logInfo("[" + ((ChatSendContext)context).ToString() + "] [" + this.mClient.playerData.name + "]: " + message);
+            StarryboundServer.logInfo("[" + ((ChatSendContext)context).ToString() + "] [" + this.client.playerData.name + "]: " + message);
 
-            string formatName = this.mClient.playerData.formatName;
+            string formatName = this.client.playerData.formatName;
 
             if (formatName != null && (ChatSendContext)context == ChatSendContext.Universe)
             {
-                foreach (ClientThread client in StarryboundServer.clients.Values)
+                foreach (Client client in StarryboundServer.clients.Values)
                 {
-                    client.sendChatMessage(ChatReceiveContext.Broadcast, "", this.mClient.playerData.id, formatName, message);
+                    client.sendChatMessage(ChatReceiveContext.Broadcast, "", this.client.playerData.id, formatName, message);
                 }
                 return false;
             }
@@ -296,7 +302,7 @@ namespace com.avilance.Starrybound.Packets
             packetWrite.WriteBE(sClientID);
             packetWrite.WriteStarString(sName);
             packetWrite.WriteStarString(sMessage);
-            this.mClient.sendClientPacket(Packet.ChatReceive, packet.ToArray());
+            this.client.sendClientPacket(Packet.ChatReceive, packet.ToArray());
         }
 
         public override int getPacketID()

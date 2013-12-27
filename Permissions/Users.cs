@@ -68,7 +68,7 @@ namespace com.avilance.Starrybound.Permissions
             }
         }
 
-        public static void SaveUser(Player player)
+        public static void SaveUser(PlayerData player)
         {
             try
             {

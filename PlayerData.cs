@@ -20,7 +20,7 @@ using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound
 {
-    public class Player
+    public class PlayerData
     {
         public string name;
         public string account;
@@ -65,7 +65,7 @@ namespace com.avilance.Starrybound
             else return false;
         }
 
-        public bool isInSameWorldAs(Player otherPlayer)
+        public bool isInSameWorldAs(PlayerData otherPlayer)
         {
             return loc.Equals(otherPlayer.loc);
         }

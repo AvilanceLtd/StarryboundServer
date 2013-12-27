@@ -19,7 +19,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Build : CommandBase
     {
-        public Build(ClientThread client)
+        public Build(Client client)
         {
             this.name = "build";
             this.HelpText = " <username>: Allows you to grant/revoke a player's building rights, this command is toggled.";
@@ -40,7 +40,7 @@ namespace com.avilance.Starrybound.Commands
 
             if (StarryboundServer.clients.ContainsKey(player))
             {
-                Player pData = StarryboundServer.clients[player].playerData;
+                PlayerData pData = StarryboundServer.clients[player].playerData;
 
                 pData.canBuild = !pData.canBuild;
 

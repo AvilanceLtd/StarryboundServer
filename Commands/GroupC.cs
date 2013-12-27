@@ -6,9 +6,9 @@ using com.avilance.Starrybound.Permissions;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class GroupCommand : CommandBase
+    class GroupC : CommandBase
     {
-        public GroupCommand(ClientThread client)
+        public GroupC(Client client)
         {
             this.name = "group";
             this.HelpText = ": Allows you to manage permission groups. Type /group help for full instructions.";

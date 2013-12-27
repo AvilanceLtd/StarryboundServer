@@ -100,28 +100,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bans.cs" />
-    <Compile Include="ClientThread.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="Commands\AdminChat.cs" />
     <Compile Include="Commands\Broadcast.cs" />
     <Compile Include="Commands\Build.cs" />
     <Compile Include="Commands\CommandBase.cs" />
-    <Compile Include="Commands\BanCommand.cs" />
-    <Compile Include="Commands\GroupCommand.cs" />
+    <Compile Include="Commands\BanC.cs" />
+    <Compile Include="Commands\GroupC.cs" />
     <Compile Include="Commands\Rules.cs" />
     <Compile Include="Commands\Find.cs" />
     <Compile Include="Commands\Help.cs" />
     <Compile Include="Commands\Item.cs" />
-    <Compile Include="Commands\MeCommand.cs" />
+    <Compile Include="Commands\Me.cs" />
     <Compile Include="Commands\Planet.cs" />
     <Compile Include="Commands\Kick.cs" />
     <Compile Include="Commands\Mute.cs" />
     <Compile Include="Commands\Home.cs" />
     <Compile Include="Commands\Ship.cs" />
-    <Compile Include="Commands\Players.cs" />
+    <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Uptime.cs" />
     <Compile Include="Commands\WarpShip.cs" />
-    <Compile Include="Commands\WhosThereCommand.cs" />
+    <Compile Include="Commands\WhosThere.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions\BinaryReaderEx.cs" />
     <Compile Include="Extensions\BinaryWriterEx.cs" />
@@ -136,7 +136,7 @@
     <Compile Include="Packets\PacketBase.cs" />
     <Compile Include="Permissions\Groups.cs" />
     <Compile Include="Permissions\Users.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="PlayerData.cs" />
     <Compile Include="ServerConfig.cs" />
     <Compile Include="ServerThread.cs" />
     <Compile Include="StarryboundServer.cs" />

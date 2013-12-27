@@ -5,9 +5,9 @@ using System.Text;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class MeCommand : CommandBase
+    class Me : CommandBase
     {
-        public MeCommand(ClientThread client)
+        public Me(Client client)
         {
             this.name = "me";
             this.HelpText = " <message>: Sends an emote message.";

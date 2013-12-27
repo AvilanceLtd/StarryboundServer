@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Home : CommandBase
     {
-        public Home(ClientThread client)
+        public Home(Client client)
         {
             this.name = "home";
             this.HelpText = ": Allows you to teleport to your home planet.";

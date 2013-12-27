@@ -20,7 +20,7 @@ namespace com.avilance.Starrybound.Commands
 {
     class Uptime : CommandBase
     {
-        public Uptime(ClientThread client)
+        public Uptime(Client client)
         {
             this.name = "uptime";
             this.HelpText = ": Shows how long has past since the server was last restarted.";
