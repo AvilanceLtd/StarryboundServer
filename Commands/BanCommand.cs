@@ -37,8 +37,8 @@ namespace com.avilance.Starrybound.Commands
 
             if (args.Length < 3) { showHelpText(); return false; }
 
-            string player = args[1].Trim();
-            string expiry = args[2].Trim();
+            string player = args[0].Trim();
+            string expiry = args[1].Trim();
             int remainStuff = player.Length + expiry.Length;
             string reason = string.Join(" ", args).Substring(remainStuff + 2).Trim();
 

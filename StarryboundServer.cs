@@ -102,6 +102,9 @@ namespace com.avilance.Starrybound
             Groups.SetupGroups();
             Users.SetupUsers();
 
+            serverConfig.maxPlayers = config.maxClients + 10;
+            serverConfig.Write(ServerConfig.ConfigPath);
+
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
 
@@ -157,7 +160,6 @@ namespace com.avilance.Starrybound
                 if (restartTime != 0)
                 {
                     if (restartTime < Utils.getTimestamp()) doRestart();
-                    break;
                 }
 
                 if (serverState == ServerState.Crashed)
