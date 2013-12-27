@@ -189,39 +189,7 @@ namespace com.avilance.Starrybound
 
                                 StarryboundServer.logDebug("WarpCommand", "[" + this.mParent.playerData.client + "][" + warp + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
                             }
-                            else if (packetID == Packet.DamageTile)
-                            {
-                                if (!this.mParent.playerData.canBuild) continue;
-                                if (this.mParent.playerData.loc != null)
-                                {
-                                    string planetCheck = this.mParent.playerData.loc.ToString();
-                                    string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
-
-                                    if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
-
-                                    if ((planetCheck == spawnPlanet) && !this.mParent.playerData.group.hasPermission("admin.spawnbuild") && !this.mParent.playerData.inPlayerShip)
-                                    {
-                                        continue;
-                                    }
-                                }
-                            }
-                            else if (packetID == Packet.DamageTileGroup)
-                            {
-                                if (!this.mParent.playerData.canBuild) continue;
-                                if (this.mParent.playerData.loc != null)
-                                {
-                                    string planetCheck = this.mParent.playerData.loc.ToString();
-                                    string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
-
-                                    if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
-
-                                    if ((planetCheck == spawnPlanet) && !this.mParent.playerData.group.hasPermission("admin.spawnbuild") && !this.mParent.playerData.inPlayerShip)
-                                    {
-                                        continue;
-                                    }
-                                }
-                            }
-                            else if (packetID == Packet.ModifyTileList)
+                            else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
                                 if (!this.mParent.playerData.canBuild) continue;
                                 if (this.mParent.playerData.loc != null)

@@ -44,6 +44,7 @@ namespace com.avilance.Starrybound
             string returnString = StarryboundServer.motdData;
 
             returnString = returnString.Replace("%players%", StarryboundServer.clientCount.ToString());
+            returnString = returnString.Replace("%versionNum%", StarryboundServer.VersionNum.ToString());
 
             return returnString;
         }
@@ -61,7 +62,7 @@ namespace com.avilance.Starrybound
             }
 
             CreateIfNot(RulesPath, "1) Respect all players 2) No griefing/hacking 3) Have fun!");
-            CreateIfNot(MotdPath, "This server is running Starrybound Server. Type /help for a list of commands. There are currently %players% player(s) online.");
+            CreateIfNot(MotdPath, "This server is running Starrybound Server v%versionNum%. Type /help for a list of commands. There are currently %players% player(s) online.");
 
             StarryboundServer.motdData = ReadConfigFile(MotdPath);
             StarryboundServer.rulesData = ReadConfigFile(RulesPath);
