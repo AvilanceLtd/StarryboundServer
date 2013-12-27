@@ -16,39 +16,22 @@ using System.Text;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class WhosThere : CommandBase
+    class VersionC : CommandBase
     {
-        public WhosThere(Client client)
+        public VersionC(Client client)
         {
-            this.name = "whosthere";
-            this.HelpText = ": shows a list of all players in this world.";
-            
-            this.Permission = new List<string>();
-            this.Permission.Add("world.listplayers");
+            this.name = "version";
+            this.HelpText = "";
 
-            this.player = client.playerData;
             this.client = client;
+            this.player = client.playerData;
         }
 
         public override bool doProcess(string[] args)
         {
-            string list = "";
-            foreach (Client otherClient in StarryboundServer.clients.Values)
-            {
-                PlayerData otherPlayer = otherClient.playerData;
-                if (this.player.isInSameWorldAs(otherPlayer) && this.player.name != otherPlayer.name)
-                {
-                    list += otherPlayer.name + ", ";
-                }
-            }
-            if (list.Length != 0)
-            {
-                this.client.sendChatMessage("^#5dc4f4;Players in this world: " + list.Substring(0, list.Length -2));
-            }
-            else
-            {
-                this.client.sendChatMessage("^#5dc4f4;There are no other players in this world.");
-            }
+            this.client.sendCommandMessage("This server is running Starrybound Server version " + StarryboundServer.VersionNum.ToString() + ".");
+            this.client.sendCommandMessage("Running Starbound Server version " + StarryboundServer.starboundVersion.Name + " (" + StarryboundServer.ProtocolVersion + ").");
+            this.client.sendCommandMessage("Copyright 2013, Avilance Ltd. Licensed under the GNU GPL v3.");
             return true;
         }
     }

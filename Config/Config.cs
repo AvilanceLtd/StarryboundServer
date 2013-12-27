@@ -82,8 +82,6 @@ namespace com.avilance.Starrybound
     class ConfigFile
     {
         [Description("")]
-        public string serverAccount = "";
-        public string serverPass = "";
         public short serverPort = 21024;
 
         public string proxyIP = "0.0.0.0";

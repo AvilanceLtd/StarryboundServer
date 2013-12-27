@@ -1,4 +1,5 @@
-﻿/* 
+extensions: .cs
+/* 
  * Starrybound Server
  * Copyright 2013, Avilance Ltd
  * Created by Zidonuke (zidonuke@gmail.com) and Crashdoom (crashdoom@avilance.com)
@@ -9,36 +10,3 @@
  * You should have received a copy of the GNU General Public License along with Starrybound Server. If not, see http://www.gnu.org/licenses/.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace com.avilance.Starrybound.Extensions
-{
-    public class SystemCoordinate
-    {
-        public string _sector;
-        public int _x;
-        public int _y;
-        public int _z;
-
-        public SystemCoordinate(string sector, int x, int y, int z)
-        {
-            _sector = sector;
-            _x = x;
-            _y = y;
-            _z = z;
-        }
-
-        public override string ToString()
-        {
-            return _sector + ":" + _x + ":" + _y + ":" + _z;
-        }
-
-        public bool Equals(WorldCoordinate test)
-        {
-            return this.ToString() == test.ToString();
-        }
-    }
-}

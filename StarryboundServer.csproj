@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>com.avilance.Starrybound</RootNamespace>
-    <AssemblyName>StarryboundServer</AssemblyName>
+    <AssemblyName>starrybound_server</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -120,9 +120,10 @@
     <Compile Include="Commands\List.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Uptime.cs" />
+    <Compile Include="Commands\VersionC.cs" />
     <Compile Include="Commands\WarpShip.cs" />
     <Compile Include="Commands\WhosThere.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="Config\Config.cs" />
     <Compile Include="Extensions\BinaryReaderEx.cs" />
     <Compile Include="Extensions\BinaryWriterEx.cs" />
     <Compile Include="Extensions\SystemCoordinate.cs" />
@@ -137,7 +138,8 @@
     <Compile Include="Permissions\Groups.cs" />
     <Compile Include="Permissions\Users.cs" />
     <Compile Include="PlayerData.cs" />
-    <Compile Include="ServerConfig.cs" />
+    <Compile Include="Config\BootstrapConfig.cs" />
+    <Compile Include="Config\ServerConfig.cs" />
     <Compile Include="ServerThread.cs" />
     <Compile Include="StarryboundServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -146,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="StarryboundServer.licenseheader" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libs\Ionic.Zlib.dll" />

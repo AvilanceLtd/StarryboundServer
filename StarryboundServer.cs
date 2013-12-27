@@ -27,7 +27,8 @@ namespace com.avilance.Starrybound
 {
     class StarryboundServer
     {
-        public static readonly string SavePath = ".." + Path.DirectorySeparatorChar + "starrybound";
+        public static string SavePath;
+        public static BootstrapFile bootstrapConfig = new BootstrapFile();
         public static ConfigFile config = new ConfigFile();
         public static ServerFile serverConfig = new ServerFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
@@ -48,6 +49,7 @@ namespace com.avilance.Starrybound
         static Thread monitorThread;
 
         public static bool allowNewClients = true;
+        public static string privatePassword;
 
         public static ServerState serverState;
 
@@ -104,6 +106,7 @@ namespace com.avilance.Starrybound
             monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
             monitorThread.Start();
 
+            BootstrapConfig.SetupConfig();
             Config.SetupConfig();
             ServerConfig.SetupConfig();
             Groups.SetupGroups();

@@ -17,12 +17,13 @@ using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using com.avilance.Starrybound.Util;
 
 namespace com.avilance.Starrybound
 {
     class ServerConfig
     {
-        internal static string ConfigPath { get { return Path.Combine("..", "starbound.config"); } }
+        internal static string ConfigPath { get { return Path.Combine(StarryboundServer.bootstrapConfig.storageDirectory, "starbound.config"); } }
 
         public static void CreateIfNot(string file, string data = "")
         {
@@ -38,6 +39,9 @@ namespace com.avilance.Starrybound
             {
                 StarryboundServer.serverConfig = ServerFile.Read(ConfigPath);
             }
+            StarryboundServer.serverConfig.gamePort = StarryboundServer.config.serverPort;
+            StarryboundServer.privatePassword = Utils.GenerateSecureSalt();
+            StarryboundServer.serverConfig.serverPasswords = new string[] { StarryboundServer.privatePassword };
             StarryboundServer.serverConfig.Write(ConfigPath);
         }
     }

@@ -89,6 +89,10 @@ namespace com.avilance.Starrybound.Packets
                             new Rules(this.client).doProcess(args);
                             break;
 
+                        case "version":
+                            new VersionC(this.client).doProcess(args);
+                            break;
+
                         case "me":
                             new Me(this.client).doProcess(args);
                             break;
