@@ -107,6 +107,7 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\BanC.cs" />
     <Compile Include="Commands\GroupC.cs" />
+    <Compile Include="Commands\Fuel.cs" />
     <Compile Include="Commands\Rules.cs" />
     <Compile Include="Commands\Find.cs" />
     <Compile Include="Commands\Help.cs" />

@@ -72,9 +72,79 @@ namespace com.avilance.Starrybound.Commands
                 pPerms.Add("chat.*", true);
                 Group newGroup = new Group(groupName, null, null, pPerms);
                 StarryboundServer.groups.Add(newGroup.name, newGroup);
+                Groups.SaveGroups();
                 this.client.sendCommandMessage("New group " + newGroup.name + " has been added.");
                 return true;
             } // Add new group end
+            else if (command == "adduser")
+            {
+                if (args.Length <= 1)
+                {
+                    this.client.sendCommandMessage("Invalid syntax. Use /group help for instructions.");
+                    return false;
+                }
+
+                string playerName = args[1].Trim();
+                string groupName = args[2].Trim();
+                if (String.IsNullOrWhiteSpace(playerName) || String.IsNullOrWhiteSpace(groupName))
+                {
+                    this.client.sendCommandMessage("Invalid syntax. Use /group help for instructions.");
+                    return false;
+                }
+
+                if (StarryboundServer.clients.ContainsKey(playerName))
+                {
+                    if (StarryboundServer.groups.ContainsKey(groupName))
+                    {
+                        PlayerData playerData = StarryboundServer.clients[playerName].playerData;
+                        playerData.group = StarryboundServer.groups[groupName];
+                        this.client.sendCommandMessage("Player " + playerName + " has been added to group " + groupName + ".");
+                        StarryboundServer.sendGlobalMessage(playerName + " has been assigned the group " + groupName);
+                        Users.SaveUser(playerData);
+                        return true;
+                    }
+                    else
+                    {
+                        this.client.sendCommandMessage("A Group with the name " + groupName + " does not exist.");
+                        return false;
+                    }
+                }
+                else
+                {
+                    this.client.sendCommandMessage("Player '" + player + "' not found.");
+                    return false;
+                }
+            }
+            else if (command == "deluser")
+            {
+                if (args.Length <= 1)
+                {
+                    this.client.sendCommandMessage("Invalid syntax. Use /group help for instructions.");
+                    return false;
+                }
+
+                string playerName = args[1].Trim();
+                if (String.IsNullOrWhiteSpace(playerName))
+                {
+                    this.client.sendCommandMessage("Invalid syntax. Use /group help for instructions.");
+                    return false;
+                }
+
+                if (StarryboundServer.clients.ContainsKey(playerName))
+                {
+                    PlayerData playerData = StarryboundServer.clients[playerName].playerData;
+                    playerData.group = StarryboundServer.groups[StarryboundServer.defaultGroup];
+                    this.client.sendCommandMessage("Player " + playerName + " has had their access revoked.");
+                    StarryboundServer.sendGlobalMessage(playerName + " has been demoted to " + StarryboundServer.defaultGroup);
+                    Users.SaveUser(playerData);
+                    return true;
+                }
+                else
+                {
+                    this.client.sendCommandMessage("Player '" + player + "' not found.");
+                    return false;
+                }
+            }
             else if (command == "del")
             { // Delete a group start
                 if (args.Length <= 1)
@@ -93,6 +163,7 @@ namespace com.avilance.Starrybound.Commands
                 if (StarryboundServer.groups.ContainsKey(groupName))
                 {
                     StarryboundServer.groups.Remove(groupName);
+                    Groups.SaveGroups();
                     this.client.sendCommandMessage("Group " + groupName + " has been removed.");
                     return true;
                 }
@@ -153,6 +224,7 @@ namespace com.avilance.Starrybound.Commands
                     if (modCommand == "prefix")
                     {
                         targetGroup.prefix = modValue;
+                        Groups.SaveGroups();
                         this.client.sendCommandMessage("Group " + targetGroup.name + "'s prefix is now set to " + modValue);
                         return true;
                     }
@@ -161,6 +233,7 @@ namespace com.avilance.Starrybound.Commands
                         if (modValue.Length == 7 && modValue[0] == '#')
                         {
                             targetGroup.nameColor = modValue;
+                            Groups.SaveGroups();
                             this.client.sendCommandMessage("Group " + targetGroup.name + "'s name color is now set to " + modValue);
                             return true;
                         }
@@ -224,6 +297,7 @@ namespace com.avilance.Starrybound.Commands
                         string prmValue = args[3].Trim();
                         if (targetGroup.givePermission(prmValue))
                         {
+                            Groups.SaveGroups();
                             this.client.sendCommandMessage("Permission " + prmValue + " was successfully added.");
                             return true;
                         }
@@ -245,6 +319,7 @@ namespace com.avilance.Starrybound.Commands
                         if (targetGroup.permissions.ContainsKey(prmValue))
                         {
                             targetGroup.permissions.Remove(prmValue);
+                            Groups.SaveGroups();
                             this.client.sendCommandMessage("Permission " + prmValue + " was successfully removed.");
                             return true;
                         }
@@ -272,6 +347,8 @@ namespace com.avilance.Starrybound.Commands
                 this.client.sendChatMessage("^#5dc4f4;/group list - shows a list of all groups.");
                 this.client.sendChatMessage("^#5dc4f4;/group add <group name> - adds a new group.");
                 this.client.sendChatMessage("^#5dc4f4;/group del <group name> - deletes a group.");
+                this.client.sendChatMessage("^#5dc4f4;/group adduser <player> <group name> - adds user to a group.");
+                this.client.sendChatMessage("^#5dc4f4;/group deluser <player> <group name> - demotes user to default group.");
                 this.client.sendChatMessage("^#5dc4f4;/group info <group name> - shows information about a group.");
                 this.client.sendChatMessage("^#5dc4f4;/group mod <group name> <prefix/color> <value> - changes a group parameter.");
                 this.client.sendChatMessage("^#5dc4f4;/group permissions list - lists the permissions of a group.");

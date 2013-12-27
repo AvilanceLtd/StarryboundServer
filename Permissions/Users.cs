@@ -28,10 +28,11 @@ namespace com.avilance.Starrybound.Permissions
 
         public bool isMuted = false;
         public bool canBuild = true;
+        public bool freeFuel = false;
 
         public int lastOnline = 0;
 
-        public User(string name, string uuid, string groupName, bool isMuted, bool canBuild, int lastOnline)
+        public User(string name, string uuid, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel)
         {
             this.name = name;
             this.uuid = uuid;
@@ -39,6 +40,7 @@ namespace com.avilance.Starrybound.Permissions
             this.isMuted = isMuted;
             this.canBuild = canBuild;
             this.lastOnline = lastOnline;
+            this.freeFuel = freeFuel;
         }
 
         public Group getGroup()
@@ -72,7 +74,7 @@ namespace com.avilance.Starrybound.Permissions
             }
             else
             {
-                User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0);
+                User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, false);
                 Write(Path.Combine(UsersPath, uuid + ".json"), user);
 
                 return user;
@@ -83,7 +85,7 @@ namespace com.avilance.Starrybound.Permissions
         {
             try
             {
-                User user = new User(player.name, player.uuid, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp());
+                User user = new User(player.name, player.uuid, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel);
                 Write(Path.Combine(UsersPath, player.uuid + ".json"), user);
             }
             catch (Exception e)
@@ -115,7 +117,7 @@ namespace com.avilance.Starrybound.Permissions
             catch (Exception)
             {
                 StarryboundServer.logException("Persistant user storage for " + data[0] + " is corrupt - Creating with default values");
-                return new User(data[0], data[1], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp());
+                return new User(data[0], data[1], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false);
             }
         }
 

@@ -73,12 +73,20 @@ namespace com.avilance.Starrybound.Packets
                             new BanC(this.client).doProcess(args);
                             break;
 
+                        case "unban":
+                            new UnbanCommand(this.client).doProcess(args);
+                            break;
+
                         case "banreload":
                             new BanReloadCommand(this.client).doProcess(args);
                             break;
 
                         case "kick":
                             new Kick(this.client).doProcess(args);
+                            break;
+
+                        case "fuel":
+                            new Fuel(this.client).doProcess(args);
                             break;
 
                         case "admin":

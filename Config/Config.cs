@@ -104,6 +104,8 @@ namespace com.avilance.Starrybound
 
         public bool allowSymbols = false;
 
+        public bool freeFuelForNewPlayers = true;
+
         public string[] sectors = new string[] { "alpha", "beta", "gamma", "delta", "sectorx" };
 
         public bool useAssetDigest = false;

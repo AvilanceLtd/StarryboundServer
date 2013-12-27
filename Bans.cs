@@ -10,6 +10,7 @@
 */
 
 using com.avilance.Starrybound.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,14 +22,14 @@ namespace com.avilance.Starrybound
 {
     public class Ban
     {
-        int banID;
-        int timeBanned;
-        string admin;
-        int expiry;
-        string reason;
-        private string username;
-        private string uuid;
-        private string ipaddress;
+        public int banID;
+        public int timeBanned;
+        public string admin;
+        public int expiry;
+        public string reason;
+        public string username;
+        public string uuid;
+        public string ipaddress;
 
         public Ban(int banID, string username, string uuid, string ipaddress, int timeBanned, string admin, int expiry, string reason)
         {
@@ -64,15 +65,46 @@ namespace com.avilance.Starrybound
         public void remove()
         {
             Bans.allBans.Remove(banID);
-            Bans.removeBan(banID);
+            Bans.Write(Path.Combine(StarryboundServer.SavePath, "bans.json"));
         }
     }
 
     public static class Bans
     {
         public static Dictionary<int, Ban> allBans = new Dictionary<int, Ban>();
+        public static Dictionary<int, Ban> legacyBans = new Dictionary<int, Ban>();
 
         static int nextBanID = 1;
+        static bool writeBans = true;
+
+        public static void ProcessBans () 
+        {
+            readLegacyBans();
+            List<Ban> bans = Read(Path.Combine(StarryboundServer.SavePath, "bans.json"));
+
+            foreach (Ban ban in bans)
+            {
+                allBans.Add(ban.banID, ban);
+            }
+
+            foreach (Ban lBan in legacyBans.Values)
+            {
+                if (!allBans.ContainsKey(lBan.banID))
+                {
+                    allBans.Add(lBan.banID, lBan);
+                }
+            }
+
+            int removedCount = 0;
+            foreach (Ban ban in allBans.Values)
+            {
+                if (ban.hasExpired()) { ban.remove(); removedCount++; }
+            }
+
+            Write(Path.Combine(StarryboundServer.SavePath, "bans.json"));
+
+            StarryboundServer.logInfo(allBans.Count + " ban(s) have been loaded from file. " + removedCount + " ban(s) have expired and been removed.");
+        }
 
         /// <summary>
         /// Checks to see if the data matches the ban record
@@ -90,28 +122,6 @@ namespace com.avilance.Starrybound
             return new string[] { };
         }
 
-        public static void removeBan(int banID)
-        {
-            try
-            {
-
-                List<string> allLines = File.ReadLines(Path.Combine(StarryboundServer.SavePath, "banned-players.txt")).ToList();
-                string[] saveLines = new string[allLines.Count];
-
-                for (var i = 0; i < allLines.Count; i++) 
-                {
-                    string line = allLines[i];
-                    if (!line.StartsWith(banID.ToString())) saveLines[i] = line;
-                }
-
-                File.WriteAllLines(Path.Combine(StarryboundServer.SavePath, "banned-players.txt"), saveLines);
-            }
-            catch (Exception e)
-            {
-                StarryboundServer.logException("Exception while trying to remove ban from banned-players.txt - " + e.StackTrace);
-            }
-        }
-
         public static bool addNewBan(string username, string uuid, string ipaddress, int timeBanned, string admin, int expiry, string reason)
         {
             string[] args = new string[8];
@@ -127,15 +137,11 @@ namespace com.avilance.Starrybound
 
             try
             {
-                FileStream fs = new FileStream(Path.Combine(StarryboundServer.SavePath, "banned-players.txt"), FileMode.Append, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs);
-                sw.WriteLine(String.Join("|", args));
-                sw.Flush();
-                sw.Close();
-
                 Ban ban = new Ban(nextBanID, username, uuid, ipaddress, timeBanned, admin, expiry, reason);
 
                 allBans.Add(nextBanID, ban);
+
+                Write(Path.Combine(StarryboundServer.SavePath, "bans.json"));
 
                 nextBanID++;
             }
@@ -147,7 +153,70 @@ namespace com.avilance.Starrybound
             return true;
         }
 
-        public static void readBansFromFile()
+        public static List<Ban> Read(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return new List<Ban>();
+            }
+
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                List<Ban> file = Read(fs);
+                return file;
+            }
+        }
+
+        public static List<Ban> Read(Stream stream)
+        {
+            try
+            {
+                using (var sr = new StreamReader(stream))
+                {
+                    return JsonConvert.DeserializeObject<List<Ban>>(sr.ReadToEnd());
+                }
+            }
+            catch (Exception)
+            {
+                StarryboundServer.logException("Server ban file is not readable - Bans WILL NOT operate until this issue is fixed.");
+                writeBans = false;
+                return new List<Ban>();
+            }
+        }
+
+        public static void Write(string path)
+        {
+            if (!writeBans) return;
+
+            using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write))
+            {
+                Write(fs);
+            }
+        }
+
+        public static void Write(Stream stream)
+        {
+            List<Ban> banList;
+            if (StarryboundServer.groups.Count > 0)
+            {
+                banList = new List<Ban>();
+
+                foreach (Ban ban in allBans.Values)
+                {
+                    banList.Add(ban);
+                }
+            }
+            else banList = new List<Ban>();
+
+            var str = JsonConvert.SerializeObject(banList, Formatting.Indented);
+            using (var sw = new StreamWriter(stream))
+            {
+                sw.Write(str);
+            }
+        }
+
+        #region Legacy Bans
+        public static void readLegacyBans()
         {
             try
             {
@@ -188,7 +257,7 @@ namespace com.avilance.Starrybound
 
                         Ban ban = new Ban(banID, username, uuid, ipaddress, timeBanned, admin, expiry, reason);
 
-                        allBans.Add(banID, ban);
+                        legacyBans.Add(banID, ban);
 
                         nextBanID = banID + 1;
 
@@ -198,19 +267,12 @@ namespace com.avilance.Starrybound
                 }
 
                 reader.Close();
-
-                int removedCount = 0;
-                foreach (Ban ban in allBans.Values)
-                {
-                    if (ban.hasExpired()) { ban.remove(); removedCount++; }
-                }
-
-                StarryboundServer.logInfo(banCount + " ban(s) have been loaded from file. " + removedCount + " ban(s) have expired and been removed.");
             }
             catch (Exception e)
             {
-                StarryboundServer.logWarn("Unable to read bans from banned-players.txt: " + e.Message);
+                StarryboundServer.logWarn("Unable to read bans from legacy banned-players.txt: " + e.Message);
             }
         }
+        #endregion Legacy
     }
 }

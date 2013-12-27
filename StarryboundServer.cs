@@ -139,7 +139,7 @@ namespace com.avilance.Starrybound
                 sectors.Add(Encoding.UTF8.GetBytes(sector));
             }
 
-            Bans.readBansFromFile();
+            Bans.ProcessBans();
 #if !NOSERVER
             sbServer = new ServerThread();
             sbServerThread = new Thread(new ThreadStart(sbServer.run));

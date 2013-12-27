@@ -29,6 +29,7 @@ namespace com.avilance.Starrybound
         public string uuid;
 
         public bool sentMotd = false;
+        public bool freeFuel = false;
 
         public Group group;
 
