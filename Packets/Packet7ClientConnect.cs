@@ -47,6 +47,9 @@ namespace com.avilance.Starrybound.Packets
             this.mClient.playerData.name = name;
             this.mClient.playerData.account = account;
 
+            User userPData;
+            userPData = Users.GetUser(name, Utils.ByteArrayToString(UUID).ToLower());
+
             string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.mClient.playerData.uuid, this.mClient.playerData.ip });
 
             if (reasonExpiry.Length == 2)
@@ -63,8 +66,11 @@ namespace com.avilance.Starrybound.Packets
 
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
-                this.mClient.rejectPreConnected("The server is full. Please try again later.");
-                return false;
+                if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
+                {
+                    this.mClient.rejectPreConnected("The server is full. Please try again later.");
+                    return false;
+                }
             }
 
             if (!StarryboundServer.config.allowSpaces)
@@ -78,7 +84,7 @@ namespace com.avilance.Starrybound.Packets
 
             if (!StarryboundServer.config.allowSymbols)
             {
-                Regex r = new Regex("^[a-zA-Z0-9_]*$");
+                Regex r = new Regex("^[a-zA-Z0-9_\\- ]*$");
                 if (!r.IsMatch(this.mClient.playerData.name))
                 {
                     this.mClient.rejectPreConnected("You may not have special characters in your name on this server.");
@@ -86,12 +92,9 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
-            User userPData;
             com.avilance.Starrybound.Permissions.Group userGroup;
             try
             {
-                userPData = Users.GetUser(name, Utils.ByteArrayToString(UUID).ToLower());
-
                 Player pData = this.mClient.playerData;
 
                 pData.isMuted = userPData.isMuted;

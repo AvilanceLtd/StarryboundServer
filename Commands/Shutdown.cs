@@ -42,7 +42,8 @@ namespace com.avilance.Starrybound.Commands
             foreach (ClientThread client in StarryboundServer.clients.Values)
             {
                 client.sendServerPacket(Packet.ClientDisconnect, new byte[1]); //This causes the server to gracefully save and remove the player, and close its connection, even if the client ignores ServerDisconnect.
-                this.client.sendChatMessage("^#f75d5d;You have been disconnected.");
+                client.sendChatMessage("^#f75d5d;You have been disconnected.");
+                client.clientState = ClientState.Disposing;
                 client.kickTargetTimestamp = Utils.getTimestamp() + 7;
             }
 
