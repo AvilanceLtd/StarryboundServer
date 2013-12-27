@@ -33,6 +33,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (!hasPermission()) { permissionError(); return false; }
+
             if (args.Length < 1)
             {
                 this.client.sendCommandMessage("Invalid syntax. Use /group help for instructions.");
