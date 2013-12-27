@@ -35,6 +35,7 @@ namespace com.avilance.Starrybound.Packets
             BinaryReader packetData = (BinaryReader)this.mStream;
 
             byte[] assetDigest = packetData.ReadStarByteArray();
+
             List<object> claim = packetData.ReadStarVariant();
             byte[] UUID = packetData.ReadStarUUID();
             string name = packetData.ReadStarString();
@@ -46,6 +47,17 @@ namespace com.avilance.Starrybound.Packets
             this.mClient.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
             this.mClient.playerData.name = name;
             this.mClient.playerData.account = account;
+
+            string sAssetDigest = Utils.ByteArrayToString(assetDigest);
+            StarryboundServer.logDebug("AssetDigest", "[" + this.mClient.playerData.client + "] [" + sAssetDigest + "]");
+            if(StarryboundServer.config.useAssetDigest)
+            {
+                if(sAssetDigest == StarryboundServer.config.assetDigest)
+                {
+                    this.mClient.rejectPreConnected("Please reinstall Starbound to connect to this server.");
+                    return false;
+                }
+            }
 
             User userPData = Users.GetUser(name, this.mClient.playerData.uuid);
 

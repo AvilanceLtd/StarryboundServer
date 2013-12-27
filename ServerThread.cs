@@ -56,12 +56,18 @@ namespace com.avilance.Starrybound
                 {
                     string[] versionString = consoleLine.Split('\'');
                     string versionName = versionString[1];
-                    int versionMajor = int.Parse(versionString[3]);
+                    int protocolVersion = int.Parse(versionString[3]);
                     int versionMinor = int.Parse(versionString[5]);
-                    StarryboundServer.starboundVersion.Major = versionMajor;
+                    StarryboundServer.starboundVersion.Protocol = protocolVersion;
                     StarryboundServer.starboundVersion.Minor = versionMinor;
                     StarryboundServer.starboundVersion.Name = versionName;
-                    StarryboundServer.logInfo("Starbound version detected: " + versionName + " ("+versionMajor+"."+versionMinor+")");
+                    if(protocolVersion != StarryboundServer.ProtocolVersion)
+                    {
+                        StarryboundServer.logFatal("Detected protcol version [" + protocolVersion + "] != [" + StarryboundServer.ProtocolVersion + "] to expected protocol version!");
+                        StarryboundServer.logFatal("Press any key to continue...");
+                        Console.ReadKey(true);
+                        Environment.Exit(0);
+                    }
                 }
 
                 if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))

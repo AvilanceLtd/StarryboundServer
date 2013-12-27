@@ -115,7 +115,7 @@ namespace com.avilance.Starrybound
             logInfo("####   Copyright (c) Avilance Ltd. 2013   ####");
             logInfo("####       Licensed under the GPLv3       ####");
             logInfo("##############################################");
-            logInfo("Version: " + VersionNum);
+            logInfo("Version: " + VersionNum + " (" + ProtocolVersion + ")");
 #if !DEBUG
             if (config.logLevel == LogType.Debug)
             {
@@ -270,7 +270,7 @@ namespace com.avilance.Starrybound
 
         public struct StarboundVersion
         {
-            public int Major;
+            public int Protocol;
             public int Minor;
             public string Name;
         }
