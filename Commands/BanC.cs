@@ -23,7 +23,7 @@ namespace com.avilance.Starrybound.Commands
         public BanC(Client client)
         {
             this.name = "ban";
-            this.HelpText = " <username> <length (mins)> <reason>: Bans the user from the server for the specified time (in minutes) and reason.";
+            this.HelpText = "<username> <length (mins)> <reason>: Bans the user from the server for the specified time (in minutes) and reason.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.ban");
 
@@ -84,7 +84,7 @@ namespace com.avilance.Starrybound.Commands
         public BanReloadCommand(Client client)
         {
             this.name = "banreload";
-            this.HelpText = ": Reloads the banned-players.txt file";
+            this.HelpText = "Reloads the banned-players.txt file";
             this.Permission = new List<string>();
             this.Permission.Add("admin.reload");
 
@@ -97,9 +97,43 @@ namespace com.avilance.Starrybound.Commands
             if (!hasPermission()) { permissionError(); return false; }
             this.client.sendChatMessage("Attempting to reload all server bans from banned-players.txt");
             Bans.allBans = new Dictionary<int, Ban>();
-            Bans.readBansFromFile();
+            Bans.ProcessBans();
             this.client.sendChatMessage(Bans.allBans.Count + " ban(s) have been loaded.");
             return true;
+        }
+    }
+
+    class UnbanCommand : CommandBase
+    {
+        public UnbanCommand(Client client)
+        {
+            this.name = "unban";
+            this.HelpText = "<string>; Unbans the specified player using a search string, checks Username, UUID and IP Address";
+            this.Permission = new List<string>();
+            this.Permission.Add("admin.unban");
+
+            this.client = client;
+            this.player = client.playerData;
+        }
+
+        public override bool doProcess(string[] args)
+        {
+            if (!hasPermission()) { permissionError(); return false; }
+
+            string player = string.Join(" ", args).Trim();
+
+            foreach (Ban banData in Bans.allBans.Values)
+            {
+                if (banData.doesMatch(new string[] { player, player, player }))
+                {
+                    banData.remove();
+                    this.client.sendCommandMessage("Ban for " + player + " has been removed.");
+                    return true;
+                }
+            }
+
+            this.client.sendCommandMessage("No ban matching string '" + player + "' could be found.");
+            return false;
         }
     }
 }

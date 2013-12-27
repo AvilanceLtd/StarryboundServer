@@ -115,6 +115,7 @@ namespace com.avilance.Starrybound.Packets
                 pData.canBuild = userPData.canBuild;
                 pData.lastOnline = userPData.lastOnline;
                 pData.group = userPData.getGroup();
+                pData.freeFuel = userPData.freeFuel;
 
                 if (userPData.name != pData.name)
                 {
