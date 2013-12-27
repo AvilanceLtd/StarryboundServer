@@ -42,6 +42,7 @@ namespace com.avilance.Starrybound
             StarryboundServer.serverConfig.gamePort = StarryboundServer.config.serverPort;
             StarryboundServer.privatePassword = Utils.GenerateSecureSalt();
             StarryboundServer.serverConfig.serverPasswords = new string[] { StarryboundServer.privatePassword };
+            StarryboundServer.serverConfig.maxPlayers = StarryboundServer.config.maxClients + 10;
             StarryboundServer.serverConfig.Write(ConfigPath);
         }
     }

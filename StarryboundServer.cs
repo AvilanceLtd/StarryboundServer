@@ -115,9 +115,6 @@ namespace com.avilance.Starrybound
             StarryboundServer.config.logLevel = LogType.Debug;
             logDebug("Init", "This was compiled in DEBUG, forcing debug logging!");
 #endif
-            serverConfig.maxPlayers = config.maxClients + 10;
-            serverConfig.Write(ServerConfig.ConfigPath);
-
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
 
