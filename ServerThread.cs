@@ -16,9 +16,10 @@ namespace com.avilance.Starrybound
 
         public void run()
         {
+            var executableName = "starbound_server" + (StarryboundServer.IsMono ? "" : ".exe");
             try
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("starbound_server.exe")
+                ProcessStartInfo startInfo = new ProcessStartInfo(executableName)
                 {
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,

@@ -27,7 +27,7 @@ namespace com.avilance.Starrybound
 {
     class StarryboundServer
     {
-        public static readonly string SavePath = "..\\starrybound";
+        public static readonly string SavePath = ".." + Path.DirectorySeparatorChar + "starrybound";
         public static ConfigFile config = new ConfigFile();
         public static ServerFile serverConfig = new ServerFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
@@ -61,6 +61,11 @@ namespace com.avilance.Starrybound
 
         public static List<byte[]> sectors = new List<byte[]>();
 
+        public static bool IsMono
+        {
+            get { return (Type.GetType("Mono.Runtime") != null); }
+        }
+
         private static void ProcessExit(object sender, EventArgs e)
         {
             try
@@ -80,6 +85,9 @@ namespace com.avilance.Starrybound
 
         static void Main(string[] args)
         {
+            if (IsMono)
+                Environment.CurrentDirectory = Path.GetDirectoryName(typeof(StarryboundServer).Assembly.Location);
+
             try
             {
 	            Process [] proc = Process.GetProcessesByName("starbound_server");

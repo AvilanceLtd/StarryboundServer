@@ -71,6 +71,10 @@ namespace com.avilance.Starrybound
             {
                 StarryboundServer.config = ConfigFile.Read(ConfigPath);
             }
+
+            if (StarryboundServer.IsMono && StarryboundServer.config == null)
+                StarryboundServer.config = new ConfigFile();
+
             StarryboundServer.config.Write(ConfigPath);
         }
     }
