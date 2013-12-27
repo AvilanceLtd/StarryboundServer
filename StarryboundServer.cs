@@ -70,30 +70,23 @@ namespace com.avilance.Starrybound
 
         private static void ProcessExit(object sender, EventArgs e)
         {
-            try
-            {
-                Process[] proc = Process.GetProcessesByName("starbound_server");
-                proc[0].Kill();
-            }
-            catch (Exception) { }
-
-            if (listenerThread != null) listenerThread.Abort();
-
-            try { sbServer.process.CloseMainWindow(); }
-            catch (Exception) { }
-
-            sbServerThread.Abort();
+            doShutdown();
         }
 
         static void Main(string[] args)
         {
+#if DEBUG
+            StarryboundServer.config.logLevel = LogType.Debug;
+#endif
             if (IsMono)
                 Environment.CurrentDirectory = Path.GetDirectoryName(typeof(StarryboundServer).Assembly.Location);
 
             try
             {
-	            Process [] proc = Process.GetProcessesByName("starbound_server");
-	            proc[0].Kill();
+                int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                Process proc = Process.GetProcessById(processId);
+                proc.Kill();
+                File.Delete("starbound_server.pid");
             }
             catch (Exception) { }
 
@@ -102,6 +95,8 @@ namespace com.avilance.Starrybound
             serverState = ServerState.Starting;
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(ProcessExit);
+            //if (!IsMono)
+            //    NativeMethods.SetConsoleCtrlHandler(new NativeMethods.HandlerRoutine(NativeMethods.ConsoleCtrlCheck), true);
 
             monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
             monitorThread.Start();
@@ -111,10 +106,7 @@ namespace com.avilance.Starrybound
             ServerConfig.SetupConfig();
             Groups.SetupGroups();
             Users.SetupUsers();
-#if DEBUG
-            StarryboundServer.config.logLevel = LogType.Debug;
-            logDebug("Init", "This was compiled in DEBUG, forcing debug logging!");
-#endif
+
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
 
@@ -154,7 +146,24 @@ namespace com.avilance.Starrybound
             sbServerThread.Start();
 
             logInfo("Starting Starbound Server - This may take a few moments...");
-            while (serverState != ServerState.StartingProxy) { if (serverState == ServerState.Crashed) return; }
+            while (serverState != ServerState.StartingProxy) 
+            {
+                if (serverState == ServerState.Crashed)
+                {
+                    try
+                    {
+                        int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                        Process proc = Process.GetProcessById(processId);
+                        proc.Kill();
+                        File.Delete("starbound_server.pid");
+                    }
+                    catch (Exception) { }
+                    logFatal("Parent Starbound Server failed to start!");
+                    logFatal("Press any key to continue...");
+                    Console.ReadKey(true);
+                    Environment.Exit(0);
+                }
+            }
 #endif
             logInfo("Starbound server is ready. Starting proxy wrapper.");
 
@@ -187,33 +196,62 @@ namespace com.avilance.Starrybound
 
         public static void doRestart()
         {
-            serverState = ServerState.Restarting;
-
-            foreach (Client client in clients.Values)
-            {
-                client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                client.state = ClientState.Disposing;
-            }
-
-            while (clients.Count > 0)
-            {
-                // Waiting
-            }
-
-            if (listenerThread != null) listenerThread.Abort();
-
-            try { sbServer.process.CloseMainWindow(); }
-            catch (Exception) { }
-
-            System.Threading.Thread.Sleep(500);
-
-            sbServerThread.Abort();
-
-            logInfo("Graceful shutdown complete, now restarting...");
+            doShutdown();
+            logInfo("Now restarting...");
             System.Threading.Thread.Sleep(3000);
-
-            Process.Start(Environment.CurrentDirectory + "\\StarryboundServer.exe");
+            Process.Start(Environment.CurrentDirectory + Path.DirectorySeparatorChar + Assembly.GetEntryAssembly().Location);
             Environment.Exit(1);
+        }
+
+        public static void doShutdown()
+        {
+            try
+            {
+                serverState = ServerState.ShuttingDown;
+
+                foreach (Client client in clients.Values)
+                {
+                    client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                    client.state = ClientState.Disposing;
+                }
+
+                while (clients.Count > 0)
+                {
+                    // Waiting
+                }
+
+                if (listenerThread != null) listenerThread.Abort();
+
+                try { sbServer.process.CloseMainWindow(); }
+                catch (Exception) { }
+
+                System.Threading.Thread.Sleep(500);
+
+                sbServerThread.Abort();
+
+                try
+                {
+                    int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                    Process proc = Process.GetProcessById(processId);
+                    proc.Kill();
+                    File.Delete("starbound_server.pid");
+                }
+                catch (Exception) { }
+
+                logInfo("Graceful shutdown complete");
+            }
+            catch(Exception e)
+            {
+                try
+                {
+                    logInfo("Graceful shutdown failed: " + e.ToString());
+                    int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                    Process proc = Process.GetProcessById(processId);
+                    proc.Kill();
+                    File.Delete("starbound_server.pid");
+                }
+                catch (Exception) { }
+            }
         }
 
         public static void logDebug(string source, string message) { writeLog("[" + source + "]:" + message, LogType.Debug); }

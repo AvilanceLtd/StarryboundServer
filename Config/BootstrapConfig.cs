@@ -44,11 +44,12 @@ namespace com.avilance.Starrybound
 
     class BootstrapFile
     {
-        public string[] assetSources;
 
-        public string modSource;
+        public string[] assetSources = new string[] { "../assets" };
 
-        public string storageDirectory;
+        public string modSource = "../mods";
+
+        public string storageDirectory = "..";
 
         public static BootstrapFile Read(string path)
         {
