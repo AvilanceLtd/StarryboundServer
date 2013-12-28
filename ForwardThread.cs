@@ -348,7 +348,7 @@ namespace com.avilance.Starrybound
                                 }
                                 catch (Exception e)
                                 {
-                                    StarryboundServer.logDebug("ClientContext", "[" + this.client.playerData.client + "] Failed to parse ClientContextUpdate from Server: " + e.Message);
+                                    StarryboundServer.logDebug("ClientContext", "[" + this.client.playerData.client + "] Failed to parse ClientContextUpdate from Server: " + e.ToString());
                                 }
                             }
                         }
