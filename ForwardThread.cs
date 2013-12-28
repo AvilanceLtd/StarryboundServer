@@ -417,7 +417,16 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                this.client.errorDisconnect(direction, "ForwardThread Exception: " + e.Message);
+                if(e.InnerException != null)
+                {
+                    if(e.InnerException is System.Net.Sockets.SocketException)
+                    {
+                        this.client.errorDisconnect(direction, e.Message);
+                        return;
+                    }
+
+                }
+                this.client.errorDisconnect(direction, "ForwardThread Exception: " + e.ToString());
             }
         }
     }
