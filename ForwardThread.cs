@@ -19,6 +19,7 @@ using com.avilance.Starrybound.Util;
 using com.avilance.Starrybound.Extensions;
 using Ionic.Zlib;
 using com.avilance.Starrybound.Packets;
+using System.Threading;
 
 namespace com.avilance.Starrybound
 {
@@ -45,7 +46,7 @@ namespace com.avilance.Starrybound
                 {
                     if (!this.client.connectionAlive)
                     {
-                        this.client.forceDisconnect("Connection Lost");
+                        this.client.forceDisconnect(direction, "Connection no longer alive");
                         return;
                     }
 
@@ -54,7 +55,7 @@ namespace com.avilance.Starrybound
                     {
                         if (this.client.kickTargetTimestamp < Utils.getTimestamp())
                         {
-                            this.client.forceDisconnect();
+                            this.client.closeConnection();
                             return;
                         }
                         continue;
@@ -65,7 +66,7 @@ namespace com.avilance.Starrybound
                     uint temp = this.incoming.ReadVarUInt32();
                     if (temp < 1 || temp > 48)
                     {
-                        this.client.errorDisconnect(direction, "Sent invalid packet ID [" + temp + "].");
+                        this.client.forceDisconnect(direction, "Sent invalid packet ID [" + temp + "].");
                         return;
                     }
                     Packet packetID = (Packet)temp;
@@ -206,8 +207,15 @@ namespace com.avilance.Starrybound
                                         BinaryReader entity = new BinaryReader(new MemoryStream(entityData));
                                         string projectileKey = entity.ReadStarString();
                                         object projParams = entity.ReadStarVariant();
-                                        if(StarryboundServer.config.projectileBlacklist.Contains(projectileKey))
+                                        if (StarryboundServer.config.projectileBlacklist.Contains(projectileKey))
+                                        {
+                                            MemoryStream packet = new MemoryStream();
+                                            BinaryWriter packetWrite = new BinaryWriter(packet);
+                                            packetWrite.WriteVarInt32(entityId);
+                                            packetWrite.Write(false);
+                                            this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
                                             returnData = false;
+                                        }
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "]");
                                     }
                                     else if(type == EntityType.Player)
@@ -406,15 +414,6 @@ namespace com.avilance.Starrybound
                         #endregion
                     }
 
-                    #if DEBUG
-                    if(packetID != Packet.Heartbeat)
-                    {
-                        //if (ms.Position != ms.Length)
-                            //StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetID + "] failed parse (" + ms.Position + " != " + ms.Length + ")");
-                        //StarryboundServer.logDebug("ForwardThread", "[" + this.mParent.playerData.client + "] [" + this.mDirection.ToString() + "][" + packetID + "] Dumping " + ms.Length + " bytes: " + Utils.ByteArrayToString(ms.ToArray()));
-                    }
-                    #endif
-
                     //Check return data
                     if (returnData is Boolean)
                     {
@@ -424,7 +423,7 @@ namespace com.avilance.Starrybound
                     {
                         if ((int)returnData == -1)
                         {
-                            this.client.forceDisconnect("Command processor requested to drop client");
+                            this.client.forceDisconnect(direction, "Command processor requested to drop client");
                             return;
                         }
                     }
@@ -451,13 +450,14 @@ namespace com.avilance.Starrybound
                     //If disconnect was forwarded to client, lets disconnect.
                     if(packetID == Packet.ServerDisconnect && direction == Direction.Server)
                     {
-                        this.client.forceDisconnect();
+                        this.client.closeConnection();
                     }
                 }
             }
+            catch (ThreadAbortException) { }
             catch (EndOfStreamException) 
             {
-                this.client.forceDisconnect();
+                this.client.forceDisconnect(direction, "End of stream");
             }
             catch (Exception e)
             {
@@ -465,12 +465,12 @@ namespace com.avilance.Starrybound
                 {
                     if(e.InnerException is System.Net.Sockets.SocketException)
                     {
-                        this.client.errorDisconnect(direction, e.InnerException.Message);
+                        this.client.forceDisconnect(direction, e.InnerException.Message);
                         return;
                     }
 
                 }
-                this.client.errorDisconnect(direction, "ForwardThread Exception: " + e.ToString());
+                this.client.forceDisconnect(direction, "ForwardThread Exception: " + e.ToString());
             }
         }
     }

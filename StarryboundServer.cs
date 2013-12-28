@@ -160,8 +160,7 @@ namespace com.avilance.Starrybound
             monitorThread = new Thread(new ThreadStart(crashMonitor));
             monitorThread.Start();
 
-            ListenerThread listener = new ListenerThread();
-            listenerThread = new Thread(new ThreadStart(listener.run));
+            listenerThread = new Thread(new ThreadStart(new ListenerThread().run));
             listenerThread.Start();
 #if !NOSERVER
             sbServer = new ServerThread();
@@ -255,7 +254,6 @@ namespace com.avilance.Starrybound
                             foreach (Client client in clients.Values.ToList())
                             {
                                 client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                                client.state = ClientState.Disposing;
                             }
                         }
 
@@ -272,7 +270,7 @@ namespace com.avilance.Starrybound
                         {
                             foreach (Client client in clients.Values.ToList())
                             {
-                                client.forceDisconnect();
+                                client.closeConnection();
                             }
                         }
                     }
