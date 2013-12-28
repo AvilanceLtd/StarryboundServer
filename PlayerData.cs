@@ -38,7 +38,7 @@ namespace com.avilance.Starrybound
 
         public int lastOnline = 0;
 
-        public bool inPlayerShip = true;
+        public bool inPlayerShip = false;
 
         public string client { get { if (String.IsNullOrEmpty(name)) return ip; else return name; } }
 

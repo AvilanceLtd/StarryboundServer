@@ -34,7 +34,7 @@ namespace com.avilance.Starrybound.Packets
         {
             byte[] assetDigest = stream.ReadStarByteArray();
 
-            List<object> claim = stream.ReadStarVariant();
+            var claim = stream.ReadStarVariant();
             byte[] UUID = stream.ReadStarUUID();
             string name = stream.ReadStarString();
             string species = stream.ReadStarString();
