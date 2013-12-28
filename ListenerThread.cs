@@ -39,6 +39,7 @@ namespace com.avilance.Starrybound
                     new Thread(new ThreadStart(new Client(clientSocket).run)).Start();
                 }
             }
+            catch (ThreadAbortException) { }
             catch (Exception e)
             {
                 StarryboundServer.logException("ListenerThread Exception: " + e.ToString());
