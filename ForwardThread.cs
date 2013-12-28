@@ -182,9 +182,13 @@ namespace com.avilance.Starrybound
                                     returnData = false;
                                 if (this.client.playerData.loc != null)
                                 {
-                                    if ((this.client.playerData.loc == StarryboundServer.spawnPlanet) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                    if ((StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc)) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
                                     {
                                         returnData = false;
+                                    }
+                                    else
+                                    {
+                                        StarryboundServer.logDebug("ForwardThread::SpawnProtection", "Player build allowed: " + this.client.playerData.loc + " != " + StarryboundServer.spawnPlanet + "; Has Permission: " + this.client.playerData.group.hasPermission("admin.spawnbuild").ToString() + "; inShip: " + this.client.playerData.inPlayerShip.ToString());
                                     }
                                 }
                                 else
@@ -249,18 +253,22 @@ namespace com.avilance.Starrybound
                                 float spawnY = packetData.ReadSingleBE();
                                 uint mapParamsSize = packetData.ReadVarUInt32();
                                 Dictionary<string, object> mapParams = new Dictionary<string, object>();
-                                bool isPlayerShip = false;
+                                int isPlayerShip = 0;
                                 for (int i = 0; i < mapParamsSize; i++)
                                 {
                                     string key = packetData.ReadStarString();
                                     var value = packetData.ReadStarVariant();
                                     mapParams.Add(key, value);
-                                    if(key == "fuel.level" || key == "fuel.max")
+                                    if(key == "fuel.level")
                                     {
-                                        isPlayerShip = true;
+                                        isPlayerShip++;
+                                    }
+                                    else if(key == "fuel.max")
+                                    {
+                                        isPlayerShip++;
                                     }
                                 }
-                                this.client.playerData.inPlayerShip = isPlayerShip;
+                                this.client.playerData.inPlayerShip = (isPlayerShip == 2);
                                 uint clientID = packetData.ReadUInt32BE();
                                 bool bool1 = packetData.ReadBoolean();
                                 WorldCoordinate coords = Utils.findGlobalCoords(sky);
@@ -269,6 +277,8 @@ namespace com.avilance.Starrybound
                                     this.client.playerData.loc = coords;
                                     StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + bool1 + ":" + clientID + "] CurLoc:[" + this.client.playerData.loc.ToString() + "][" + this.client.playerData.inPlayerShip + "]");
                                 }
+                                else
+                                    StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + bool1 + ":" + clientID + "] InPlayerShip:[" + this.client.playerData.inPlayerShip + "]");
                             }
                             else if (packetID == Packet.WorldStop)
                             {
