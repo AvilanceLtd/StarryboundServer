@@ -353,8 +353,8 @@ namespace com.avilance.Starrybound.Commands
                 this.client.sendChatMessage("^#5dc4f4;/group deluser <player> <group name> - demotes user to default group.");
                 this.client.sendChatMessage("^#5dc4f4;/group info <group name> - shows information about a group.");
                 this.client.sendChatMessage("^#5dc4f4;/group mod <group name> <prefix/color> <value> - changes a group parameter.");
-                this.client.sendChatMessage("^#5dc4f4;/group permissions list - lists the permissions of a group.");
-                this.client.sendChatMessage("^#5dc4f4;/group permissions <add/del> <permission> - adds or removes a permission from the group.");
+                this.client.sendChatMessage("^#5dc4f4;/group permissions <group name> list - lists the permissions of a group.");
+                this.client.sendChatMessage("^#5dc4f4;/group permissions <group name> <add/del> <permission> - adds or removes a permission from the group.");
                 return true;
             }
             else
