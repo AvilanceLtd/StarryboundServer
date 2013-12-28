@@ -177,6 +177,10 @@ namespace com.avilance.Starrybound.Packets
                             new WarpShip(this.client).doProcess(args);
                             break;
 
+                        case "spawn":
+                            new Spawn(this.client).doProcess(args);
+                            break;
+
                         case "group":
                             new GroupC(this.client).doProcess(args);
                             break;
