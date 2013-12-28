@@ -191,8 +191,8 @@ namespace com.avilance.Starrybound
                 if (StarryboundServer.clients.ContainsKey(this.playerData.name))
                 {
                     StarryboundServer.clients.Remove(this.playerData.name);
-                    if(this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
-                    if(!log)
+                    if (this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    if (!log)
                         StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
                 }
             }

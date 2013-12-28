@@ -55,7 +55,6 @@ namespace com.avilance.Starrybound.Packets
                 this.client.rejectPreConnected("Connection Failed: Rejected by parent server: " + rejectReason);
                 return true;
             }
-
             StarryboundServer.clients.Add(player.name, this.client);
             string geoip_prefix = "";
             if (Starrybound.StarryboundServer.config.enableGeoIP)

@@ -244,11 +244,10 @@ namespace com.avilance.Starrybound.Util
     public enum ServerState
     {
         Starting = 0,
-        StartingProxy = 1,
+        Ready = 1,
         Running = 2,
-        ShuttingDown = 3,
+        DoShutdown = 3,
         Crashed = 4,
-        ShutDown = 5,
     }
 
     public enum WarpType

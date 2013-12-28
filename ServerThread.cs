@@ -83,13 +83,11 @@ namespace com.avilance.Starrybound
                     StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
                     StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
                     StarryboundServer.restartTime = Utils.getTimestamp() + 30;
-
-                    StarryboundServer.serverState = Util.ServerState.ShuttingDown;
                 }
 
                 if (consoleLine.Contains("TcpServer listening on: "))
                 {
-                    StarryboundServer.serverState = Util.ServerState.StartingProxy;
+                    StarryboundServer.serverState = ServerState.Ready;
                 }
 
                 if (consoleLine.Contains("Info: Client "))

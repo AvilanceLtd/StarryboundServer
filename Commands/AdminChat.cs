@@ -48,7 +48,7 @@ namespace com.avilance.Starrybound.Commands
                 message = "^#ff00c7;Message to admins from " + this.player.name + ": " + message;
             }
 
-            var buffer = StarryboundServer.clients.Values;
+            var buffer = StarryboundServer.clients.Values.ToList();
 
             foreach (Client client in buffer)
             {

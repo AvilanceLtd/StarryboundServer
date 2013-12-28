@@ -33,7 +33,7 @@ namespace com.avilance.Starrybound.Commands
         public override bool doProcess(string[] args)
         {
             string list = "";
-            var buffer = StarryboundServer.clients.Values;
+            var buffer = StarryboundServer.clients.Values.ToList();
             foreach (Client otherClient in buffer)
             {
                 PlayerData otherPlayer = otherClient.playerData;

@@ -73,16 +73,31 @@ namespace com.avilance.Starrybound
             get { return (Type.GetType("Mono.Runtime") != null); }
         }
 
-        private static void ProcessExit(object sender, EventArgs e)
+        static void ProcessExit(object sender, EventArgs e)
         {
             doShutdown(true);
-            Environment.Exit(0);
+        }
+
+        static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            try
+            {
+                logFatal("Unhandled Exception Occurred: " + e.ToString());
+                doShutdown(true);
+                Environment.Exit(1);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine("[FATAL ERROR] Unhandled Exception Occurred: " + e.ToString());
+                Console.WriteLine("[EXCEPTION] Unhandled Exception Handler Failed: " + ex.ToString());
+            }
         }
 
         static void Main(string[] args)
         {
 #if DEBUG
-            StarryboundServer.config.logLevel = LogType.Debug;
+            config.logLevel = LogType.Debug;
 #endif
             startTime = Utils.getTimestamp();
             serverState = ServerState.Starting;
@@ -92,6 +107,8 @@ namespace com.avilance.Starrybound
                 Environment.CurrentDirectory = Path.GetDirectoryName(typeof(StarryboundServer).Assembly.Location);
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(ProcessExit);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException);
+
             if (!IsMono)
                 NativeMethods.SetConsoleCtrlHandler(new NativeMethods.HandlerRoutine(NativeMethods.ConsoleCtrlCheck), true);
 
@@ -140,7 +157,7 @@ namespace com.avilance.Starrybound
 
             logInfo("Starrybound Server initialization complete.");
 
-            monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
+            monitorThread = new Thread(new ThreadStart(crashMonitor));
             monitorThread.Start();
 
             ListenerThread listener = new ListenerThread();
@@ -151,8 +168,9 @@ namespace com.avilance.Starrybound
             sbServerThread = new Thread(new ThreadStart(sbServer.run));
             sbServerThread.Start();
 
+            Console.Title = "Starting... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
             logInfo("Starting parent Starbound server - This may take a few moments...");
-            while (serverState != ServerState.StartingProxy) 
+            while (serverState != ServerState.Ready) 
             {
                 if (serverState == ServerState.Crashed)
                 {
@@ -170,7 +188,7 @@ namespace com.avilance.Starrybound
             }
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
-            StarryboundServer.serverState = ServerState.Running;
+            serverState = ServerState.Running;
         }
 
         public static void crashMonitor()
@@ -178,7 +196,7 @@ namespace com.avilance.Starrybound
             int lastCount = -1;
             while (true)
             {
-                if (lastCount != clientCount)
+                if (lastCount != clientCount && serverState == ServerState.Running)
                     Console.Title = serverConfig.serverName + " (" + clientCount + "/" + config.maxClients + ") - Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")"; 
 
                 if (restartTime != 0)
@@ -209,14 +227,16 @@ namespace com.avilance.Starrybound
         {
             doShutdown(false);
             logInfo("Now restarting...");
-            Thread.Sleep(1500);
             Process.Start(Assembly.GetEntryAssembly().Location);
             Environment.Exit(0);
         }
 
         public static void doShutdown(bool quick)
         {
-            if (serverState == ServerState.ShutDown) return;
+            if (serverState == ServerState.DoShutdown) return;
+            serverState = ServerState.DoShutdown;
+            Console.Title = "Shutting Down... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
+            logInfo("Starting graceful shutdown...");
             try
             {
                 if (Geo != null)
@@ -224,16 +244,17 @@ namespace com.avilance.Starrybound
                     Geo.Dispose();
                 }
 
-                serverState = ServerState.ShuttingDown;
                 if (listenerThread != null) listenerThread.Abort();
 
                 if (!quick)
                 {
-                    var buffer = clients.Values;
-                    foreach (Client client in buffer)
+                    lock (clients)
                     {
-                        client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                        client.state = ClientState.Disposing;
+                        foreach (Client client in clients.Values.ToList())
+                        {
+                            client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                            client.state = ClientState.Disposing;
+                        }
                     }
 
                     while (clientCount > 0)
@@ -243,10 +264,12 @@ namespace com.avilance.Starrybound
                 }
                 else
                 {
-                    var buffer = clients.Values;
-                    foreach (Client client in buffer)
+                    lock (clients)
                     {
-                        client.forceDisconnect();
+                        foreach (Client client in clients.Values.ToList())
+                        {
+                            client.forceDisconnect();
+                        }
                     }
                 }
 
@@ -265,8 +288,7 @@ namespace com.avilance.Starrybound
                 }
                 catch (Exception) { }
 
-                serverState = ServerState.ShutDown;
-                logInfo("Graceful shutdown complete");
+                logInfo("Graceful shutdown complete.");
             }
             catch(Exception e)
             {
@@ -326,7 +348,7 @@ namespace com.avilance.Starrybound
 
             try
             {
-                using (StreamWriter w = File.AppendText(Path.Combine(StarryboundServer.SavePath, "log.txt")))
+                using (StreamWriter w = File.AppendText(Path.Combine(SavePath, "log.txt")))
                 {
                     w.WriteLine(message);
                 }                
@@ -348,7 +370,7 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage (string message) 
         {
-            var buffer = clients.Values;
+            var buffer = clients.Values.ToList();
             foreach (Client client in buffer)
             {
                 client.sendChatMessage("^#5dc4f4;" + message);
@@ -357,7 +379,7 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage(string message, string color)
         {
-            var buffer = clients.Values;
+            var buffer = clients.Values.ToList();
             foreach (Client client in buffer)
             {
                 client.sendChatMessage("^"+color+";" + message);
