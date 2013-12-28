@@ -120,15 +120,15 @@ namespace com.avilance.Starrybound
                             {
                                 if (curState == ClientState.PendingConnect && packetID != Packet.ClientConnect)
                                 {
-                                    this.client.forceDisconnect("Violated PendingConnect protocol state with " + packetID);
+                                    this.client.errorDisconnect(direction, "Violated PendingConnect protocol state with " + packetID);
                                 }
                                 else if (curState == ClientState.PendingAuthentication && packetID != Packet.HandshakeResponse)
                                 {
-                                    this.client.forceDisconnect("Violated PendingAuthentication protocol state with " + packetID);
+                                    this.client.errorDisconnect(direction, "Violated PendingAuthentication protocol state with " + packetID);
                                 }
                                 else if (curState == ClientState.PendingConnectResponse)
                                 {
-                                    this.client.forceDisconnect("Violated PendingConnectResponse protocol state with " + packetID);
+                                    this.client.errorDisconnect(direction, "Violated PendingConnectResponse protocol state with " + packetID);
                                 }
                             }
                             #endregion
@@ -346,7 +346,7 @@ namespace com.avilance.Starrybound
                                 }
                                 catch (Exception e)
                                 {
-                                    StarryboundServer.logException("[" + this.client.playerData.client + "] Failed to parse ClientContextUpdate from Server: " + e.Message);
+                                    StarryboundServer.logDebug("ClientContext", "[" + this.client.playerData.client + "] Failed to parse ClientContextUpdate from Server: " + e.Message);
                                 }
                             }
                         }

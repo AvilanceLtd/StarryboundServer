@@ -34,9 +34,8 @@ namespace com.avilance.Starrybound
             }
             else
             {
-                StarryboundServer.logFatal("Bootstrap.config file could not be detected!");
-                StarryboundServer.logFatal("Press any key to continue...");
-                Console.ReadKey(true);
+                StarryboundServer.logFatal("bootstrap.config file could not be detected!");
+                System.Threading.Thread.Sleep(5000);
                 Environment.Exit(0);
             }
         }
@@ -72,9 +71,8 @@ namespace com.avilance.Starrybound
             }
             catch (Exception)
             {
-                StarryboundServer.logFatal("Bootstrap.config file is unreadable. The server start cannot continue.");
-                StarryboundServer.logFatal("Press any key to continue...");
-                Console.ReadKey(true);
+                StarryboundServer.logFatal("bootstrap.config file is unreadable. The server start cannot continue.");
+                System.Threading.Thread.Sleep(5000);
                 Environment.Exit(0);
             }
 

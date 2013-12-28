@@ -35,29 +35,8 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            StarryboundServer.sendGlobalMessage("^#f75d5d;The server is now going down for a restart... We'll be back shortly.");
-
-            StarryboundServer.allowNewClients = false;
-
-            var buffer = StarryboundServer.clients.Values;
-            foreach (Client client in buffer)
-            {
-                client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                client.state = ClientState.Disposing;
-            }
-
-            while (StarryboundServer.clients.Count > 0)
-            {
-                // Waiting
-            }
-
-            StarryboundServer.logInfo("All connections closed -- Shutting down gracefully.");
-
-            // Saves all groups, in case they were modified while running
-            Permissions.Groups.SaveGroups();
-
+            StarryboundServer.doShutdown();
             System.Environment.Exit(0);
-
             return true;
         }
     }

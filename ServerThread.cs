@@ -28,6 +28,7 @@ namespace com.avilance.Starrybound
                     CreateNoWindow = true
                 };
                 process = Process.Start(startInfo);
+                StarryboundServer.parentProcessId = process.Id;
                 File.WriteAllText("starbound_server.pid", process.Id.ToString());
                 process.OutputDataReceived += (sender, e) => parseOutput(e.Data);
                 process.BeginOutputReadLine();
@@ -62,8 +63,7 @@ namespace com.avilance.Starrybound
                     if(protocolVersion != StarryboundServer.ProtocolVersion)
                     {
                         StarryboundServer.logFatal("Detected protcol version [" + protocolVersion + "] != [" + StarryboundServer.ProtocolVersion + "] to expected protocol version!");
-                        StarryboundServer.logFatal("Press any key to continue...");
-                        Console.ReadKey(true);
+                        System.Threading.Thread.Sleep(5000);
                         Environment.Exit(0);
                     }
                 }

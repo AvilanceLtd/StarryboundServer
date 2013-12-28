@@ -36,6 +36,7 @@ namespace com.avilance.Starrybound
         public static readonly int ProtocolVersion = 628;
         public static StarboundVersion starboundVersion = new StarboundVersion();
         public static GeoIPCountry Geo;
+        public static int parentProcessId;
         
         // Dictionary<string, ClientThread>
         // string           Username        Unique username for client, MUST be lowercase
@@ -134,8 +135,7 @@ namespace com.avilance.Starrybound
             if(config.proxyPort == config.serverPort)
             {
                 logFatal("You cannot have the serverPort and proxyPort on the same port!");
-                logFatal("Press any key to continue...");
-                Console.ReadKey(true);
+                System.Threading.Thread.Sleep(5000);
                 Environment.Exit(0);
             }
 #endif
@@ -158,15 +158,13 @@ namespace com.avilance.Starrybound
                 {
                     try
                     {
-                        int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
-                        Process proc = Process.GetProcessById(processId);
+                        Process proc = Process.GetProcessById(parentProcessId);
                         proc.Kill();
                         File.Delete("starbound_server.pid");
                     }
                     catch (Exception) { }
                     logFatal("Parent Starbound Server failed to start!");
-                    logFatal("Press any key to continue...");
-                    Console.ReadKey(true);
+                    System.Threading.Thread.Sleep(5000);
                     Environment.Exit(0);
                 }
             }
@@ -244,8 +242,7 @@ namespace com.avilance.Starrybound
 
                 try
                 {
-                    int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
-                    Process proc = Process.GetProcessById(processId);
+                    Process proc = Process.GetProcessById(parentProcessId);
                     proc.Kill();
                     File.Delete("starbound_server.pid");
                 }
@@ -257,9 +254,8 @@ namespace com.avilance.Starrybound
             {
                 try
                 {
-                    logInfo("Graceful shutdown failed: " + e.ToString());
-                    int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
-                    Process proc = Process.GetProcessById(processId);
+                    logException("Graceful shutdown failed: " + e.ToString());
+                    Process proc = Process.GetProcessById(parentProcessId);
                     proc.Kill();
                     File.Delete("starbound_server.pid");
                 }

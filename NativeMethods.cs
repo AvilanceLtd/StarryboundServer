@@ -12,8 +12,7 @@ namespace com.avilance.Starrybound
     {
         internal static bool ConsoleCtrlCheck(CtrlTypes ctrlType)
         {
-            int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
-            Process proc = Process.GetProcessById(processId);
+            Process proc = Process.GetProcessById(StarryboundServer.parentProcessId);
             proc.Kill();
             File.Delete("starbound_server.pid");
             return true;

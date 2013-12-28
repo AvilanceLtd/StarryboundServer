@@ -107,8 +107,7 @@ namespace com.avilance.Starrybound.Permissions
             if (String.IsNullOrWhiteSpace(defaultGroup))
             {
                 StarryboundServer.logFatal("Default user group flag (isDefault) is not set for any groups - Please set this in the groups.json!");
-                StarryboundServer.logFatal("Press any key to continue...");
-                Console.ReadKey(true);
+                System.Threading.Thread.Sleep(5000);
                 Environment.Exit(0);
             }
 

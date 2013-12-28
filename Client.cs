@@ -91,7 +91,7 @@ namespace com.avilance.Starrybound
                 packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                 this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
                 rejectPreConnected("Starrybound server was unable to connect to the parent server.");
-                StarryboundServer.logException("ClientThread Exception: " + e.Message);
+                StarryboundServer.logException("ClientThread Exception: " + e.ToString());
             }
         }
 

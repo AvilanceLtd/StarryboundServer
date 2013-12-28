@@ -42,12 +42,12 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                StarryboundServer.logException("ListenerThread: " + e.ToString());
+                StarryboundServer.logException("ListenerThread Exception: " + e.ToString());
             }
 
             serversocket.Stop();
-            StarryboundServer.logException("ListenerThread has failed - No new connections will be possible.");
-            Console.ReadLine();
+            StarryboundServer.logFatal("ListenerThread has failed - No new connections will be possible.");
+            StarryboundServer.serverState = ServerState.Crashed;
         }
     }
 }

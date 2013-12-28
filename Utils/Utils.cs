@@ -102,7 +102,7 @@ namespace com.avilance.Starrybound.Util
             }
             catch(Exception e)
             {
-                StarryboundServer.logException("findGlobalCoords Exception: " + e.ToString());
+                StarryboundServer.logDebug("findGlobalCoords", "Exception: " + e.ToString());
                 return null;
             }
         }
