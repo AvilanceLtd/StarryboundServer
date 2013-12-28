@@ -18,6 +18,7 @@ using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using com.avilance.Starrybound.Util;
+using System.Threading;
 
 namespace com.avilance.Starrybound
 {
@@ -34,9 +35,9 @@ namespace com.avilance.Starrybound
             }
             else
             {
-                StarryboundServer.logFatal("bootstrap.config file could not be detected!");
-                System.Threading.Thread.Sleep(5000);
-                Environment.Exit(0);
+                Console.WriteLine("[FATAL ERROR] bootstrap.config file could not be detected!");
+                Thread.Sleep(5000);
+                Environment.Exit(7);
             }
         }
     }
@@ -55,7 +56,6 @@ namespace com.avilance.Starrybound
             using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 BootstrapFile file = Read(fs);
-                StarryboundServer.logInfo("Bootstrap config loaded successfully.");
                 return file;
             }
         }
@@ -72,8 +72,8 @@ namespace com.avilance.Starrybound
             catch (Exception)
             {
                 StarryboundServer.logFatal("bootstrap.config file is unreadable. The server start cannot continue.");
-                System.Threading.Thread.Sleep(5000);
-                Environment.Exit(0);
+                Thread.Sleep(5000);
+                Environment.Exit(6);
             }
 
             return null;

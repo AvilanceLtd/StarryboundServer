@@ -35,7 +35,7 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            StarryboundServer.doShutdown();
+            StarryboundServer.doShutdown(false);
             System.Environment.Exit(0);
             return true;
         }

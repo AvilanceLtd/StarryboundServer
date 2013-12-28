@@ -17,6 +17,15 @@ namespace com.avilance.Starrybound
 
         public void run()
         {
+            try
+            {
+                int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                Process proc = Process.GetProcessById(processId);
+                proc.Kill();
+                File.Delete("starbound_server.pid");
+            }
+            catch (Exception) { }
+
             var executableName = "starbound_server" + (StarryboundServer.IsMono ? "" : ".exe");
             try
             {
@@ -35,6 +44,7 @@ namespace com.avilance.Starrybound
                 process.WaitForExit();
                 StarryboundServer.serverState = ServerState.Crashed;
             }
+            catch (ThreadAbortException) { }
             catch (Exception e)
             {
                 StarryboundServer.logException("Unable to start starbound_server.exe, is this file in the same directory? " + e.ToString());
@@ -63,8 +73,8 @@ namespace com.avilance.Starrybound
                     if(protocolVersion != StarryboundServer.ProtocolVersion)
                     {
                         StarryboundServer.logFatal("Detected protcol version [" + protocolVersion + "] != [" + StarryboundServer.ProtocolVersion + "] to expected protocol version!");
-                        System.Threading.Thread.Sleep(5000);
-                        Environment.Exit(0);
+                        Thread.Sleep(5000);
+                        Environment.Exit(4);
                     }
                 }
 

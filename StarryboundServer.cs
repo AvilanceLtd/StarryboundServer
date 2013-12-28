@@ -12,6 +12,7 @@
 
 using com.avilance.Starrybound.Packets;
 using com.avilance.Starrybound.Util;
+using com.avilance.Starrybound.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,6 +66,7 @@ namespace com.avilance.Starrybound
         public static string rulesData = "";
 
         public static List<byte[]> sectors = new List<byte[]>();
+        public static WorldCoordinate spawnPlanet;
 
         public static bool IsMono
         {
@@ -73,7 +75,8 @@ namespace com.avilance.Starrybound
 
         private static void ProcessExit(object sender, EventArgs e)
         {
-            doShutdown();
+            doShutdown(true);
+            Environment.Exit(0);
         }
 
         static void Main(string[] args)
@@ -81,48 +84,34 @@ namespace com.avilance.Starrybound
 #if DEBUG
             StarryboundServer.config.logLevel = LogType.Debug;
 #endif
+            startTime = Utils.getTimestamp();
+            serverState = ServerState.Starting;
+            Console.Title = "Loading... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
+
             if (IsMono)
                 Environment.CurrentDirectory = Path.GetDirectoryName(typeof(StarryboundServer).Assembly.Location);
 
-            try
-            {
-                int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
-                Process proc = Process.GetProcessById(processId);
-                proc.Kill();
-                File.Delete("starbound_server.pid");
-            }
-            catch (Exception) { }
-
-            startTime = Utils.getTimestamp();
-
-            serverState = ServerState.Starting;
-
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(ProcessExit);
-            //if (!IsMono)
-            //    NativeMethods.SetConsoleCtrlHandler(new NativeMethods.HandlerRoutine(NativeMethods.ConsoleCtrlCheck), true);
-
-            monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
-            monitorThread.Start();
+            if (!IsMono)
+                NativeMethods.SetConsoleCtrlHandler(new NativeMethods.HandlerRoutine(NativeMethods.ConsoleCtrlCheck), true);
 
             BootstrapConfig.SetupConfig();
-            Config.SetupConfig();
-            ServerConfig.SetupConfig();
-            Groups.SetupGroups();
-            Users.SetupUsers();
-
-            var geoippath = Path.Combine(SavePath, "GeoIP.dat");
-            if (config.enableGeoIP && File.Exists(geoippath))
-                Geo = new GeoIPCountry(geoippath);
 
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
 
             logInfo("##############################################");
-            logInfo("####   Avilance Ltd. StarryBound Server   ####");
+            logInfo("####   Avilance Ltd. Starrybound Server   ####");
             logInfo("####   Copyright (c) Avilance Ltd. 2013   ####");
             logInfo("####       Licensed under the GPLv3       ####");
             logInfo("##############################################");
             logInfo("Version: " + VersionNum + " (" + ProtocolVersion + ")");
+            logInfo("Loading Starrybound Server...");
+
+            Config.SetupConfig();
+            ServerConfig.SetupConfig();
+            Groups.SetupGroups();
+            Users.SetupUsers();
 #if !DEBUG
             if (config.logLevel == LogType.Debug)
             {
@@ -135,23 +124,34 @@ namespace com.avilance.Starrybound
             if(config.proxyPort == config.serverPort)
             {
                 logFatal("You cannot have the serverPort and proxyPort on the same port!");
-                System.Threading.Thread.Sleep(5000);
-                Environment.Exit(0);
+                Thread.Sleep(5000);
+                Environment.Exit(3);
             }
 #endif
-            //Precompute for global position search
+            var geoippath = Path.Combine(SavePath, "GeoIP.dat");
+            if (config.enableGeoIP && File.Exists(geoippath))
+                Geo = new GeoIPCountry(geoippath);
+
             foreach(string sector in config.sectors)
             {
                 sectors.Add(Encoding.UTF8.GetBytes(sector));
             }
-
             Bans.ProcessBans();
+
+            logInfo("Starrybound Server initialization complete.");
+
+            monitorThread = new Thread(new ThreadStart(StarryboundServer.crashMonitor));
+            monitorThread.Start();
+
+            ListenerThread listener = new ListenerThread();
+            listenerThread = new Thread(new ThreadStart(listener.run));
+            listenerThread.Start();
 #if !NOSERVER
             sbServer = new ServerThread();
             sbServerThread = new Thread(new ThreadStart(sbServer.run));
             sbServerThread.Start();
 
-            logInfo("Starting Starbound Server - This may take a few moments...");
+            logInfo("Starting parent Starbound server - This may take a few moments...");
             while (serverState != ServerState.StartingProxy) 
             {
                 if (serverState == ServerState.Crashed)
@@ -164,52 +164,59 @@ namespace com.avilance.Starrybound
                     }
                     catch (Exception) { }
                     logFatal("Parent Starbound Server failed to start!");
-                    System.Threading.Thread.Sleep(5000);
-                    Environment.Exit(0);
+                    Thread.Sleep(5000);
+                    Environment.Exit(2);
                 }
             }
 #endif
-            logInfo("Starbound server is ready. Starting proxy wrapper.");
-
-            ListenerThread listener = new ListenerThread();
-
-            listenerThread = new Thread(new ThreadStart(listener.run));
-            listenerThread.Start();
+            logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
+            StarryboundServer.serverState = ServerState.Running;
         }
 
         public static void crashMonitor()
         {
+            int lastCount = -1;
             while (true)
             {
+                if (lastCount != clientCount)
+                    Console.Title = serverConfig.serverName + " (" + clientCount + "/" + config.maxClients + ") - Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")"; 
+
                 if (restartTime != 0)
                 {
-                    if (restartTime < Utils.getTimestamp()) doRestart();
+                    int remaining = restartTime - Utils.getTimestamp();
+                    if (remaining < 0) 
+                        doRestart();
+                    else if ((remaining % 5 == 0 || remaining < 5) && remaining != 0)
+                        sendGlobalMessage("^#f75d5d;The server will restart in " + remaining + " seconds.");
                 }
 
                 if (serverState == ServerState.Crashed)
                 {
                     logFatal("The server has encountered a fatal error and cannot continue. Restarting in 10 seconds.");
-                    System.Threading.Thread.Sleep(10000);
+                    Thread.Sleep(10000);
                     doRestart();
                     break;
                 }
 
-                System.Threading.Thread.Sleep(2000);
+                if (restartTime != 0)
+                    Thread.Sleep(1000);
+                else
+                    Thread.Sleep(3000);
             }
         }
 
         public static void doRestart()
         {
-            doShutdown();
+            doShutdown(false);
             logInfo("Now restarting...");
-            System.Threading.Thread.Sleep(3000);
-            Process.Start(Environment.CurrentDirectory + Path.DirectorySeparatorChar + Assembly.GetEntryAssembly().Location);
             Thread.Sleep(1500);
-            Environment.Exit(1);
+            Process.Start(Assembly.GetEntryAssembly().Location);
+            Environment.Exit(0);
         }
 
-        public static void doShutdown()
+        public static void doShutdown(bool quick)
         {
+            if (serverState == ServerState.ShutDown) return;
             try
             {
                 if (Geo != null)
@@ -218,25 +225,35 @@ namespace com.avilance.Starrybound
                 }
 
                 serverState = ServerState.ShuttingDown;
-
-                var buffer = clients.Values;
-                foreach (Client client in buffer)
-                {
-                    client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                    client.state = ClientState.Disposing;
-                }
-
-                while (clients.Count > 0)
-                {
-                    // Waiting
-                }
-
                 if (listenerThread != null) listenerThread.Abort();
+
+                if (!quick)
+                {
+                    var buffer = clients.Values;
+                    foreach (Client client in buffer)
+                    {
+                        client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                        client.state = ClientState.Disposing;
+                    }
+
+                    while (clientCount > 0)
+                    {
+                        // Waiting
+                    }
+                }
+                else
+                {
+                    var buffer = clients.Values;
+                    foreach (Client client in buffer)
+                    {
+                        client.forceDisconnect();
+                    }
+                }
 
                 try { sbServer.process.CloseMainWindow(); }
                 catch (Exception) { }
 
-                System.Threading.Thread.Sleep(500);
+                Thread.Sleep(500);
 
                 sbServerThread.Abort();
 
@@ -248,6 +265,7 @@ namespace com.avilance.Starrybound
                 }
                 catch (Exception) { }
 
+                serverState = ServerState.ShutDown;
                 logInfo("Graceful shutdown complete");
             }
             catch(Exception e)

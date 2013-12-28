@@ -30,7 +30,6 @@ namespace com.avilance.Starrybound
 
             serversocket.Start();
             StarryboundServer.logInfo("Proxy server has been started on " + localAdd.ToString() + ":" + StarryboundServer.config.proxyPort);
-            StarryboundServer.serverState = ServerState.Running;
 
             try
             {

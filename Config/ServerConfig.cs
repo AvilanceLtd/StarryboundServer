@@ -18,6 +18,7 @@ using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using com.avilance.Starrybound.Util;
+using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound
 {
@@ -43,6 +44,10 @@ namespace com.avilance.Starrybound
             StarryboundServer.privatePassword = Utils.GenerateSecureSalt();
             StarryboundServer.serverConfig.serverPasswords = new string[] { StarryboundServer.privatePassword };
             StarryboundServer.serverConfig.maxPlayers = StarryboundServer.config.maxClients + 10;
+            string[] spawnPlanet = new string[6];
+            spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':');
+            if (spawnPlanet[5] == null) spawnPlanet[5] = "0";
+            StarryboundServer.spawnPlanet = new WorldCoordinate(spawnPlanet[0], Convert.ToInt32(spawnPlanet[1]), Convert.ToInt32(spawnPlanet[2]), Convert.ToInt32(spawnPlanet[3]), Convert.ToInt32(spawnPlanet[4]), Convert.ToInt32(spawnPlanet[5]));
             StarryboundServer.serverConfig.Write(ConfigPath);
         }
     }

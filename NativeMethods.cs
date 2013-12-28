@@ -10,11 +10,9 @@ namespace com.avilance.Starrybound
 {
     internal static class NativeMethods
     {
-        internal static bool ConsoleCtrlCheck(CtrlTypes ctrlType)
+        internal static bool ConsoleCtrlCheck()
         {
-            Process proc = Process.GetProcessById(StarryboundServer.parentProcessId);
-            proc.Kill();
-            File.Delete("starbound_server.pid");
+            StarryboundServer.doShutdown(true);
             return true;
         }
 
@@ -27,18 +25,7 @@ namespace com.avilance.Starrybound
 
         // A delegate type to be used as the handler routine
         // for SetConsoleCtrlHandler.
-        internal delegate bool HandlerRoutine(CtrlTypes CtrlType);
-
-        // An enumerated type for the control messages
-        // sent to the handler routine.
-        internal enum CtrlTypes
-        {
-            CTRL_C_EVENT = 0,
-            CTRL_BREAK_EVENT,
-            CTRL_CLOSE_EVENT,
-            CTRL_LOGOFF_EVENT = 5,
-            CTRL_SHUTDOWN_EVENT
-        }
+        internal delegate bool HandlerRoutine();
 
         #endregion
     }

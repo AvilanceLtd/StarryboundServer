@@ -33,7 +33,7 @@ namespace com.avilance.Starrybound.Commands
         {
             string list = "";
 
-            int noOfUsers = StarryboundServer.clients.Count;
+            int noOfUsers = StarryboundServer.clientCount;
             int i = 0;
 
             var buffer = StarryboundServer.clients.Keys;

@@ -52,7 +52,7 @@ namespace com.avilance.Starrybound.Packets
 
             if(!success)
             {
-                this.client.rejectPreConnected("Rejected by parent server: " + rejectReason);
+                this.client.rejectPreConnected("Connection Failed: Rejected by parent server: " + rejectReason);
                 return true;
             }
 

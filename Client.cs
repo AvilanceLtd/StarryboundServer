@@ -61,6 +61,17 @@ namespace com.avilance.Starrybound
 
                 StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
+                if(StarryboundServer.serverState != ServerState.Running)
+                {
+                    MemoryStream packet = new MemoryStream();
+                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                    this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+
+                    rejectPreConnected("Connection Failed: The server is not ready yet.");
+                    return;
+                }
+
                 sSocket = new TcpClient();
                 sSocket.Connect(IPAddress.Loopback, StarryboundServer.config.serverPort);
 
@@ -74,7 +85,7 @@ namespace com.avilance.Starrybound
                     packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
-                    rejectPreConnected("Starrybound server was unable to connect to the parent server.");
+                    rejectPreConnected("Connection Failed: Unable to connect to the parent server.");
                     return;
                 }
 
@@ -90,7 +101,7 @@ namespace com.avilance.Starrybound
                 BinaryWriter packetWrite = new BinaryWriter(packet);
                 packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                 this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-                rejectPreConnected("Starrybound server was unable to connect to the parent server.");
+                rejectPreConnected("Connection Failed: A internal server error occurred (1)");
                 StarryboundServer.logException("ClientThread Exception: " + e.ToString());
             }
         }

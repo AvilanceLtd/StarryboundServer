@@ -248,6 +248,7 @@ namespace com.avilance.Starrybound.Util
         Running = 2,
         ShuttingDown = 3,
         Crashed = 4,
+        ShutDown = 5,
     }
 
     public enum WarpType

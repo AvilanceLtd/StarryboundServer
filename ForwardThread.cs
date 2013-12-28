@@ -120,15 +120,18 @@ namespace com.avilance.Starrybound
                             {
                                 if (curState == ClientState.PendingConnect && packetID != Packet.ClientConnect)
                                 {
-                                    this.client.errorDisconnect(direction, "Violated PendingConnect protocol state with " + packetID);
+                                    this.client.rejectPreConnected("Violated PendingConnect protocol state with " + packetID);
+                                    return;
                                 }
                                 else if (curState == ClientState.PendingAuthentication && packetID != Packet.HandshakeResponse)
                                 {
-                                    this.client.errorDisconnect(direction, "Violated PendingAuthentication protocol state with " + packetID);
+                                    this.client.rejectPreConnected("Violated PendingAuthentication protocol state with " + packetID);
+                                    return;
                                 }
                                 else if (curState == ClientState.PendingConnectResponse)
                                 {
-                                    this.client.errorDisconnect(direction, "Violated PendingConnectResponse protocol state with " + packetID);
+                                    this.client.rejectPreConnected("Violated PendingConnectResponse protocol state with " + packetID);
+                                    return;
                                 }
                             }
                             #endregion
@@ -159,6 +162,7 @@ namespace com.avilance.Starrybound
                                 if (passwordHash != verifyHash)
                                 {
                                     this.client.rejectPreConnected("Your password was incorrect.");
+                                    return;
                                 }
 
                                 this.client.state = ClientState.PendingConnectResponse;
@@ -174,19 +178,17 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
-                                if (!this.client.playerData.canBuild) continue;
+                                if (!this.client.playerData.canBuild) 
+                                    returnData = false;
                                 if (this.client.playerData.loc != null)
                                 {
-                                    string planetCheck = this.client.playerData.loc.ToString();
-                                    string spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate;
-
-                                    if (StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':').Length == 5) spawnPlanet = spawnPlanet + ":0";
-
-                                    if ((planetCheck == spawnPlanet) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                    if ((this.client.playerData.loc == StarryboundServer.spawnPlanet) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
                                     {
-                                        continue;
+                                        returnData = false;
                                     }
                                 }
+                                else
+                                    returnData = false;
                             }
                         }
                         #endregion
@@ -207,8 +209,8 @@ namespace com.avilance.Starrybound
                                     packetWrite.WriteBE(protocolVersion);
                                     this.client.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
-                                    this.client.rejectPreConnected("Starrybound Server was unable to handle the parent server protocol version.");
-                                    returnData = false;
+                                    this.client.rejectPreConnected("Connection Failed: Unable to handle parent server protocol version.");
+                                    return;
                                 }
                             }
                             else if (packetID == Packet.HandshakeChallenge)
@@ -372,6 +374,7 @@ namespace com.avilance.Starrybound
                         if ((int)returnData == -1)
                         {
                             this.client.forceDisconnect("Command processor requested to drop client");
+                            return;
                         }
                     }
 
@@ -404,7 +407,7 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                this.client.errorDisconnect(direction, "ForwardThread Exception: " + e.ToString());
+                this.client.errorDisconnect(direction, "ForwardThread Exception: " + e.Message);
             }
         }
     }

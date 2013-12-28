@@ -52,7 +52,7 @@ namespace com.avilance.Starrybound.Packets
             {
                 if(sAssetDigest != StarryboundServer.config.assetDigest)
                 {
-                    this.client.rejectPreConnected("Please reinstall Starbound to connect to this server.");
+                    this.client.rejectPreConnected("Please reinstall Starbound without mods to connect to this server.");
                     return false;
                 }
             }
@@ -119,13 +119,13 @@ namespace com.avilance.Starrybound.Packets
 
                 if (userPData.name != pData.name)
                 {
-                    this.client.rejectPreConnected("Your character data is corrupt. Unable to connect to server.");
+                    this.client.rejectPreConnected("Connection Failed: Your server side user data is corrupt.");
                     return false;
                 }
             }
             catch (Exception)
             {
-                this.client.rejectPreConnected("The server was unable to accept your connection at this time.\nPlease try again later.");
+                this.client.rejectPreConnected("Connection Failed: A internal server error occurred (2)");
                 return false;
             }
 
