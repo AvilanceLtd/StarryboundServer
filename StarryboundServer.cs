@@ -227,7 +227,7 @@ namespace com.avilance.Starrybound
         {
             doShutdown(false);
             logInfo("Now restarting...");
-            Process.Start(Assembly.GetEntryAssembly().Location);
+            Process.Start(AppDomain.CurrentDomain.FriendlyName);
             Environment.Exit(0);
         }
 
