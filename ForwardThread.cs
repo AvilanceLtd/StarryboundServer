@@ -188,10 +188,6 @@ namespace com.avilance.Starrybound
                                         {
                                             returnData = false;
                                         }
-                                        else
-                                        {
-                                            StarryboundServer.logDebug("ForwardThread::SpawnProtection", "Player build allowed: " + this.client.playerData.loc + " != " + StarryboundServer.spawnPlanet + "; Has Permission: " + this.client.playerData.group.hasPermission("admin.spawnbuild").ToString() + "; inShip: " + this.client.playerData.inPlayerShip.ToString());
-                                        }
                                     }
                                     else
                                         returnData = false;
@@ -237,7 +233,16 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.ConnectResponse)
                             {
-                                while (this.client.state != ClientState.PendingConnectResponse) { } //TODO: needs timeout
+                                int startTime = Utils.getTimestamp();
+                                while (true) 
+                                {
+                                    if (this.client.state == ClientState.PendingConnectResponse) break;
+                                    if (Utils.getTimestamp() > startTime + 3)
+                                    {
+                                        this.client.rejectPreConnected("Connection Failed: Client did not respond with handshake.");
+                                        return;
+                                    }
+                                }
                                 returnData = new Packet2ConnectResponse(this.client, packetData, this.direction).onReceive();
                             }
                             else if (packetID == Packet.WorldStart)
@@ -393,18 +398,21 @@ namespace com.avilance.Starrybound
 
                     #region Forward Packet
                     //Write data to dest
-                    this.outgoing.WriteVarUInt32((uint)packetID);
-                    if (compressed)
+                    lock (this.outgoing)
                     {
-                        this.outgoing.WriteVarInt32(-packetSize);
-                        this.outgoing.Write(dataBuffer, 0, packetSize);
+                        this.outgoing.WriteVarUInt32((uint)packetID);
+                        if (compressed)
+                        {
+                            this.outgoing.WriteVarInt32(-packetSize);
+                            this.outgoing.Write(dataBuffer, 0, packetSize);
+                        }
+                        else
+                        {
+                            this.outgoing.WriteVarInt32(packetSize);
+                            this.outgoing.Write(dataBuffer, 0, packetSize);
+                        }
+                        this.outgoing.Flush();
                     }
-                    else
-                    {
-                        this.outgoing.WriteVarInt32(packetSize);
-                        this.outgoing.Write(dataBuffer, 0, packetSize);
-                    }
-                    this.outgoing.Flush();
                     #endregion
 
                     //If disconnect was forwarded to client, lets disconnect.
