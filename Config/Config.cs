@@ -56,11 +56,6 @@ namespace com.avilance.Starrybound
 
         public static void SetupConfig()
         {
-            if (!Directory.Exists(StarryboundServer.SavePath))
-            {
-                Directory.CreateDirectory(StarryboundServer.SavePath);
-            }
-
             CreateIfNot(RulesPath, "1) Respect all players 2) No griefing/hacking 3) Have fun!");
             CreateIfNot(MotdPath, "This server is running Starrybound Server v%versionNum%. Type /help for a list of commands. There are currently %players% player(s) online.");
 

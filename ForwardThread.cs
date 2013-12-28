@@ -193,6 +193,140 @@ namespace com.avilance.Starrybound
                                         returnData = false;
                                 }
                             }
+                            else if (packetID == Packet.EntityCreate)
+                            {
+                                while(true)
+                                {
+                                    EntityType type = (EntityType)packetData.Read();
+                                    if(type == EntityType.EOF) break;
+                                    byte[] entityData = packetData.ReadStarByteArray();
+                                    int entityId = packetData.ReadVarInt32();
+                                    if(type == EntityType.Projectile)
+                                    {
+                                        BinaryReader entity = new BinaryReader(new MemoryStream(entityData));
+                                        string projectileKey = entity.ReadStarString();
+                                        object projParams = entity.ReadStarVariant();
+                                        /*
+                                         * string ProjectileKey
+                                         * Variant ProjectileParams
+                                         * Star::StatusEffectSource
+                                         * [
+                                         * VLQU (size)
+                                         * {
+                                         * string
+                                         * Variant
+                                         * float
+                                         * }
+                                         * ]
+                                         * float x2 (MovementController)
+                                         * float x2 (MovementController)
+                                         * VLQI (Source Entity)
+                                         * bool (Source Entity)
+                                         * float (???)
+                                         * float x2 (???)
+                                         * Star::EntityDamageTeam
+                                         * [
+                                         * uchar
+                                         * uchar
+                                         * ]
+                                         */
+                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "]");
+                                    }
+                                    else if(type == EntityType.Player)
+                                    {
+                                        /*
+                                         * UUID
+                                         * Star::HumanoidIdentity
+                                         * [
+                                         * string
+                                         * string
+                                         * uchar
+                                         * string x12
+                                         * float
+                                         * float
+                                         * float
+                                         * float
+                                         * { ??? (4)
+                                         * uchar
+                                         * }
+                                         * ]
+                                         * Star::StatusEntityParameters
+                                         * [
+                                         * bool
+                                         * float x16
+                                         * string
+                                         * string
+                                         * ]
+                                         * Star::Status
+                                         * [
+                                         * float x2 x5
+                                         * bool
+                                         * float x3
+                                         * Star::StringList?? x2
+                                         * [
+                                         * VLQU
+                                         * {
+                                         * string
+                                         * }
+                                         * ]
+                                         * ]
+                                         * string
+                                         * double
+                                         * Star::PlayerInventory
+                                         * [
+                                         * StarByteArray
+                                         * [
+                                         * ulong
+                                         * Star::ItemBag x3
+                                         * [
+                                         * VLQU
+                                         * {
+                                         * Star::ItemDatabase::readItem []
+                                         * }
+                                         * ]
+                                         * VLQU (size)
+                                         * {
+                                         * Star::ItemDatabase::readItem []
+                                         * }
+                                         * VLQU (size)
+                                         * {
+                                         * Star::ItemDatabase::readItem []
+                                         * }
+                                         * VLQU (size)
+                                         * {
+                                         * Star::ItemDatabase::readItem []
+                                         * }
+                                         * Star::ItemDatabase::readItem
+                                         * [
+                                         * Star::ItemDescriptor
+                                         * [
+                                         * string
+                                         * VLQS
+                                         * Variant
+                                         * ]
+                                         * ]
+                                         * uchar
+                                         * VLQS
+                                         * uchar
+                                         * VLQS
+                                         * ]
+                                         * ]
+                                         */
+                                    }
+                                    else if (type != EntityType.Effect)
+                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
+                                }
+                            }
+                            else if (packetID == Packet.SpawnEntity)
+                            {
+                                while(true)
+                                {
+                                    int type = packetData.Read();
+                                    if (type == -1) break;
+                                    byte[] entityData = packetData.ReadStarByteArray();
+                                    StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "]");
+                                }
+                            }
                         }
                         #endregion
                         else

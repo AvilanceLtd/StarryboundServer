@@ -261,6 +261,7 @@ namespace com.avilance.Starrybound.Util
 
     public enum EntityType
     {
+        EOF = -1, //Not actually valid
         Player = 1,
         Monster = 2,
         Object = 3,

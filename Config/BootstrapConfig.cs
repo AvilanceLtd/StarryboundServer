@@ -39,6 +39,10 @@ namespace com.avilance.Starrybound
                 Thread.Sleep(5000);
                 Environment.Exit(7);
             }
+            if (!Directory.Exists(StarryboundServer.SavePath))
+            {
+                Directory.CreateDirectory(StarryboundServer.SavePath);
+            }
         }
     }
 
