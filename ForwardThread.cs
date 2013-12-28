@@ -54,7 +54,7 @@ namespace com.avilance.Starrybound
                     {
                         if (this.client.kickTargetTimestamp < Utils.getTimestamp())
                         {
-                            this.client.forceDisconnect("Kicked from server");
+                            this.client.forceDisconnect();
                             return;
                         }
                         continue;
@@ -421,7 +421,7 @@ namespace com.avilance.Starrybound
                 {
                     if(e.InnerException is System.Net.Sockets.SocketException)
                     {
-                        this.client.errorDisconnect(direction, e.Message);
+                        this.client.errorDisconnect(direction, e.InnerException.Message);
                         return;
                     }
 

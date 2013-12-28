@@ -240,35 +240,38 @@ namespace com.avilance.Starrybound
             try
             {
                 if (Geo != null)
-                {
                     Geo.Dispose();
-                }
 
-                if (listenerThread != null) listenerThread.Abort();
+                if (listenerThread != null) 
+                    listenerThread.Abort();
 
-                if (!quick)
+                if (clients != null)
                 {
-                    lock (clients)
+
+                    if (!quick)
                     {
-                        foreach (Client client in clients.Values.ToList())
+                        lock (clients)
                         {
-                            client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                            client.state = ClientState.Disposing;
+                            foreach (Client client in clients.Values.ToList())
+                            {
+                                client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                                client.state = ClientState.Disposing;
+                            }
+                        }
+
+                        while (clientCount > 0)
+                        {
+                            // Waiting
                         }
                     }
-
-                    while (clientCount > 0)
+                    else
                     {
-                        // Waiting
-                    }
-                }
-                else
-                {
-                    lock (clients)
-                    {
-                        foreach (Client client in clients.Values.ToList())
+                        lock (clients)
                         {
-                            client.forceDisconnect();
+                            foreach (Client client in clients.Values.ToList())
+                            {
+                                client.forceDisconnect();
+                            }
                         }
                     }
                 }
@@ -278,7 +281,8 @@ namespace com.avilance.Starrybound
 
                 Thread.Sleep(500);
 
-                sbServerThread.Abort();
+                try { sbServerThread.Abort(); }
+                catch (Exception) { }
 
                 try
                 {

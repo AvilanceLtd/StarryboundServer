@@ -213,6 +213,7 @@ namespace com.avilance.Starrybound
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             sendChatMessage("^#f75d5d;" + reason);
             kickTargetTimestamp = Utils.getTimestamp() + 7;
+            StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + reason);
         }
 
         public void delayDisconnect(string reason, string message)
@@ -221,6 +222,7 @@ namespace com.avilance.Starrybound
             sendChatMessage("^#f75d5d;" + reason);
             kickTargetTimestamp = Utils.getTimestamp() + 7;
             StarryboundServer.sendGlobalMessage("^#f75d5d;" + message);
+            StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + message);
         }
 
         public void rejectPreConnected(string reason)
