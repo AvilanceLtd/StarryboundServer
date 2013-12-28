@@ -46,33 +46,7 @@ namespace com.avilance.Starrybound.Packets
             this.client.playerData.name = name;
             this.client.playerData.account = account;
 
-            string sAssetDigest = Utils.ByteArrayToString(assetDigest);
-            StarryboundServer.logDebug("AssetDigest", "[" + this.client.playerData.client + "] [" + sAssetDigest + "]");
-            if(StarryboundServer.config.useAssetDigest)
-            {
-                if(sAssetDigest != StarryboundServer.config.assetDigest)
-                {
-                    this.client.rejectPreConnected("Please reinstall Starbound without mods to connect to this server.");
-                    return false;
-                }
-            }
-
             User userPData = Users.GetUser(name, this.client.playerData.uuid);
-
-            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
-
-            if (reasonExpiry.Length == 2)
-            {
-                this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
-                return false;
-            }
-
-            if (StarryboundServer.clients.ContainsKey(name))
-            {
-                this.client.rejectPreConnected("This username is already in use.");
-                return false;
-            }
-
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
                 if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
@@ -80,6 +54,30 @@ namespace com.avilance.Starrybound.Packets
                     this.client.rejectPreConnected("The server is full. Please try again later.");
                     return false;
                 }
+            }
+
+            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
+            if (reasonExpiry.Length == 2)
+            {
+                this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
+                return false;
+            }
+
+            string sAssetDigest = Utils.ByteArrayToString(assetDigest);
+            StarryboundServer.logDebug("AssetDigest", "[" + this.client.playerData.client + "] [" + sAssetDigest + "]");
+            if (StarryboundServer.config.useAssetDigest)
+            {
+                if (sAssetDigest != StarryboundServer.config.assetDigest)
+                {
+                    this.client.rejectPreConnected("Please reinstall Starbound without mods to connect to this server.");
+                    return false;
+                }
+            }
+
+            if (StarryboundServer.clients.ContainsKey(name))
+            {
+                this.client.rejectPreConnected("This username is already in use.");
+                return false;
             }
 
             if (String.IsNullOrWhiteSpace(this.client.playerData.name))
@@ -105,6 +103,12 @@ namespace com.avilance.Starrybound.Packets
                     this.client.rejectPreConnected("You may not have special characters in your name on this server.");
                     return false;
                 }
+            }
+
+            if(!String.IsNullOrEmpty(account))
+            {
+                this.client.rejectPreConnected("You need clear the server account field of all text.");
+                return false;
             }
 
             try

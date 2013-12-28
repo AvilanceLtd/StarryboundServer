@@ -52,9 +52,9 @@ namespace com.avilance.Starrybound
         static Thread listenerThread;
         static Thread monitorThread;
 
-        public static bool allowNewClients = true;
         public static string privatePassword;
 
+        public static int failedConnections;
         public static ServerState serverState;
 
         public static int startTime;
@@ -259,9 +259,11 @@ namespace com.avilance.Starrybound
                             }
                         }
 
+                        int startWait = Utils.getTimestamp();
                         while (clientCount > 0)
                         {
-                            // Waiting
+                            if (Utils.getTimestamp() > startWait + 7) break;
+                            Thread.Sleep(500);
                         }
                     }
                     else

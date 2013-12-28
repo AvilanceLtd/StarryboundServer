@@ -178,21 +178,24 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
-                                if (!this.client.playerData.canBuild) 
-                                    returnData = false;
-                                if (this.client.playerData.loc != null)
+                                if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
                                 {
-                                    if ((StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc)) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
-                                    {
+                                    if (!this.client.playerData.canBuild)
                                         returnData = false;
+                                    if (this.client.playerData.loc != null)
+                                    {
+                                        if ((StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc)) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                        {
+                                            returnData = false;
+                                        }
+                                        else
+                                        {
+                                            StarryboundServer.logDebug("ForwardThread::SpawnProtection", "Player build allowed: " + this.client.playerData.loc + " != " + StarryboundServer.spawnPlanet + "; Has Permission: " + this.client.playerData.group.hasPermission("admin.spawnbuild").ToString() + "; inShip: " + this.client.playerData.inPlayerShip.ToString());
+                                        }
                                     }
                                     else
-                                    {
-                                        StarryboundServer.logDebug("ForwardThread::SpawnProtection", "Player build allowed: " + this.client.playerData.loc + " != " + StarryboundServer.spawnPlanet + "; Has Permission: " + this.client.playerData.group.hasPermission("admin.spawnbuild").ToString() + "; inShip: " + this.client.playerData.inPlayerShip.ToString());
-                                    }
+                                        returnData = false;
                                 }
-                                else
-                                    returnData = false;
                             }
                         }
                         #endregion

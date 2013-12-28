@@ -73,36 +73,44 @@ namespace com.avilance.Starrybound
                 }
 
                 sSocket = new TcpClient();
-                sSocket.Connect(IPAddress.Loopback, StarryboundServer.config.serverPort);
-
-                this.sIn = new BinaryReader(this.sSocket.GetStream());
-                this.sOut = new BinaryWriter(this.sSocket.GetStream());
-
-                if (!sSocket.Connected)
+                IAsyncResult result = sSocket.BeginConnect(IPAddress.Loopback, StarryboundServer.config.serverPort, null, null);
+                bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+                if (!success)
                 {
+                    StarryboundServer.failedConnections++;
+                    if (StarryboundServer.failedConnections >= StarryboundServer.config.maxFailedConnections)
+                    {
+                        StarryboundServer.logFatal(StarryboundServer.failedConnections + " clients failed to connect in a row. Restarting...");
+                        StarryboundServer.serverState = ServerState.Crashed;
+                    }
                     MemoryStream packet = new MemoryStream();
                     BinaryWriter packetWrite = new BinaryWriter(packet);
                     packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-
                     rejectPreConnected("Connection Failed: Unable to connect to the parent server.");
                     return;
                 }
+
+                this.sIn = new BinaryReader(this.sSocket.GetStream());
+                this.sOut = new BinaryWriter(this.sSocket.GetStream());
 
                 // Forwarding for data from SERVER (sIn) to CLIENT (cOut)
                 new Thread(new ThreadStart(new ForwardThread(this, this.sIn, this.cOut, Direction.Server).run)).Start();
 
                 // Forwarding for data from CLIENT (cIn) to SERVER (sOut)
                 new Thread(new ThreadStart(new ForwardThread(this, this.cIn, this.sOut, Direction.Client).run)).Start();
+
+                StarryboundServer.failedConnections = 0;
             }
             catch (Exception e)
             {
+                StarryboundServer.logException("ClientThread Exception: " + e.ToString());
+                StarryboundServer.failedConnections++;
                 MemoryStream packet = new MemoryStream();
                 BinaryWriter packetWrite = new BinaryWriter(packet);
                 packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                 this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
                 rejectPreConnected("Connection Failed: A internal server error occurred (1)");
-                StarryboundServer.logException("ClientThread Exception: " + e.ToString());
             }
         }
 
