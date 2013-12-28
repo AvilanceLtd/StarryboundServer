@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using com.avilance.Starrybound.Permissions;
+using MaxMind;
 
 namespace com.avilance.Starrybound
 {
@@ -34,6 +35,7 @@ namespace com.avilance.Starrybound
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly int ProtocolVersion = 628;
         public static StarboundVersion starboundVersion = new StarboundVersion();
+        public static GeoIPCountry Geo;
         
         // Dictionary<string, ClientThread>
         // string           Username        Unique username for client, MUST be lowercase
@@ -106,6 +108,10 @@ namespace com.avilance.Starrybound
             ServerConfig.SetupConfig();
             Groups.SetupGroups();
             Users.SetupUsers();
+
+            var geoippath = Path.Combine(SavePath, "GeoIP.dat");
+            if (config.enableGeoIP && File.Exists(geoippath))
+                Geo = new GeoIPCountry(geoippath);
 
             writeLog("", LogType.FileOnly);
             writeLog("-- Log Start: " + DateTime.Now + " --", LogType.FileOnly);
@@ -200,6 +206,7 @@ namespace com.avilance.Starrybound
             logInfo("Now restarting...");
             System.Threading.Thread.Sleep(3000);
             Process.Start(Environment.CurrentDirectory + Path.DirectorySeparatorChar + Assembly.GetEntryAssembly().Location);
+            Thread.Sleep(1500);
             Environment.Exit(1);
         }
 
@@ -207,6 +214,11 @@ namespace com.avilance.Starrybound
         {
             try
             {
+                if (Geo != null)
+                {
+                    Geo.Dispose();
+                }
+
                 serverState = ServerState.ShuttingDown;
 
                 foreach (Client client in clients.Values)
