@@ -33,7 +33,8 @@ namespace com.avilance.Starrybound.Commands
         public override bool doProcess(string[] args)
         {
             string list = "";
-            foreach (Client otherClient in StarryboundServer.clients.Values)
+            var buffer = StarryboundServer.clients.Values;
+            foreach (Client otherClient in buffer)
             {
                 PlayerData otherPlayer = otherClient.playerData;
                 if (this.player.isInSameWorldAs(otherPlayer) && this.player.name != otherPlayer.name)

@@ -209,7 +209,8 @@ namespace com.avilance.Starrybound
             {
                 serverState = ServerState.ShuttingDown;
 
-                foreach (Client client in clients.Values)
+                var buffer = clients.Values;
+                foreach (Client client in buffer)
                 {
                     client.delayDisconnect("^#f75d5d;You have been disconnected.");
                     client.state = ClientState.Disposing;
@@ -321,7 +322,8 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage (string message) 
         {
-            foreach (Client client in clients.Values)
+            var buffer = clients.Values;
+            foreach (Client client in buffer)
             {
                 client.sendChatMessage("^#5dc4f4;" + message);
             }
@@ -329,7 +331,8 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage(string message, string color)
         {
-            foreach (Client client in clients.Values)
+            var buffer = clients.Values;
+            foreach (Client client in buffer)
             {
                 client.sendChatMessage("^"+color+";" + message);
             }

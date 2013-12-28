@@ -39,7 +39,8 @@ namespace com.avilance.Starrybound.Commands
 
             StarryboundServer.allowNewClients = false;
 
-            foreach (Client client in StarryboundServer.clients.Values)
+            var buffer = StarryboundServer.clients.Values;
+            foreach (Client client in buffer)
             {
                 client.delayDisconnect("^#f75d5d;You have been disconnected.");
                 client.state = ClientState.Disposing;

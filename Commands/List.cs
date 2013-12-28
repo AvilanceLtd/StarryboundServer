@@ -36,7 +36,8 @@ namespace com.avilance.Starrybound.Commands
             int noOfUsers = StarryboundServer.clients.Count;
             int i = 0;
 
-            foreach (string user in StarryboundServer.clients.Keys) {
+            var buffer = StarryboundServer.clients.Keys;
+            foreach (string user in buffer) {
                 list = list + user;
 
                 if (i != noOfUsers - 1) list = list + ", ";
