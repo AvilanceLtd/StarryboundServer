@@ -214,7 +214,8 @@ namespace com.avilance.Starrybound.Packets
 
             if (formatName != null && (ChatSendContext)context == ChatSendContext.Universe)
             {
-                foreach (Client client in StarryboundServer.clients.Values)
+                var buffer = StarryboundServer.clients.Values;
+                foreach (Client client in buffer)
                 {
                     client.sendChatMessage(ChatReceiveContext.Broadcast, "", this.client.playerData.id, formatName, message);
                 }
