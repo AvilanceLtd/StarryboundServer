@@ -107,6 +107,7 @@ namespace com.avilance.Starrybound
         public int maxFailedConnections = 3;
 
         public string[] projectileBlacklist = new string[] { "" };
+        public string[] projectileBlacklistSpawn = new string[] { "" };
         
         public static ConfigFile Read(string path) {
             if (!File.Exists(path))

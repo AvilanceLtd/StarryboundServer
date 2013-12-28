@@ -216,10 +216,20 @@ namespace com.avilance.Starrybound
                                             this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
                                             returnData = false;
                                         }
+                                        if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
+                                        {
+                                            if (this.client.playerData.loc != null)
+                                            {
+                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) && StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                {
+                                                    returnData = false;
+                                                }
+                                            }
+                                            else
+                                                returnData = false;
+                                        }
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "]");
                                     }
-                                    else if(type == EntityType.Player)
-                                    { }
                                     else if (type != EntityType.Effect)
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
                                 }
