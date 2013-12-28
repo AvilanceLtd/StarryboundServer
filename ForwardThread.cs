@@ -206,113 +206,12 @@ namespace com.avilance.Starrybound
                                         BinaryReader entity = new BinaryReader(new MemoryStream(entityData));
                                         string projectileKey = entity.ReadStarString();
                                         object projParams = entity.ReadStarVariant();
-                                        /*
-                                         * string ProjectileKey
-                                         * Variant ProjectileParams
-                                         * Star::StatusEffectSource
-                                         * [
-                                         * VLQU (size)
-                                         * {
-                                         * string
-                                         * Variant
-                                         * float
-                                         * }
-                                         * ]
-                                         * float x2 (MovementController)
-                                         * float x2 (MovementController)
-                                         * VLQI (Source Entity)
-                                         * bool (Source Entity)
-                                         * float (???)
-                                         * float x2 (???)
-                                         * Star::EntityDamageTeam
-                                         * [
-                                         * uchar
-                                         * uchar
-                                         * ]
-                                         */
+                                        if(StarryboundServer.config.projectileBlacklist.Contains(projectileKey))
+                                            returnData = false;
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "]");
                                     }
                                     else if(type == EntityType.Player)
-                                    {
-                                        /*
-                                         * UUID
-                                         * Star::HumanoidIdentity
-                                         * [
-                                         * string
-                                         * string
-                                         * uchar
-                                         * string x12
-                                         * float
-                                         * float
-                                         * float
-                                         * float
-                                         * { ??? (4)
-                                         * uchar
-                                         * }
-                                         * ]
-                                         * Star::StatusEntityParameters
-                                         * [
-                                         * bool
-                                         * float x16
-                                         * string
-                                         * string
-                                         * ]
-                                         * Star::Status
-                                         * [
-                                         * float x2 x5
-                                         * bool
-                                         * float x3
-                                         * Star::StringList?? x2
-                                         * [
-                                         * VLQU
-                                         * {
-                                         * string
-                                         * }
-                                         * ]
-                                         * ]
-                                         * string
-                                         * double
-                                         * Star::PlayerInventory
-                                         * [
-                                         * StarByteArray
-                                         * [
-                                         * ulong
-                                         * Star::ItemBag x3
-                                         * [
-                                         * VLQU
-                                         * {
-                                         * Star::ItemDatabase::readItem []
-                                         * }
-                                         * ]
-                                         * VLQU (size)
-                                         * {
-                                         * Star::ItemDatabase::readItem []
-                                         * }
-                                         * VLQU (size)
-                                         * {
-                                         * Star::ItemDatabase::readItem []
-                                         * }
-                                         * VLQU (size)
-                                         * {
-                                         * Star::ItemDatabase::readItem []
-                                         * }
-                                         * Star::ItemDatabase::readItem
-                                         * [
-                                         * Star::ItemDescriptor
-                                         * [
-                                         * string
-                                         * VLQS
-                                         * Variant
-                                         * ]
-                                         * ]
-                                         * uchar
-                                         * VLQS
-                                         * uchar
-                                         * VLQS
-                                         * ]
-                                         * ]
-                                         */
-                                    }
+                                    { }
                                     else if (type != EntityType.Effect)
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
                                 }
