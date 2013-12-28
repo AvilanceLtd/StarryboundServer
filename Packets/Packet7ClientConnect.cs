@@ -69,7 +69,7 @@ namespace com.avilance.Starrybound.Packets
             {
                 if (sAssetDigest != StarryboundServer.config.assetDigest)
                 {
-                    this.client.rejectPreConnected("Please reinstall Starbound without mods to connect to this server.");
+                    this.client.rejectPreConnected("Modded client detected: You cannot modify or add asset files or mods. Please delete your entire Starbound folder and reinstall Starbound to join.");
                     return false;
                 }
             }
