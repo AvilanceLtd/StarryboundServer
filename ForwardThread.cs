@@ -170,23 +170,6 @@ namespace com.avilance.Starrybound
                                 WorldCoordinate coord = packetData.ReadStarWorldCoordinate();
                                 string player = packetData.ReadStarString();
                                 WarpType cmd = (WarpType)warp;
-                                if (cmd == WarpType.WarpToHomePlanet)
-                                {
-                                    this.client.playerData.inPlayerShip = false;
-                                }
-                                else if (cmd == WarpType.WarpToOrbitedPlanet)
-                                {
-                                    this.client.playerData.inPlayerShip = false;
-                                }
-                                else if (cmd == WarpType.WarpToOwnShip)
-                                {
-                                    this.client.playerData.inPlayerShip = true;
-                                }
-                                else if (cmd == WarpType.WarpToPlayerShip)
-                                {
-                                    this.client.playerData.inPlayerShip = true;
-                                }
-
                                 StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + warp + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
@@ -264,10 +247,18 @@ namespace com.avilance.Starrybound
                                 float spawnY = packetData.ReadSingleBE();
                                 uint mapParamsSize = packetData.ReadVarUInt32();
                                 Dictionary<string, object> mapParams = new Dictionary<string, object>();
+                                bool isPlayerShip = false;
                                 for (int i = 0; i < mapParamsSize; i++)
                                 {
-                                    mapParams.Add(packetData.ReadStarString(), packetData.ReadStarVariant());
+                                    string key = packetData.ReadStarString();
+                                    var value = packetData.ReadStarVariant();
+                                    mapParams.Add(key, value);
+                                    if(key == "fuel.level" || key == "fuel.max")
+                                    {
+                                        isPlayerShip = true;
+                                    }
                                 }
+                                this.client.playerData.inPlayerShip = isPlayerShip;
                                 uint clientID = packetData.ReadUInt32BE();
                                 bool bool1 = packetData.ReadBoolean();
                                 WorldCoordinate coords = Utils.findGlobalCoords(sky);
@@ -285,7 +276,7 @@ namespace com.avilance.Starrybound
                             {
                                 string name = packetData.ReadStarString();
                                 uint count = packetData.ReadVarUInt32();
-                                List<object> itemDesc = packetData.ReadStarVariant();
+                                var itemDesc = packetData.ReadStarVariant();
                             }
                             else if (packetID == Packet.EnvironmentUpdate)
                             {

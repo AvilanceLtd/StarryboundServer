@@ -105,42 +105,37 @@ namespace com.avilance.Starrybound.Extensions
             return returnList;
         }
 
-        public static List<object> ReadStarVariant(this BinaryReader read)
+        public static object ReadStarVariant(this BinaryReader read)
         {
-            List<object> result = new List<object>();
             byte type = read.ReadByte();
             switch (type)
             {
                 case 2:
-                    result.Add(read.ReadDoubleBE());
-                    break;
+                    return read.ReadDoubleBE();
                 case 3:
-                    result.Add(read.ReadBoolean());
-                    break;
+                    return read.ReadBoolean();
                 case 4:
-                    result.Add(read.ReadVarInt64());
-                    break;
+                    return read.ReadVarInt64();
                 case 5:
-                    result.Add(read.ReadStarString());
-                    break;
+                    return read.ReadStarString();
                 case 6:
                     uint size = read.ReadVarUInt32();
+                    List<object> Variant = new List<object>();
                     for(int i=0; i < size; i++)
                     {
-                        result.Add(read.ReadStarVariant());
+                        Variant.Add(read.ReadStarVariant());
                     }
-                    break;
+                    return Variant;
                 case 7:
                     uint size2 = read.ReadVarUInt32();
+                    Dictionary<string, object> VariantMap = new Dictionary<string, object>();
                     for(int i=0; i < size2; i++)
                     {
-                        Dictionary<string, object> VariantMap = new Dictionary<string,object>();
                         VariantMap.Add(read.ReadStarString(), read.ReadStarVariant());
-                        result.Add(VariantMap);
                     }
-                    break;
+                    return VariantMap;
             }
-            return result;
+            return null;
         }
 
         public static short ReadInt16BE(this BinaryReader read)

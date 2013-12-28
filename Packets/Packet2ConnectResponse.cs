@@ -16,6 +16,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using com.avilance.Starrybound.Extensions;
+using System.Net;
+using MaxMind;
 
 namespace com.avilance.Starrybound.Packets
 {
@@ -55,9 +57,19 @@ namespace com.avilance.Starrybound.Packets
             }
 
             StarryboundServer.clients.Add(player.name, this.client);
-            StarryboundServer.sendGlobalMessage(player.name + " has joined the server!");
+            string geoip_prefix = "";
+            if (Starrybound.StarryboundServer.config.enableGeoIP)
+            {
+                var code = Starrybound.StarryboundServer.Geo.TryGetCountryCode(IPAddress.Parse(player.ip));
+                var geo_loc = code == null ? "N/A" : GeoIPCountry.GetCountryNameByCode(code);
+                geoip_prefix = String.Format("({0})", geo_loc);
+            }
+
+            StarryboundServer.sendGlobalMessage(String.Format("{0}{1} has joined the server!", player.name, geoip_prefix));
             this.client.state = ClientState.Connected;
-            StarryboundServer.logInfo("[" + this.client.playerData.client + "][" + this.client.playerData.id + "] joined with UUID " + player.uuid);
+            StarryboundServer.logInfo(String.Format("[{0}][{1}] joined with UUID {2}{3}", this.client.playerData.client, this.client.playerData.id, player.uuid, 
+                                      geoip_prefix != "" ? String.Format(" from {0}", geoip_prefix) : ""));
+
             return true;
         }
 
