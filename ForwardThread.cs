@@ -410,6 +410,38 @@ namespace com.avilance.Starrybound
                                     StarryboundServer.logDebug("ClientContext", "[" + this.client.playerData.client + "] Failed to parse ClientContextUpdate from Server: " + e.ToString());
                                 }
                             }
+                            else if (packetID == Packet.EntityCreate)
+                            {
+                                MemoryStream sendStream = new MemoryStream();
+                                BinaryWriter sendWriter = new BinaryWriter(sendStream);
+                                bool test = false;
+                                while (true)
+                                {
+                                    EntityType type = (EntityType)packetData.Read();
+                                    if (type == EntityType.EOF) break;
+                                    byte[] entityData = packetData.ReadStarByteArray();
+                                    int entityId = packetData.ReadVarInt32();
+                                    if (type == EntityType.Player)
+                                    {
+                                        byte[] buffer = new byte[16];
+                                        Buffer.BlockCopy(entityData, 0, buffer, 0, 16);
+                                        buffer = Utils.HashUUID(buffer);
+                                        Buffer.BlockCopy(buffer, 0, entityData, 0, 16);
+                                        returnData = test = false;
+                                    }
+                                    sendWriter.Write((byte)type);
+                                    sendWriter.WriteVarUInt64((ulong)entityData.Length);
+                                    sendWriter.Write(entityData);
+                                    sendWriter.WriteVarInt32(entityId);
+                                }
+                                if(test == false)
+                                {
+                                    this.outgoing.WriteVarUInt32((uint)packetID);
+                                    this.outgoing.WriteVarInt32((int)sendStream.Length);
+                                    this.outgoing.Write(sendStream.ToArray());
+                                    this.outgoing.Flush();
+                                }
+                            }
                         }
                         #endregion
                     }

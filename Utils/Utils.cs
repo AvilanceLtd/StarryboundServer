@@ -69,6 +69,12 @@ namespace com.avilance.Starrybound.Util
             return Convert.ToBase64String(buffer);
         }
 
+        public static byte[] HashUUID(byte[] uuid)
+        {
+            MD5 md5 = MD5.Create();
+            return md5.ComputeHash(uuid);
+        }
+
         public static int getTimestamp()
         {
             int unixTimeStamp;

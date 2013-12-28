@@ -209,19 +209,6 @@ namespace com.avilance.Starrybound.Packets
             }
 
             StarryboundServer.logInfo("[" + ((ChatSendContext)context).ToString() + "] [" + this.client.playerData.name + "]: " + message);
-
-            string formatName = this.client.playerData.formatName;
-
-            if (formatName != null && (ChatSendContext)context == ChatSendContext.Universe)
-            {
-                var buffer = StarryboundServer.clients.Values.ToList();
-                foreach (Client client in buffer)
-                {
-                    client.sendChatMessage(ChatReceiveContext.Broadcast, "", this.client.playerData.id, formatName, message);
-                }
-                return false;
-            }
-            
             return true;
         }
 

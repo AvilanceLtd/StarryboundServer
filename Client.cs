@@ -215,6 +215,7 @@ namespace com.avilance.Starrybound
                         if (StarryboundServer.clients.ContainsKey(this.playerData.name))
                         {
                             Users.SaveUser(this.playerData);
+                            StarryboundServer.clientsById.Remove(this.playerData.id);
                             StarryboundServer.clients.Remove(this.playerData.name);
                         }
                         if (this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
@@ -224,6 +225,11 @@ namespace com.avilance.Starrybound
                 {
                     StarryboundServer.logException("Failed to remove client from clients: " + e.ToString());
                 }
+                try
+                {
+                    this.sendServerPacket(Packet.ClientDisconnect, new byte[0]);
+                }
+                catch (Exception) { }
                 try
                 {
                     this.cSocket.Close();

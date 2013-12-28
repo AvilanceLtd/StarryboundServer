@@ -43,6 +43,7 @@ namespace com.avilance.Starrybound
         // string           Username        Unique username for client, MUST be lowercase
         // ClientThread     ClientThread    Invidivual thread for client, used to access client specific functions
         public static Dictionary<string, Client> clients = new Dictionary<string, Client>();
+        public static Dictionary<uint, Client> clientsById = new Dictionary<uint, Client>();
         public static int clientCount { get { return clients.Count; } set { return; } }
 
         public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
@@ -374,19 +375,25 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage (string message) 
         {
-            var buffer = clients.Values.ToList();
-            foreach (Client client in buffer)
+            lock (clients)
             {
-                client.sendChatMessage("^#5dc4f4;" + message);
+                var buffer = clients.Values.ToList();
+                foreach (Client client in buffer)
+                {
+                    client.sendChatMessage("^#5dc4f4;" + message);
+                }
             }
         }
 
         public static void sendGlobalMessage(string message, string color)
         {
-            var buffer = clients.Values.ToList();
-            foreach (Client client in buffer)
+            lock (clients)
             {
-                client.sendChatMessage("^"+color+";" + message);
+                var buffer = clients.Values.ToList();
+                foreach (Client client in buffer)
+                {
+                    client.sendChatMessage("^" + color + ";" + message);
+                }
             }
         }
     }

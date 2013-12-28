@@ -36,13 +36,15 @@ namespace com.avilance.Starrybound.Commands
             int noOfUsers = StarryboundServer.clientCount;
             int i = 0;
 
-            var buffer = StarryboundServer.clients.Keys;
-            foreach (string user in buffer) {
-                list = list + user;
-
-                if (i != noOfUsers - 1) list = list + ", ";
-
-                i++;
+            lock (StarryboundServer.clients)
+            {
+                var buffer = StarryboundServer.clients.Values.ToList();
+                foreach (Client user in buffer)
+                {
+                    list = list + user.playerData.formatName;
+                    if (i != noOfUsers - 1) list = list + ", ";
+                    i++;
+                }
             }
             this.client.sendCommandMessage(noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s): " + list);
             return true;
