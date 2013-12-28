@@ -70,7 +70,20 @@ namespace com.avilance.Starrybound.Permissions
         {
             if (File.Exists(Path.Combine(UsersPath, uuid + ".json")))
             {
-                return Read(Path.Combine(UsersPath, uuid + ".json"), new string[] { name, uuid });
+                try
+                {
+                    User user = Read(Path.Combine(UsersPath, uuid + ".json"), new string[] { name, uuid });
+                    return user;
+                }
+                catch (Exception)
+                {
+                    StarryboundServer.logError("Player data for user " + name + " with UUID " + uuid + " is corrupt. Re-generating user file");
+
+                    User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, true);
+                    Write(Path.Combine(UsersPath, uuid + ".json"), user);
+
+                    return user;
+                }
             }
             else
             {

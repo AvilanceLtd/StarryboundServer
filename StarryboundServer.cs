@@ -200,6 +200,7 @@ namespace com.avilance.Starrybound
             logInfo("Now restarting...");
             System.Threading.Thread.Sleep(3000);
             Process.Start(Environment.CurrentDirectory + Path.DirectorySeparatorChar + Assembly.GetEntryAssembly().Location);
+            Thread.Sleep(1500);
             Environment.Exit(1);
         }
 
