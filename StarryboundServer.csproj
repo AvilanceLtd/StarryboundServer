@@ -146,6 +146,7 @@
     <Compile Include="StarryboundServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Enums.cs" />
+    <Compile Include="Utils\GeoIPCountry.cs" />
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
