@@ -15,6 +15,8 @@ namespace com.avilance.Starrybound
         public Process process;
         string[] filterConsole = new string[] { "Slow asset", "does not have a", "Perf: ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <" };
 
+        bool parseError = false;
+
         public void run()
         {
             try
@@ -40,6 +42,7 @@ namespace com.avilance.Starrybound
                 StarryboundServer.parentProcessId = process.Id;
                 File.WriteAllText("starbound_server.pid", process.Id.ToString());
                 process.OutputDataReceived += (sender, e) => parseOutput(e.Data);
+                process.ErrorDataReceived += (sender, e) => logStarboundError("ErrorDataReceived from starbound_server.exe: " + e.Data);
                 process.BeginOutputReadLine();
                 process.WaitForExit();
                 StarryboundServer.serverState = ServerState.Crashed;
@@ -59,6 +62,17 @@ namespace com.avilance.Starrybound
                 foreach (string line in filterConsole)
                 {
                     if (consoleLine.Contains(line)) return;
+                }
+
+                if (consoleLine.StartsWith("Error: "))
+                {
+                    this.parseError = true;
+                }
+                else if (String.IsNullOrWhiteSpace(consoleLine) && this.parseError)
+                {
+                    logStarboundError(" ");
+                    this.parseError = false;
+                    return;
                 }
 
                 if (consoleLine.Contains("Info: Server version"))
@@ -83,6 +97,7 @@ namespace com.avilance.Starrybound
                     StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
                     StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
                     StarryboundServer.restartTime = Utils.getTimestamp() + 30;
+                    StarryboundServer.serverState = ServerState.Crashed;
                 }
 
                 if (consoleLine.Contains("TcpServer listening on: "))
@@ -90,17 +105,18 @@ namespace com.avilance.Starrybound
                     StarryboundServer.serverState = ServerState.Ready;
                 }
 
-                if (consoleLine.Contains("Info: Client "))
-                {
-                    if (consoleLine.Contains(" connected"))
-                    {
-
-                    }
-                }
-
-                Console.WriteLine("[STAR] " + consoleLine);
+                if (!this.parseError) Console.WriteLine("[STAR] " + consoleLine);
+                else logStarboundError(consoleLine);
             }
             catch (Exception) { }
+        }
+
+        void logStarboundError(string errStr)
+        {
+            using (StreamWriter w = File.AppendText(Path.Combine(StarryboundServer.SavePath, "server-errors.log")))
+            {
+                w.WriteLine(errStr);
+            }
         }
     }
 }

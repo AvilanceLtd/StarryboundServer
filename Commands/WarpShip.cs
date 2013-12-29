@@ -48,6 +48,11 @@ namespace com.avilance.Starrybound.Commands
                 if (StarryboundServer.clients.ContainsKey(player))
                 {
                     loc = StarryboundServer.clients[player].playerData.loc;
+                    if (loc == null)
+                    {
+                        this.client.sendCommandMessage("Unable to find an exact location for " + player + ".");
+                        return false;
+                    }
                     this.client.sendCommandMessage("Warping ship to " + player + " [" + loc.ToString() + "]");
                 }
                 else

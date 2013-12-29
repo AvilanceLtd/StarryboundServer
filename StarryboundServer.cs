@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using com.avilance.Starrybound.Permissions;
 using MaxMind;
+using System.Net;
 
 namespace com.avilance.Starrybound
 {
@@ -190,6 +191,9 @@ namespace com.avilance.Starrybound
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
             serverState = ServerState.Running;
+
+            //Keep this last!
+            runCallback();
         }
 
         public static void crashMonitor()
@@ -389,6 +393,43 @@ namespace com.avilance.Starrybound
             foreach (Client client in buffer)
             {
                 client.sendChatMessage("^" + color + ";" + message);
+            }
+        }
+
+        public static void runCallback()
+        {
+            while (true)
+            {
+                if (config.enableCallback)
+                {
+                    logInfo("Sending callback data to master server");
+
+                    var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://callback.avilance.com/");
+                    httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+                    httpWebRequest.Method = "POST";
+
+                    using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                    {
+                        string json = "json={\"version\":\"" + VersionNum + "\"," +
+                                      "\"protocol\":\"" + ProtocolVersion + "\"," +
+                                      "\"mono\":\"" + IsMono + "\"," +
+                                      "\"proxyPort\":\"" + config.proxyPort + "\"," +
+                                      "\"maxSlots\":\"" + config.maxClients + "\"," +
+                                      "\"clientCount\":\"" + clientCount + "\"}";
+
+                        streamWriter.Write(json);
+                        streamWriter.Flush();
+                        streamWriter.Close();
+                    }
+
+                    /*WebResponse response = httpWebRequest.GetResponse();
+
+                    StreamReader reader = new StreamReader(response.GetResponseStream());
+                    string responseFromServer = reader.ReadToEnd();
+
+                    logInfo("Server said: " + responseFromServer);*/
+                }
+                Thread.Sleep(1000 * 60 * 15);
             }
         }
     }
