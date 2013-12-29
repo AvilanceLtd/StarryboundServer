@@ -177,7 +177,7 @@ namespace com.avilance.Starrybound
             listenerThread = new Thread(new ThreadStart(tcpListener.run));
             listenerThread.Start();
             while (serverState != ServerState.ListenerReady) { }
-            if (serverState == ServerState.Crashed) return;
+            if ((int)serverState > 3) return;
 
             Console.Title = "Starting... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
 #if !NOSERVER
@@ -186,7 +186,7 @@ namespace com.avilance.Starrybound
             sbServerThread = new Thread(new ThreadStart(sbServer.run));
             sbServerThread.Start();
             while (serverState != ServerState.StarboundReady) { }
-            if (serverState == ServerState.Crashed) return;
+            if ((int)serverState > 3) return;
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
             serverState = ServerState.Running;
@@ -246,6 +246,11 @@ namespace com.avilance.Starrybound
         private static void doRestart()
         {
             doShutdown(false);
+            if (IsMono)
+            {
+                logWarn("Auto Restarter doesn't support Mono. Exiting.");
+                Environment.Exit(0);
+            }
             logInfo("Now restarting...");
             Thread.Sleep(2500);
             if (serverState == ServerState.Shutdown || serverState == ServerState.GracefulShutdown)

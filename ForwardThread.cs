@@ -472,10 +472,8 @@ namespace com.avilance.Starrybound
                                     {
                                         byte[] buffer = new byte[16];
                                         Buffer.BlockCopy(entityData, 0, buffer, 0, 16);
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "] Old:[" + Utils.ByteArrayToString(buffer) + "]");
                                         buffer = Utils.HashUUID(buffer);
                                         Buffer.BlockCopy(buffer, 0, entityData, 0, 16);
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "] New:[" + Utils.ByteArrayToString(buffer) + "]");
                                         returnData = test = false;
                                     }
                                     sendWriter.Write((byte)type);

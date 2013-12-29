@@ -47,6 +47,7 @@ namespace com.avilance.Starrybound
                 catch (ThreadAbortException) { }
                 catch (Exception e)
                 {
+                    if ((int)StarryboundServer.serverState > 3) return;
                     StarryboundServer.logException("ListenerThread Exception: " + e.ToString());
                 }
 

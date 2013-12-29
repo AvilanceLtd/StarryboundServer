@@ -64,7 +64,7 @@ namespace com.avilance.Starrybound
 
                 StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
-                if(StarryboundServer.serverState != ServerState.Running)
+                if((int)StarryboundServer.serverState < 3)
                 {
                     MemoryStream packet = new MemoryStream();
                     BinaryWriter packetWrite = new BinaryWriter(packet);
@@ -72,6 +72,16 @@ namespace com.avilance.Starrybound
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
                     rejectPreConnected("Connection Failed: The server is not ready yet.");
+                    return;
+                }
+                else if ((int)StarryboundServer.serverState > 3)
+                {
+                    MemoryStream packet = new MemoryStream();
+                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                    this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+
+                    rejectPreConnected("Connection Failed: The server is shutting down.");
                     return;
                 }
                 else if (StarryboundServer.restartTime != 0)

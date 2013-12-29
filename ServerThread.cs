@@ -77,6 +77,7 @@ namespace com.avilance.Starrybound
 
                 if (consoleLine.Contains("Info: Server version"))
                 {
+                    ServerConfig.RemovePrivateConfig();
                     string[] versionString = consoleLine.Split('\'');
                     string versionName = versionString[1];
                     int protocolVersion = int.Parse(versionString[3]);
