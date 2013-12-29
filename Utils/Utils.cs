@@ -69,6 +69,12 @@ namespace com.avilance.Starrybound.Util
             return Convert.ToBase64String(buffer);
         }
 
+        public static byte[] HashUUID(byte[] uuid)
+        {
+            MD5 md5 = MD5.Create();
+            return md5.ComputeHash(uuid);
+        }
+
         public static int getTimestamp()
         {
             int unixTimeStamp;
@@ -94,7 +100,9 @@ namespace com.avilance.Starrybound.Util
                             byte[] returnBytes = new byte[sector.Length + 21];
                             Buffer.BlockCopy(input, i - 1, returnBytes, 0, sector.Length + 21);
                             BinaryReader coords = new BinaryReader(new MemoryStream(returnBytes));
-                            return coords.ReadStarWorldCoordinate();
+                            WorldCoordinate rCoords = coords.ReadStarWorldCoordinate();
+                            if (String.IsNullOrEmpty(rCoords._syscoord._sector)) rCoords = null;
+                            return rCoords;
                         }
                     }
                 }
@@ -102,7 +110,7 @@ namespace com.avilance.Starrybound.Util
             }
             catch(Exception e)
             {
-                StarryboundServer.logException("findGlobalCoords Exception: " + e.ToString());
+                StarryboundServer.logDebug("findGlobalCoords", "Exception: " + e.ToString());
                 return null;
             }
         }

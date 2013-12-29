@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace com.avilance.Starrybound.Permissions
 {
@@ -107,9 +108,8 @@ namespace com.avilance.Starrybound.Permissions
             if (String.IsNullOrWhiteSpace(defaultGroup))
             {
                 StarryboundServer.logFatal("Default user group flag (isDefault) is not set for any groups - Please set this in the groups.json!");
-                StarryboundServer.logFatal("Press any key to continue...");
-                Console.ReadKey(true);
-                Environment.Exit(0);
+                Thread.Sleep(5000);
+                Environment.Exit(5);
             }
 
             StarryboundServer.defaultGroup = defaultGroup;

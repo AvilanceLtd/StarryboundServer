@@ -39,6 +39,9 @@ namespace com.avilance.Starrybound
         private BinaryReader sIn;
         private BinaryWriter sOut;
 
+        private Thread ServerForwarder;
+        private Thread ClientForwarder;
+
         public int kickTargetTimestamp = 0;
         public bool connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected && this.state != ClientState.Disposing) return true; else return false; } }
 
@@ -61,37 +64,58 @@ namespace com.avilance.Starrybound
 
                 StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
-                sSocket = new TcpClient();
-                sSocket.Connect(IPAddress.Loopback, StarryboundServer.config.serverPort);
-
-                this.sIn = new BinaryReader(this.sSocket.GetStream());
-                this.sOut = new BinaryWriter(this.sSocket.GetStream());
-
-                if (!sSocket.Connected)
+                if(StarryboundServer.serverState != ServerState.Running)
                 {
                     MemoryStream packet = new MemoryStream();
                     BinaryWriter packetWrite = new BinaryWriter(packet);
                     packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
 
-                    rejectPreConnected("Starrybound server was unable to connect to the parent server.");
+                    rejectPreConnected("Connection Failed: The server is not ready yet.");
                     return;
                 }
 
+                sSocket = new TcpClient();
+                IAsyncResult result = sSocket.BeginConnect(IPAddress.Loopback, StarryboundServer.config.serverPort, null, null);
+                bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+                if (!success)
+                {
+                    StarryboundServer.failedConnections++;
+                    if (StarryboundServer.failedConnections >= StarryboundServer.config.maxFailedConnections)
+                    {
+                        StarryboundServer.logFatal(StarryboundServer.failedConnections + " clients failed to connect in a row. Restarting...");
+                        StarryboundServer.serverState = ServerState.Crashed;
+                    }
+                    MemoryStream packet = new MemoryStream();
+                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                    this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+                    rejectPreConnected("Connection Failed: Unable to connect to the parent server.");
+                    return;
+                }
+
+                this.sIn = new BinaryReader(this.sSocket.GetStream());
+                this.sOut = new BinaryWriter(this.sSocket.GetStream());
+
                 // Forwarding for data from SERVER (sIn) to CLIENT (cOut)
-                new Thread(new ThreadStart(new ForwardThread(this, this.sIn, this.cOut, Direction.Server).run)).Start();
+                this.ServerForwarder = new Thread(new ThreadStart(new ForwardThread(this, this.sIn, this.cOut, Direction.Server).run));
+                ServerForwarder.Start();
 
                 // Forwarding for data from CLIENT (cIn) to SERVER (sOut)
-                new Thread(new ThreadStart(new ForwardThread(this, this.cIn, this.sOut, Direction.Client).run)).Start();
+                this.ClientForwarder = new Thread(new ThreadStart(new ForwardThread(this, this.cIn, this.sOut, Direction.Client).run));
+                ClientForwarder.Start();
+
+                StarryboundServer.failedConnections = 0;
             }
             catch (Exception e)
             {
+                StarryboundServer.logException("ClientThread Exception: " + e.ToString());
+                StarryboundServer.failedConnections++;
                 MemoryStream packet = new MemoryStream();
                 BinaryWriter packetWrite = new BinaryWriter(packet);
                 packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                 this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-                rejectPreConnected("Starrybound server was unable to connect to the parent server.");
-                StarryboundServer.logException("ClientThread Exception: " + e.Message);
+                rejectPreConnected("Connection Failed: A internal server error occurred (1)");
             }
         }
 
@@ -107,7 +131,7 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                this.errorDisconnect(Direction.Client, "Failed to send packet: " + e.Message);
+                this.forceDisconnect(Direction.Client, "Failed to send packet: " + e.Message);
             }
         }
 
@@ -122,7 +146,7 @@ namespace com.avilance.Starrybound
             }
             catch (Exception e)
             {
-                this.errorDisconnect(Direction.Server, "Failed to send packet: " + e.Message);
+                this.forceDisconnect(Direction.Server, "Failed to send packet: " + e.Message);
             }
         }
 
@@ -172,26 +196,44 @@ namespace com.avilance.Starrybound
             delayDisconnect("You have been kicked from the server.", this.playerData.name + " has been kicked from the server!");
         }
 
-        private void doDisconnect(bool log)
+        private void doDisconnect(string logMessage)
         {
-            if (this.playerData.name != null)
-            {
-                Users.SaveUser(this.playerData);
-                if (StarryboundServer.clients.ContainsKey(this.playerData.name))
-                {
-                    StarryboundServer.clients.Remove(this.playerData.name);
-                    if(this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
-                    if(!log)
-                        StarryboundServer.logInfo("[" + playerData.client + "] has left the server.");
-                }
-            }
             if (this.state != ClientState.Disposing)
             {
                 this.state = ClientState.Disposing;
+                StarryboundServer.logInfo("[" + playerData.client + "] " + logMessage);
+                try
+                {
+                    if (this.playerData.name != null)
+                    {
+                        if (StarryboundServer.clients.ContainsKey(this.playerData.name))
+                        {
+                            Users.SaveUser(this.playerData);
+                            StarryboundServer.clientsById.Remove(this.playerData.id);
+                            StarryboundServer.clients.Remove(this.playerData.name);
+                        }
+                        if (this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    StarryboundServer.logException("Failed to remove client from clients: " + e.ToString());
+                }
+                try
+                {
+                    this.sendServerPacket(Packet.ClientDisconnect, new byte[0]);
+                }
+                catch (Exception) { }
                 try
                 {
                     this.cSocket.Close();
                     this.sSocket.Close();
+                }
+                catch (Exception) { }
+                try
+                {
+                    this.ClientForwarder.Abort();
+                    this.ServerForwarder.Abort();
                 }
                 catch (Exception) { }
             }
@@ -202,6 +244,7 @@ namespace com.avilance.Starrybound
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             sendChatMessage("^#f75d5d;" + reason);
             kickTargetTimestamp = Utils.getTimestamp() + 7;
+            StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + reason);
         }
 
         public void delayDisconnect(string reason, string message)
@@ -210,33 +253,24 @@ namespace com.avilance.Starrybound
             sendChatMessage("^#f75d5d;" + reason);
             kickTargetTimestamp = Utils.getTimestamp() + 7;
             StarryboundServer.sendGlobalMessage("^#f75d5d;" + message);
+            StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + message);
         }
 
         public void rejectPreConnected(string reason)
         {
             Packet2ConnectResponse packet = new Packet2ConnectResponse(this, Util.Direction.Client, reason);
             packet.onSend();
-            forceDisconnect(reason);
+            doDisconnect(reason);
         }
 
-        public void forceDisconnect(string reason)
+        public void forceDisconnect(Direction direction, string reason)
         {
-            if (this.state != ClientState.Disposing)
-                StarryboundServer.logWarn("[" + playerData.client + "] Dropped for " + reason);
-            doDisconnect(true);
+            doDisconnect("Dropped by parent " + direction.ToString() + " for " + reason);
         }
 
-        public void errorDisconnect(Direction direction, string reason)
+        public void closeConnection()
         {
-            if (this.state != ClientState.Disposing)
-                StarryboundServer.logError("[" + playerData.client + "] Dropped by parent " + direction.ToString() + " for " + reason);
-            doDisconnect(true);
-        }
-
-
-        public void forceDisconnect()
-        {
-            doDisconnect(false);
+            doDisconnect("has left the server.");
         }
     }
 }

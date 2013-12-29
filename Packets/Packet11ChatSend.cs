@@ -177,6 +177,10 @@ namespace com.avilance.Starrybound.Packets
                             new WarpShip(this.client).doProcess(args);
                             break;
 
+                        case "spawn":
+                            new Spawn(this.client).doProcess(args);
+                            break;
+
                         case "group":
                             new GroupC(this.client).doProcess(args);
                             break;
@@ -209,19 +213,6 @@ namespace com.avilance.Starrybound.Packets
             }
 
             StarryboundServer.logInfo("[" + ((ChatSendContext)context).ToString() + "] [" + this.client.playerData.name + "]: " + message);
-
-            string formatName = this.client.playerData.formatName;
-
-            if (formatName != null && (ChatSendContext)context == ChatSendContext.Universe)
-            {
-                var buffer = StarryboundServer.clients.Values;
-                foreach (Client client in buffer)
-                {
-                    client.sendChatMessage(ChatReceiveContext.Broadcast, "", this.client.playerData.id, formatName, message);
-                }
-                return false;
-            }
-            
             return true;
         }
 

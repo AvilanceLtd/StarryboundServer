@@ -56,11 +56,6 @@ namespace com.avilance.Starrybound
 
         public static void SetupConfig()
         {
-            if (!Directory.Exists(StarryboundServer.SavePath))
-            {
-                Directory.CreateDirectory(StarryboundServer.SavePath);
-            }
-
             CreateIfNot(RulesPath, "1) Respect all players 2) No griefing/hacking 3) Have fun!");
             CreateIfNot(MotdPath, "This server is running Starrybound Server v%versionNum%. Type /help for a list of commands. There are currently %players% player(s) online.");
 
@@ -88,7 +83,6 @@ namespace com.avilance.Starrybound
     {
         [Description("")]
         public short serverPort = 21024;
-
         public string proxyIP = "0.0.0.0";
         public short proxyPort = 21025;
         public string proxyPass = "";
@@ -97,21 +91,22 @@ namespace com.avilance.Starrybound
         public int maxClients = 25;
 
         public string logFile = "proxy.log";
-
         public LogType logLevel = LogType.Info;
 
-        public bool allowSpaces = false;
-
+        public bool allowSpaces = true;
         public bool allowSymbols = false;
-
         public bool freeFuelForNewPlayers = true;
+        public bool spawnWorldProtection = false;
 
         public string[] sectors = new string[] { "alpha", "beta", "gamma", "delta", "sectorx" };
 
-        public bool useAssetDigest = false;
-        public string assetDigest = "8168975B43CBB5A002D3CCBD41FAFD226D3F58ECC3A6F835C26980531EF6AA6C";
+        public bool allowModdedClients = true;
 
         public bool enableGeoIP = false;
+        public int maxFailedConnections = 3;
+
+        public string[] projectileBlacklist = new string[] { "" };
+        public string[] projectileBlacklistSpawn = new string[] { "" };
         
         public static ConfigFile Read(string path) {
             if (!File.Exists(path))

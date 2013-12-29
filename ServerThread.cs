@@ -17,6 +17,15 @@ namespace com.avilance.Starrybound
 
         public void run()
         {
+            try
+            {
+                int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                Process proc = Process.GetProcessById(processId);
+                proc.Kill();
+                File.Delete("starbound_server.pid");
+            }
+            catch (Exception) { }
+
             var executableName = "starbound_server" + (StarryboundServer.IsMono ? "" : ".exe");
             try
             {
@@ -28,12 +37,14 @@ namespace com.avilance.Starrybound
                     CreateNoWindow = true
                 };
                 process = Process.Start(startInfo);
+                StarryboundServer.parentProcessId = process.Id;
                 File.WriteAllText("starbound_server.pid", process.Id.ToString());
                 process.OutputDataReceived += (sender, e) => parseOutput(e.Data);
                 process.BeginOutputReadLine();
                 process.WaitForExit();
                 StarryboundServer.serverState = ServerState.Crashed;
             }
+            catch (ThreadAbortException) { }
             catch (Exception e)
             {
                 StarryboundServer.logException("Unable to start starbound_server.exe, is this file in the same directory? " + e.ToString());
@@ -62,9 +73,8 @@ namespace com.avilance.Starrybound
                     if(protocolVersion != StarryboundServer.ProtocolVersion)
                     {
                         StarryboundServer.logFatal("Detected protcol version [" + protocolVersion + "] != [" + StarryboundServer.ProtocolVersion + "] to expected protocol version!");
-                        StarryboundServer.logFatal("Press any key to continue...");
-                        Console.ReadKey(true);
-                        Environment.Exit(0);
+                        Thread.Sleep(5000);
+                        Environment.Exit(4);
                     }
                 }
 
@@ -73,13 +83,11 @@ namespace com.avilance.Starrybound
                     StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
                     StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
                     StarryboundServer.restartTime = Utils.getTimestamp() + 30;
-
-                    StarryboundServer.serverState = Util.ServerState.ShuttingDown;
                 }
 
                 if (consoleLine.Contains("TcpServer listening on: "))
                 {
-                    StarryboundServer.serverState = Util.ServerState.StartingProxy;
+                    StarryboundServer.serverState = ServerState.Ready;
                 }
 
                 if (consoleLine.Contains("Info: Client "))

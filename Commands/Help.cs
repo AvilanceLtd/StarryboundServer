@@ -35,6 +35,8 @@ namespace com.avilance.Starrybound.Commands
                 new Build(client), 
                 new Find(client),
                 new GroupC(client),
+                new UnbanCommand(client),
+                new VersionC(client),
                 new Home(client), 
                 new Item(client),
                 new Kick(client), 
@@ -53,9 +55,9 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
-            if (args.Length == 2)
+            if (args.Length == 1)
             {
-                string commandToFind = args[1];
+                string commandToFind = args[0];
                 foreach (CommandBase command in commands)
                 {
                     if (command.name.ToLower().Equals(commandToFind.ToLower()))

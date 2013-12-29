@@ -18,6 +18,8 @@ using System.Text;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using com.avilance.Starrybound.Util;
+using com.avilance.Starrybound.Extensions;
+using System.Threading;
 
 namespace com.avilance.Starrybound
 {
@@ -35,15 +37,30 @@ namespace com.avilance.Starrybound
 
         public static void SetupConfig()
         {
-            if (File.Exists(ConfigPath))
+            try
             {
-                StarryboundServer.serverConfig = ServerFile.Read(ConfigPath);
+                if (File.Exists(ConfigPath))
+                {
+                    StarryboundServer.serverConfig = ServerFile.Read(ConfigPath);
+                }
+                StarryboundServer.serverConfig.gamePort = StarryboundServer.config.serverPort;
+                StarryboundServer.privatePassword = Utils.GenerateSecureSalt();
+                StarryboundServer.serverConfig.serverPasswords = new string[] { StarryboundServer.privatePassword };
+                StarryboundServer.serverConfig.maxPlayers = StarryboundServer.config.maxClients + 10;
+                if (StarryboundServer.serverConfig.useDefaultWorldCoordinate)
+                {
+                    string[] spawnPlanet = StarryboundServer.serverConfig.defaultWorldCoordinate.Split(':');
+                    if (spawnPlanet.Length == 5) StarryboundServer.spawnPlanet = new WorldCoordinate(spawnPlanet[0], Convert.ToInt32(spawnPlanet[1]), Convert.ToInt32(spawnPlanet[2]), Convert.ToInt32(spawnPlanet[3]), Convert.ToInt32(spawnPlanet[4]), 0);
+                    else StarryboundServer.spawnPlanet = new WorldCoordinate(spawnPlanet[0], Convert.ToInt32(spawnPlanet[1]), Convert.ToInt32(spawnPlanet[2]), Convert.ToInt32(spawnPlanet[3]), Convert.ToInt32(spawnPlanet[4]), Convert.ToInt32(spawnPlanet[5]));
+                }
+                StarryboundServer.serverConfig.Write(ConfigPath);
             }
-            StarryboundServer.serverConfig.gamePort = StarryboundServer.config.serverPort;
-            StarryboundServer.privatePassword = Utils.GenerateSecureSalt();
-            StarryboundServer.serverConfig.serverPasswords = new string[] { StarryboundServer.privatePassword };
-            StarryboundServer.serverConfig.maxPlayers = StarryboundServer.config.maxClients + 10;
-            StarryboundServer.serverConfig.Write(ConfigPath);
+            catch(Exception e)
+            {
+                StarryboundServer.logFatal("Failed to parse starbound.config: " + e.ToString());
+                Thread.Sleep(5000);
+                Environment.Exit(8);
+            }
         }
     }
 

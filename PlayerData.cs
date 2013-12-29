@@ -27,6 +27,7 @@ namespace com.avilance.Starrybound
         public string ip;
         public uint id;
         public string uuid;
+        public string serverName;
 
         public bool sentMotd = false;
         public bool freeFuel = false;
@@ -56,6 +57,21 @@ namespace com.avilance.Starrybound
                 if (color == null) color = "";
 
                 return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name; 
+            }
+            set { return; }
+        }
+
+        public string format
+        {
+            get
+            {
+                string prefix = group.prefix;
+                string color = group.nameColor;
+
+                if (prefix == null) prefix = "";
+                if (color == null) color = "";
+
+                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "");
             }
             set { return; }
         }

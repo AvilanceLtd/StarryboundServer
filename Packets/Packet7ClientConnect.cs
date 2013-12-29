@@ -46,33 +46,7 @@ namespace com.avilance.Starrybound.Packets
             this.client.playerData.name = name;
             this.client.playerData.account = account;
 
-            string sAssetDigest = Utils.ByteArrayToString(assetDigest);
-            StarryboundServer.logDebug("AssetDigest", "[" + this.client.playerData.client + "] [" + sAssetDigest + "]");
-            if(StarryboundServer.config.useAssetDigest)
-            {
-                if(sAssetDigest != StarryboundServer.config.assetDigest)
-                {
-                    this.client.rejectPreConnected("Please reinstall Starbound to connect to this server.");
-                    return false;
-                }
-            }
-
             User userPData = Users.GetUser(name, this.client.playerData.uuid);
-
-            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
-
-            if (reasonExpiry.Length == 2)
-            {
-                this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
-                return false;
-            }
-
-            if (StarryboundServer.clients.ContainsKey(name))
-            {
-                this.client.rejectPreConnected("This username is already in use.");
-                return false;
-            }
-
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
                 if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
@@ -80,6 +54,30 @@ namespace com.avilance.Starrybound.Packets
                     this.client.rejectPreConnected("The server is full. Please try again later.");
                     return false;
                 }
+            }
+
+            string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
+            if (reasonExpiry.Length == 2)
+            {
+                this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
+                return false;
+            }
+
+            string sAssetDigest = Utils.ByteArrayToString(assetDigest);
+            StarryboundServer.logDebug("AssetDigest", "[" + this.client.playerData.client + "] [" + sAssetDigest + "]");
+            if (!StarryboundServer.config.allowModdedClients)
+            {
+                if (sAssetDigest != StarryboundServer.unmoddedClientDigest)
+                {
+                    this.client.rejectPreConnected("Modded client detected: You cannot modify or add asset files or mods. Please delete your entire Starbound folder and reinstall Starbound to join.");
+                    return false;
+                }
+            }
+
+            if (StarryboundServer.clients.ContainsKey(name))
+            {
+                this.client.rejectPreConnected("This username is already in use.");
+                return false;
             }
 
             if (String.IsNullOrWhiteSpace(this.client.playerData.name))
@@ -107,6 +105,12 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
+            if(!String.IsNullOrEmpty(account))
+            {
+                this.client.rejectPreConnected("You need clear the server account field of all text.");
+                return false;
+            }
+
             try
             {
                 PlayerData pData = this.client.playerData;
@@ -119,13 +123,13 @@ namespace com.avilance.Starrybound.Packets
 
                 if (userPData.name != pData.name)
                 {
-                    this.client.rejectPreConnected("Your character data is corrupt. Unable to connect to server.");
+                    this.client.rejectPreConnected("Connection Failed: Your server side user data is corrupt.");
                     return false;
                 }
             }
             catch (Exception)
             {
-                this.client.rejectPreConnected("The server was unable to accept your connection at this time.\nPlease try again later.");
+                this.client.rejectPreConnected("Connection Failed: A internal server error occurred (2)");
                 return false;
             }
 

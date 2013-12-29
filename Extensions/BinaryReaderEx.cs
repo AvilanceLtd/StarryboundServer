@@ -47,17 +47,23 @@ namespace com.avilance.Starrybound.Extensions
         public static WorldCoordinate ReadStarWorldCoordinate(this BinaryReader read)
         {
             string sector = read.ReadStarString();
-            if (sector != "")
+            if (StarryboundServer.config.sectors.Contains(sector))
             {
                 int x = read.ReadInt32BE();
                 int y = read.ReadInt32BE();
                 int z = read.ReadInt32BE();
                 int planet = read.ReadInt32BE();
+                if (planet < 0 || planet > 256)
+                    throw new IndexOutOfRangeException("WorldCoordinate Planet out of range: " + planet);
                 int satellite = read.ReadInt32BE();
+                if (satellite < 0 || satellite > 256)
+                    throw new IndexOutOfRangeException("WorldCoordinate Satellite out of range: " + satellite);
                 return new WorldCoordinate(sector, x, y, z, planet, satellite);
             }
+            else if (String.IsNullOrEmpty(sector))
+                return new WorldCoordinate("", 0, 0, 0, 0, 0);
             else
-                return null;
+                throw new IndexOutOfRangeException("WorldCoordinate Sector out of range: " + sector);
         }
 
         public static SystemCoordinate ReadStarSystemCoordinate(this BinaryReader read)
@@ -93,11 +99,13 @@ namespace com.avilance.Starrybound.Extensions
             byte unk = celestialRead.ReadByte();
             SystemCoordinate coords = celestialRead.ReadStarSystemCoordinate(); //Seems to be the current system coords.
             WorldCoordinate curLoc = celestialRead.ReadStarWorldCoordinate();
+            if (String.IsNullOrEmpty(curLoc._syscoord._sector)) curLoc = null;
             if (curLoc != null)
             {
                 returnList.Add("loc", curLoc);
             }
             WorldCoordinate curHome = celestialRead.ReadStarWorldCoordinate();
+            if (String.IsNullOrEmpty(curHome._syscoord._sector)) curHome = null;
             if (curHome != null)
             {
                 returnList.Add("home", curHome);

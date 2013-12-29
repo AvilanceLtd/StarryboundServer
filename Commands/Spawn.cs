@@ -12,20 +12,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
+using com.avilance.Starrybound.Util;
+using com.avilance.Starrybound.Extensions;
 
 namespace com.avilance.Starrybound.Commands
 {
-    class AdminChat : CommandBase
+    class Spawn : CommandBase
     {
-        public AdminChat(Client client)
+        public Spawn(Client client)
         {
-            this.name = "admin";
-            this.HelpText = "<message>: Sends a message to all online admins.";
-            this.aliases = new string[] {"#<message>"};
-            this.Permission = new List<string>();
-            this.Permission.Add("chat.admin");
-            this.Permission.Add("e:admin.chat");
+            this.name = "spawn";
+            this.HelpText = " Warps your ship to the spawn planet.";
 
             this.client = client;
             this.player = client.playerData;
@@ -35,26 +34,20 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            string message = string.Join(" ", args).Trim();
-
-            if (message == null || message.Length < 1) { showHelpText(); return false; }
-
-            if (this.player.group.hasPermission("admin.chat"))
+            if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.spawnPlanet != null)
             {
-                message = "^#f75d5d;[ADMIN] " + this.player.name + ": " + message;
-            }
-            else
-            {
-                message = "^#ff00c7;Message to admins from " + this.player.name + ": " + message;
-            }
+                MemoryStream packetWarp = new MemoryStream();
+                BinaryWriter packetWrite = new BinaryWriter(packetWarp);
 
-            var buffer = StarryboundServer.clients.Values.ToList();
-            foreach (Client client in buffer)
-            {
-                if (client.playerData.group.hasPermission("admin.chat") || client == this.client) client.sendChatMessage(message);
+                packetWrite.WriteBE((uint)WarpType.MoveShip);
+                packetWrite.Write(StarryboundServer.spawnPlanet);
+                packetWrite.WriteStarString("");
+                client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
+                this.client.sendCommandMessage("Teleporting your ship to the spawn planet.");
+                return true;
             }
-
-            return true;
+            this.client.sendCommandMessage("Spawn planet not enabled.");
+            return false;
         }
     }
 }
