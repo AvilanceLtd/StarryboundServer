@@ -23,31 +23,43 @@ namespace com.avilance.Starrybound
 {
     class ListenerThread
     {
+        public TcpListener tcpSocket;
+
         public void run()
         {
-            IPAddress localAdd = IPAddress.Parse(StarryboundServer.config.proxyIP);
-            TcpListener serversocket = new TcpListener(localAdd, StarryboundServer.config.proxyPort);
-
-            serversocket.Start();
-            StarryboundServer.logInfo("Proxy server has been started on " + localAdd.ToString() + ":" + StarryboundServer.config.proxyPort);
-
             try
             {
-                while (true)
+                IPAddress localAdd = IPAddress.Parse(StarryboundServer.config.proxyIP);
+                tcpSocket = new TcpListener(localAdd, StarryboundServer.config.proxyPort);
+                tcpSocket.Start();
+
+                StarryboundServer.logInfo("Proxy server has been started on " + localAdd.ToString() + ":" + StarryboundServer.config.proxyPort);
+                StarryboundServer.serverState = ServerState.ListenerReady;
+
+                try
                 {
-                    TcpClient clientSocket = serversocket.AcceptTcpClient();
-                    new Thread(new ThreadStart(new Client(clientSocket).run)).Start();
+                    while (true)
+                    {
+                        TcpClient clientSocket = tcpSocket.AcceptTcpClient();
+                        new Thread(new ThreadStart(new Client(clientSocket).run)).Start();
+                    }
                 }
+                catch (ThreadAbortException) { }
+                catch (Exception e)
+                {
+                    StarryboundServer.logException("ListenerThread Exception: " + e.ToString());
+                }
+
+                tcpSocket.Stop();
+                StarryboundServer.logFatal("ListenerThread has failed - No new connections will be possible.");
+                StarryboundServer.serverState = ServerState.Crashed;
             }
             catch (ThreadAbortException) { }
-            catch (Exception e)
+            catch(SocketException e)
             {
-                StarryboundServer.logException("ListenerThread Exception: " + e.ToString());
+                StarryboundServer.logFatal("TcpListener has failed to start: " + e.Message);
+                StarryboundServer.serverState = ServerState.Crashed;
             }
-
-            serversocket.Stop();
-            StarryboundServer.logFatal("ListenerThread has failed - No new connections will be possible.");
-            StarryboundServer.serverState = ServerState.Crashed;
         }
     }
 }
