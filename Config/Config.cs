@@ -98,6 +98,7 @@ namespace com.avilance.Starrybound
         public string[] bannedUsernames = new string[] { "admin", "developer", "moderator", "owner" };
 
         public bool freeFuelForNewPlayers = true;
+        public string[] starterItems = new string[] { "" };
 
         public bool spawnWorldProtection = false;
         public string buildErrorMessage = "You do not have permission to build on this server. You can apply for build rights on our forum.";

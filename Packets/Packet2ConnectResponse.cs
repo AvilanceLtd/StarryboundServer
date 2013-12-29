@@ -73,7 +73,7 @@ namespace com.avilance.Starrybound.Packets
 
             StarryboundServer.sendGlobalMessage(String.Format("{0}{1} has joined the server!", player.name, geoip_prefix));
             this.client.state = ClientState.Connected;
-            StarryboundServer.logInfo(String.Format("[{0}][{1}] joined with UUID {2}{3}", this.client.playerData.client, this.client.playerData.id, player.uuid, 
+            StarryboundServer.logInfo(String.Format("[{0}][{1}] joined with UUID [{2}]{3}", this.client.playerData.client, this.client.playerData.ip, player.uuid, 
                                       geoip_prefix != "" ? String.Format(" from {0}", geoip_prefix) : ""));
 
             return true;

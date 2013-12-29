@@ -35,7 +35,7 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            StarryboundServer.serverState = ServerState.Shutdown;
+            StarryboundServer.serverState = ServerState.GracefulShutdown;
             return true;
         }
     }
@@ -60,12 +60,14 @@ namespace com.avilance.Starrybound.Commands
             if (StarryboundServer.restartTime != 0)
             {
                 StarryboundServer.sendGlobalMessage("^#f75d5d;The server restart has been aborted by " + this.player.name);
+                StarryboundServer.logWarn("The server restart has been aborted.");
                 StarryboundServer.serverState = ServerState.Running;
                 StarryboundServer.restartTime = 0;
             }
             else
             {
                 StarryboundServer.sendGlobalMessage("^#f75d5d;The server will restart in 30 seconds. We will be back shortly.");
+                StarryboundServer.logWarn("The server will restart in 30 seconds.");
                 StarryboundServer.restartTime = Utils.getTimestamp() + 30;
             }
 

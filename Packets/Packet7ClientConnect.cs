@@ -42,11 +42,11 @@ namespace com.avilance.Starrybound.Packets
             string account = stream.ReadStarString();
 
             // Identify player to server
-            this.client.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
+            this.client.playerData.uuid = Utils.ByteArrayToString(Utils.HashUUID(UUID)).ToLower();
             this.client.playerData.name = name;
             this.client.playerData.account = account;
 
-            User userPData = Users.GetUser(name, this.client.playerData.uuid);
+            User userPData = Users.GetUser(name, this.client.playerData.uuid, this.client.playerData.ip);
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
                 if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
@@ -108,7 +108,7 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
-            if (!this.client.playerData.group.hasPermission("admin.bypassban"))
+            if (userPData.getGroup().hasPermission("admin.bypassban"))
             {
                 foreach (string bannedUnamePhrase in StarryboundServer.config.bannedUsernames)
                 {
@@ -135,6 +135,7 @@ namespace com.avilance.Starrybound.Packets
                 pData.lastOnline = userPData.lastOnline;
                 pData.group = userPData.getGroup();
                 pData.freeFuel = userPData.freeFuel;
+                pData.receivedStarterKit = userPData.receivedStarterKit;
 
                 if (userPData.uuid != pData.uuid)
                 {

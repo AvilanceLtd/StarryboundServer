@@ -10,12 +10,6 @@ namespace com.avilance.Starrybound
 {
     internal static class NativeMethods
     {
-        internal static bool ConsoleCtrlCheck()
-        {
-            StarryboundServer.doShutdown(true);
-            return true;
-        }
-
         #region unmanaged
         // Declare the SetConsoleCtrlHandler function
         // as external and receiving a delegate.
