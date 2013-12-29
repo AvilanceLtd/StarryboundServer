@@ -193,7 +193,8 @@ namespace com.avilance.Starrybound
             serverState = ServerState.Running;
 
             //Keep this last!
-            runCallback();
+            if (config.enableCallback)
+                runCallback();
         }
 
         public static void crashMonitor()
@@ -394,33 +395,28 @@ namespace com.avilance.Starrybound
         {
             while (true)
             {
-                if (config.enableCallback)
+                logInfo("Sending callback data to master server.");
+                try
                 {
-                    logInfo("Sending callback data to master server.");
+                    string json = "json={\"version\":\"" + VersionNum + "\"," +
+                                  "\"protocol\":\"" + ProtocolVersion + "\"," +
+                                  "\"mono\":\"" + IsMono + "\"," +
+                                  "\"proxyPort\":\"" + config.proxyPort + "\"," +
+                                  "\"maxSlots\":\"" + config.maxClients + "\"," +
+                                  "\"clientCount\":\"" + clientCount + "\"}";
+                    byte[] buffer = Encoding.UTF8.GetBytes(json);
 
-                    try
-                    {
-                        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://callback.avilance.com/");
-                        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-                        httpWebRequest.Method = "POST";
-
-                        using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-                        {
-                            string json = "json={\"version\":\"" + VersionNum + "\"," +
-                                          "\"protocol\":\"" + ProtocolVersion + "\"," +
-                                          "\"mono\":\"" + IsMono + "\"," +
-                                          "\"proxyPort\":\"" + config.proxyPort + "\"," +
-                                          "\"maxSlots\":\"" + config.maxClients + "\"," +
-                                          "\"clientCount\":\"" + clientCount + "\"}";
-
-                            streamWriter.Write(json);
-                            streamWriter.Flush();
-                        }
-                    }
-                    catch(Exception e)
-                    {
-                        logDebug("Callback", e.ToString());
-                    }
+                    WebRequest request = WebRequest.Create("http://callback.avilance.com/");
+                    request.ContentType = "application/x-www-form-urlencoded";
+                    request.Method = "POST";
+                    request.ContentLength = buffer.Length;
+                    Stream streamWriter = request.GetRequestStream();
+                    streamWriter.Write(buffer, 0, buffer.Length);
+                    streamWriter.Close();
+                }
+                catch (Exception e)
+                {
+                    logDebug("Callback", e.ToString());
                 }
                 Thread.Sleep(1000 * 60 * 15);
             }
