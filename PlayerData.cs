@@ -31,6 +31,7 @@ namespace com.avilance.Starrybound
 
         public bool sentMotd = false;
         public bool freeFuel = false;
+        public bool receivedStarterKit = false;
 
         public Group group;
 

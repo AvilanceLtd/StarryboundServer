@@ -123,6 +123,7 @@
     <Compile Include="Commands\ShipAccess.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Spawn.cs" />
+    <Compile Include="Commands\StarterItems.cs" />
     <Compile Include="Commands\Uptime.cs" />
     <Compile Include="Commands\VersionC.cs" />
     <Compile Include="Commands\WarpShip.cs" />

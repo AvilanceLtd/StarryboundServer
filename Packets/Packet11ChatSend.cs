@@ -89,6 +89,10 @@ namespace com.avilance.Starrybound.Packets
                             new Fuel(this.client).doProcess(args);
                             break;
 
+                        case "starteritems":
+                            new StarterItems(this.client).doProcess(args);
+                            break;
+
                         case "admin":
                             new AdminChat(this.client).doProcess(args);
                             break;

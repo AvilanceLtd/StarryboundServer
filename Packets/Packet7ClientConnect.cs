@@ -108,7 +108,7 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
-            if (!this.client.playerData.group.hasPermission("admin.bypassban"))
+            if (userPData.getGroup().hasPermission("admin.bypassban"))
             {
                 foreach (string bannedUnamePhrase in StarryboundServer.config.bannedUsernames)
                 {
@@ -135,6 +135,7 @@ namespace com.avilance.Starrybound.Packets
                 pData.lastOnline = userPData.lastOnline;
                 pData.group = userPData.getGroup();
                 pData.freeFuel = userPData.freeFuel;
+                pData.receivedStarterKit = userPData.receivedStarterKit;
 
                 if (userPData.name != pData.name)
                 {
