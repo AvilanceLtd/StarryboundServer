@@ -40,6 +40,8 @@ namespace com.avilance.Starrybound
         public static StarboundVersion starboundVersion = new StarboundVersion();
         public static GeoIPCountry Geo;
         public static int parentProcessId;
+
+        public static string authCode;
         
         // Dictionary<string, ClientThread>
         // string           Username        Unique username for client, MUST be lowercase

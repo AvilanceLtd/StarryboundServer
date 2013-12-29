@@ -66,7 +66,39 @@ namespace com.avilance.Starrybound.Permissions
 
         public static void SetupUsers()
         {
-            if (!Directory.Exists(UsersPath)) Directory.CreateDirectory(UsersPath);
+            if (!Directory.Exists(UsersPath))
+            {
+                Directory.CreateDirectory(UsersPath);
+                GenerateSAKey();
+            }
+            else if (!Directory.EnumerateFileSystemEntries(UsersPath).Any()) GenerateSAKey();
+            else if (File.Exists(Path.Combine(StarryboundServer.SavePath, "authcode.txt"))) GenerateSAKey();
+        }
+
+        public static void GenerateSAKey()
+        {
+            if (!File.Exists(Path.Combine(StarryboundServer.SavePath, "authcode.txt")))
+            {
+                var r = new Random((int)DateTime.Now.ToBinary());
+                StarryboundServer.authCode = r.Next(100000, 10000000).ToString();
+
+                using (var tw = new StreamWriter(Path.Combine(StarryboundServer.SavePath, "authcode.txt")))
+                {
+                    tw.WriteLine(StarryboundServer.authCode);
+                }
+            }
+            else
+            {
+                using (var tr = new StreamReader(Path.Combine(StarryboundServer.SavePath, "authcode.txt")))
+                {
+                    StarryboundServer.authCode = tr.ReadLine();
+                }
+            }
+
+            StarryboundServer.logWarn("************************************************************************");
+            StarryboundServer.logWarn("Important notice: To become SuperAdmin, you need to join the game and type /auth " + StarryboundServer.authCode);
+            StarryboundServer.logWarn("This token will display until disabled by verification and is usable by any player.");
+            StarryboundServer.logWarn("************************************************************************");
         }
 
         public static User GetUser(string name, string uuid, string ip)

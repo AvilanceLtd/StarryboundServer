@@ -206,6 +206,11 @@ namespace com.avilance.Starrybound.Packets
                             new Help(this.client).doProcess(args);
                             break;
 
+                        case "auth":
+                            if (String.IsNullOrWhiteSpace(StarryboundServer.authCode)) goto default;
+                            else new Auth(this.client).doProcess(args);
+                            break;
+
                         default:
                             this.client.sendCommandMessage("Command " + cmd + " not found.");
                             break;
