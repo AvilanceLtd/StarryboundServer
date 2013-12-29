@@ -402,32 +402,31 @@ namespace com.avilance.Starrybound
             {
                 if (config.enableCallback)
                 {
-                    logInfo("Sending callback data to master server");
+                    logInfo("Sending callback data to master server.");
 
-                    var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://callback.avilance.com/");
-                    httpWebRequest.ContentType = "application/x-www-form-urlencoded";
-                    httpWebRequest.Method = "POST";
-
-                    using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                    try
                     {
-                        string json = "json={\"version\":\"" + VersionNum + "\"," +
-                                      "\"protocol\":\"" + ProtocolVersion + "\"," +
-                                      "\"mono\":\"" + IsMono + "\"," +
-                                      "\"proxyPort\":\"" + config.proxyPort + "\"," +
-                                      "\"maxSlots\":\"" + config.maxClients + "\"," +
-                                      "\"clientCount\":\"" + clientCount + "\"}";
+                        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://callback.avilance.com/");
+                        httpWebRequest.ContentType = "application/x-www-form-urlencoded";
+                        httpWebRequest.Method = "POST";
 
-                        streamWriter.Write(json);
-                        streamWriter.Flush();
-                        streamWriter.Close();
+                        using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                        {
+                            string json = "json={\"version\":\"" + VersionNum + "\"," +
+                                          "\"protocol\":\"" + ProtocolVersion + "\"," +
+                                          "\"mono\":\"" + IsMono + "\"," +
+                                          "\"proxyPort\":\"" + config.proxyPort + "\"," +
+                                          "\"maxSlots\":\"" + config.maxClients + "\"," +
+                                          "\"clientCount\":\"" + clientCount + "\"}";
+
+                            streamWriter.Write(json);
+                            streamWriter.Flush();
+                        }
                     }
-
-                    /*WebResponse response = httpWebRequest.GetResponse();
-
-                    StreamReader reader = new StreamReader(response.GetResponseStream());
-                    string responseFromServer = reader.ReadToEnd();
-
-                    logInfo("Server said: " + responseFromServer);*/
+                    catch(Exception e)
+                    {
+                        logDebug("Callback", e.ToString());
+                    }
                 }
                 Thread.Sleep(1000 * 60 * 15);
             }
