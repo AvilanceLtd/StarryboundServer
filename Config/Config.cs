@@ -107,6 +107,8 @@ namespace com.avilance.Starrybound
 
         public string[] projectileBlacklist = new string[] { "" };
         public string[] projectileBlacklistSpawn = new string[] { "" };
+
+        public bool enableCallback = true;
         
         public static ConfigFile Read(string path) {
             if (!File.Exists(path))
