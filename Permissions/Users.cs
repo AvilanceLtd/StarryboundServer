@@ -95,10 +95,10 @@ namespace com.avilance.Starrybound.Permissions
                 }
             }
 
-            StarryboundServer.logWarn("***********************************************************************************************");
+            StarryboundServer.logWarn("************************************************************************");
             StarryboundServer.logWarn("Important notice: To become SuperAdmin, you need to join the game and type /auth " + StarryboundServer.authCode);
             StarryboundServer.logWarn("This token will display until disabled by verification and is usable by any player.");
-            StarryboundServer.logWarn("***********************************************************************************************");
+            StarryboundServer.logWarn("************************************************************************");
         }
 
         public static User GetUser(string name, string uuid, string ip)
