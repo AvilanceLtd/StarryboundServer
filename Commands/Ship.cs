@@ -51,7 +51,13 @@ namespace com.avilance.Starrybound.Commands
             }
             else
             {
+                PlayerData targetPlayer = StarryboundServer.clients[player].playerData;
                 if (!hasPermission(true)) { permissionError(2); return false; }
+                if (!this.player.canAccessShip(targetPlayer))
+                {
+                    this.client.sendCommandMessage("You cannot access this player's ship due to their ship's access settings.");
+                    return false;
+                }
                 this.client.sendCommandMessage("Teleporting to " + player + " ship!");
 
                 warp = (uint)WarpType.WarpToPlayerShip;

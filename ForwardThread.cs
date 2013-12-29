@@ -175,6 +175,22 @@ namespace com.avilance.Starrybound
                                 WorldCoordinate coord = packetData.ReadStarWorldCoordinate();
                                 string player = packetData.ReadStarString();
                                 WarpType cmd = (WarpType)warp;
+                                if (cmd == WarpType.WarpToPlayerShip)
+                                {
+                                    if (StarryboundServer.clients.ContainsKey(player.ToLower()))
+                                    {
+                                        Client targetPlayer = StarryboundServer.clients[player.ToLower()];
+                                        if (targetPlayer != null)
+                                        {
+                                            if (!this.client.playerData.canAccessShip(targetPlayer.playerData))
+                                            {
+                                                this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to his ship access settings.");
+                                                StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + targetPlayer.playerData.name + "'s ship.");
+                                                returnData = false;
+                                            }
+                                        }
+                                    }
+                                }
                                 StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + warp + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)

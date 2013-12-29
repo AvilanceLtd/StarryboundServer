@@ -48,7 +48,7 @@ namespace com.avilance.Starrybound.Commands
             BinaryWriter packetWrite = new BinaryWriter(packet);
 
             packetWrite.WriteStarString("solariumore");
-            packetWrite.WriteVarUInt32(30);
+            packetWrite.WriteVarUInt32(31); // Seems like it always gives 1 less than the amount entered, so we need 31 to give 30.
             packetWrite.Write((byte)0); //0 length Star::Variant
             client.sendClientPacket(Packet.GiveItem, packet.ToArray());
             client.sendCommandMessage("You have received 30 Solarium Ore as free starter fuel!");
