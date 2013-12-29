@@ -207,7 +207,7 @@ namespace com.avilance.Starrybound.Packets
                             break;
 
                         case "auth":
-                            if (!String.IsNullOrWhiteSpace(StarryboundServer.authCode)) goto default;
+                            if (String.IsNullOrWhiteSpace(StarryboundServer.authCode)) goto default;
                             else new Auth(this.client).doProcess(args);
                             break;
 
