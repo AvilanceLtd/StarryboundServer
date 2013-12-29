@@ -25,6 +25,8 @@ namespace com.avilance.Starrybound.Commands
         {
             this.name = "spawn";
             this.HelpText = " Warps your ship to the spawn planet.";
+            this.Permission = new List<string>();
+            this.Permission.Add("world.spawn");
 
             this.client = client;
             this.player = client.playerData;
