@@ -222,13 +222,16 @@ namespace com.avilance.Starrybound
                                             {
                                                 if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) && StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
                                                 {
+                                                    MemoryStream packet = new MemoryStream();
+                                                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                                                    packetWrite.WriteVarInt32(entityId);
+                                                    packetWrite.Write(false);
+                                                    this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
                                                     returnData = false;
                                                 }
                                             }
-                                            else
-                                                returnData = false;
                                         }
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "]");
+                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "][" + returnData + "]");
                                     }
                                     else if (type != EntityType.Effect)
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
@@ -353,11 +356,14 @@ namespace com.avilance.Starrybound
                             {
                                 byte[] sky = packetData.ReadStarByteArray();
                                 byte[] serverWeather = packetData.ReadStarByteArray();
-                                WorldCoordinate coords = Utils.findGlobalCoords(sky);
-                                if (coords != null && this.client.playerData.loc == null)
+                                if (this.client.playerData.loc == null)
                                 {
-                                    this.client.playerData.loc = coords;
-                                    StarryboundServer.logDebug("EnvUpdate", "[" + this.client.playerData.client + "] CurLoc:[" + this.client.playerData.loc.ToString() + "]");
+                                    WorldCoordinate coords = Utils.findGlobalCoords(sky);
+                                    if (coords != null)
+                                    {
+                                        this.client.playerData.loc = coords;
+                                        StarryboundServer.logDebug("EnvUpdate", "[" + this.client.playerData.client + "] CurLoc:[" + this.client.playerData.loc.ToString() + "]");
+                                    }
                                 }
                             }
                             else if (packetID == Packet.ClientContextUpdate)
@@ -424,7 +430,7 @@ namespace com.avilance.Starrybound
                             {
                                 MemoryStream sendStream = new MemoryStream();
                                 BinaryWriter sendWriter = new BinaryWriter(sendStream);
-                                bool test = false;
+                                bool test = true;
                                 while (true)
                                 {
                                     EntityType type = (EntityType)packetData.Read();
@@ -435,8 +441,10 @@ namespace com.avilance.Starrybound
                                     {
                                         byte[] buffer = new byte[16];
                                         Buffer.BlockCopy(entityData, 0, buffer, 0, 16);
+                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "] Old:[" + Utils.ByteArrayToString(buffer) + "]");
                                         buffer = Utils.HashUUID(buffer);
                                         Buffer.BlockCopy(buffer, 0, entityData, 0, 16);
+                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "] New:[" + Utils.ByteArrayToString(buffer) + "]");
                                         returnData = test = false;
                                     }
                                     sendWriter.Write((byte)type);
