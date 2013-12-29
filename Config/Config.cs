@@ -100,8 +100,7 @@ namespace com.avilance.Starrybound
 
         public string[] sectors = new string[] { "alpha", "beta", "gamma", "delta", "sectorx" };
 
-        public bool useAssetDigest = false;
-        public string assetDigest = "515E04DF26D1E9777FCFB32D7789DDAF6EF733EFC3BEB798454DAB3BE6668719";
+        public bool allowModdedClients = true;
 
         public bool enableGeoIP = false;
         public int maxFailedConnections = 3;

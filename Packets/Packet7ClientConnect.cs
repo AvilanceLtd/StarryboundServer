@@ -65,9 +65,9 @@ namespace com.avilance.Starrybound.Packets
 
             string sAssetDigest = Utils.ByteArrayToString(assetDigest);
             StarryboundServer.logDebug("AssetDigest", "[" + this.client.playerData.client + "] [" + sAssetDigest + "]");
-            if (StarryboundServer.config.useAssetDigest)
+            if (!StarryboundServer.config.allowModdedClients)
             {
-                if (sAssetDigest != StarryboundServer.config.assetDigest)
+                if (sAssetDigest != StarryboundServer.unmoddedClientDigest)
                 {
                     this.client.rejectPreConnected("Modded client detected: You cannot modify or add asset files or mods. Please delete your entire Starbound folder and reinstall Starbound to join.");
                     return false;
