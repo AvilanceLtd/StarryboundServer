@@ -195,20 +195,7 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
-                                if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
-                                {
-                                    if (this.client.playerData.loc != null)
-                                    {
-                                        if ((StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc)) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
-                                        {
-                                            returnData = false;
-                                        }
-                                    }
-                                    else
-                                        returnData = false;
-                                }
-                                else if (!this.client.playerData.hasPermission("client.build")) returnData = false;
-                                else if (!this.client.playerData.canBuild) returnData = false;
+                                if(!this.client.playerData.canIBuild()) returnData = false;
                             }
                             else if (packetID == Packet.EntityCreate)
                             {
@@ -249,6 +236,18 @@ namespace com.avilance.Starrybound
                                         }
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "][" + returnData + "]");
                                     }
+                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop)
+                                    {
+                                        if (!this.client.playerData.canIBuild())
+                                        {
+                                            MemoryStream packet = new MemoryStream();
+                                            BinaryWriter packetWrite = new BinaryWriter(packet);
+                                            packetWrite.WriteVarInt32(entityId);
+                                            packetWrite.Write(false);
+                                            this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                            returnData = false;
+                                        }
+                                    }
                                     else if (type != EntityType.Effect)
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
                                 }
@@ -257,8 +256,12 @@ namespace com.avilance.Starrybound
                             {
                                 while(true)
                                 {
-                                    int type = packetData.Read();
-                                    if (type == -1) break;
+                                    EntityType type = (EntityType)packetData.Read();
+                                    if (type == EntityType.EOF) break;
+                                    if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop)
+                                    {
+                                        if (!this.client.playerData.canIBuild()) returnData = false;
+                                    }
                                     byte[] entityData = packetData.ReadStarByteArray();
                                     StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "]");
                                 }

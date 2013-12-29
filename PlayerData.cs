@@ -91,6 +91,23 @@ namespace com.avilance.Starrybound
             return loc.Equals(otherPlayer.loc);
         }
 
+        public bool canIBuild()
+        {
+            if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
+            {
+                if (loc != null)
+                {
+                    if ((StarryboundServer.spawnPlanet.Equals(loc)) && !group.hasPermission("admin.spawnbuild") && !inPlayerShip)
+                        return false;
+                }
+                else
+                    return false;
+            }
+            else if (!hasPermission("client.build")) return false;
+            else if (!canBuild) return false;
+            return true;
+        }
+
         public bool canAccessShip(PlayerData otherPlayer)
         {
             if (this.hasPermission("admin.ignoreshipaccess")) return true; // Admins can bypass access control

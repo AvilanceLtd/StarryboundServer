@@ -268,7 +268,7 @@ namespace com.avilance.Starrybound.Util
         Object = 3,
         ItemDrop = 4,
         Projectile = 5,
-        Planet = 6,
+        Plant = 6,
         PlantDrop = 7,
         Effect = 8,
     }
