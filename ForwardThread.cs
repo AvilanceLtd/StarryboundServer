@@ -353,12 +353,12 @@ namespace com.avilance.Starrybound
                             {
                                 byte[] sky = packetData.ReadStarByteArray();
                                 byte[] serverWeather = packetData.ReadStarByteArray();
-                                /*WorldCoordinate coords = Utils.findGlobalCoords(sky);
-                                if (coords != null)
+                                WorldCoordinate coords = Utils.findGlobalCoords(sky);
+                                if (coords != null && this.client.playerData.loc == null)
                                 {
-                                    this.mParent.playerData.loc = coords;
-                                    StarryboundServer.logDebug("EnvUpdate", "[" + this.mParent.playerData.client + "] CurLoc:[" + this.mParent.playerData.loc.ToString() + "]");
-                                }*/
+                                    this.client.playerData.loc = coords;
+                                    StarryboundServer.logDebug("EnvUpdate", "[" + this.client.playerData.client + "] CurLoc:[" + this.client.playerData.loc.ToString() + "]");
+                                }
                             }
                             else if (packetID == Packet.ClientContextUpdate)
                             {
@@ -472,21 +472,18 @@ namespace com.avilance.Starrybound
 
                     #region Forward Packet
                     //Write data to dest
-                    lock (this.outgoing)
+                    this.outgoing.WriteVarUInt32((uint)packetID);
+                    if (compressed)
                     {
-                        this.outgoing.WriteVarUInt32((uint)packetID);
-                        if (compressed)
-                        {
-                            this.outgoing.WriteVarInt32(-packetSize);
-                            this.outgoing.Write(dataBuffer, 0, packetSize);
-                        }
-                        else
-                        {
-                            this.outgoing.WriteVarInt32(packetSize);
-                            this.outgoing.Write(dataBuffer, 0, packetSize);
-                        }
-                        this.outgoing.Flush();
+                        this.outgoing.WriteVarInt32(-packetSize);
+                        this.outgoing.Write(dataBuffer, 0, packetSize);
                     }
+                    else
+                    {
+                        this.outgoing.WriteVarInt32(packetSize);
+                        this.outgoing.Write(dataBuffer, 0, packetSize);
+                    }
+                    this.outgoing.Flush();
                     #endregion
 
                     //If disconnect was forwarded to client, lets disconnect.

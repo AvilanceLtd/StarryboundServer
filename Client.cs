@@ -124,13 +124,10 @@ namespace com.avilance.Starrybound
             if (this.kickTargetTimestamp != 0) return;
             try
             {
-                lock (this.cOut)
-                {
-                    this.cOut.WriteVarUInt32((uint)packetID);
-                    this.cOut.WriteVarInt32((int)packetData.Length);
-                    this.cOut.Write(packetData);
-                    this.cOut.Flush();
-                }
+                this.cOut.WriteVarUInt32((uint)packetID);
+                this.cOut.WriteVarInt32((int)packetData.Length);
+                this.cOut.Write(packetData);
+                this.cOut.Flush();
             }
             catch (Exception e)
             {
@@ -142,13 +139,10 @@ namespace com.avilance.Starrybound
         {
             try
             {
-                lock (this.sOut)
-                {
-                    this.sOut.WriteVarUInt32((uint)packetID);
-                    this.sOut.WriteVarInt32((int)packetData.Length);
-                    this.sOut.Write(packetData);
-                    this.sOut.Flush();
-                }
+                this.sOut.WriteVarUInt32((uint)packetID);
+                this.sOut.WriteVarInt32((int)packetData.Length);
+                this.sOut.Write(packetData);
+                this.sOut.Flush();
             }
             catch (Exception e)
             {

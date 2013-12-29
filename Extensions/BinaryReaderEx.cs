@@ -99,11 +99,13 @@ namespace com.avilance.Starrybound.Extensions
             byte unk = celestialRead.ReadByte();
             SystemCoordinate coords = celestialRead.ReadStarSystemCoordinate(); //Seems to be the current system coords.
             WorldCoordinate curLoc = celestialRead.ReadStarWorldCoordinate();
+            if (String.IsNullOrEmpty(curLoc._syscoord._sector)) curLoc = null;
             if (curLoc != null)
             {
                 returnList.Add("loc", curLoc);
             }
             WorldCoordinate curHome = celestialRead.ReadStarWorldCoordinate();
+            if (String.IsNullOrEmpty(curHome._syscoord._sector)) curHome = null;
             if (curHome != null)
             {
                 returnList.Add("home", curHome);

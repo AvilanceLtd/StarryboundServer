@@ -100,7 +100,9 @@ namespace com.avilance.Starrybound.Util
                             byte[] returnBytes = new byte[sector.Length + 21];
                             Buffer.BlockCopy(input, i - 1, returnBytes, 0, sector.Length + 21);
                             BinaryReader coords = new BinaryReader(new MemoryStream(returnBytes));
-                            return coords.ReadStarWorldCoordinate();
+                            WorldCoordinate rCoords = coords.ReadStarWorldCoordinate();
+                            if (String.IsNullOrEmpty(rCoords._syscoord._sector)) rCoords = null;
+                            return rCoords;
                         }
                     }
                 }

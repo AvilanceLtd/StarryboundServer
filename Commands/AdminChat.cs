@@ -48,13 +48,10 @@ namespace com.avilance.Starrybound.Commands
                 message = "^#ff00c7;Message to admins from " + this.player.name + ": " + message;
             }
 
-            lock (StarryboundServer.clients)
+            var buffer = StarryboundServer.clients.Values.ToList();
+            foreach (Client client in buffer)
             {
-                var buffer = StarryboundServer.clients.Values.ToList();
-                foreach (Client client in buffer)
-                {
-                    if (client.playerData.group.hasPermission("admin.chat") || client == this.client) client.sendChatMessage(message);
-                }
+                if (client.playerData.group.hasPermission("admin.chat") || client == this.client) client.sendChatMessage(message);
             }
 
             return true;

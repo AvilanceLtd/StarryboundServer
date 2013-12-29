@@ -375,25 +375,19 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage (string message) 
         {
-            lock (clients)
+            var buffer = clients.Values.ToList();
+            foreach (Client client in buffer)
             {
-                var buffer = clients.Values.ToList();
-                foreach (Client client in buffer)
-                {
-                    client.sendChatMessage("^#5dc4f4;" + message);
-                }
+                client.sendChatMessage("^#5dc4f4;" + message);
             }
         }
 
         public static void sendGlobalMessage(string message, string color)
         {
-            lock (clients)
+            var buffer = clients.Values.ToList();
+            foreach (Client client in buffer)
             {
-                var buffer = clients.Values.ToList();
-                foreach (Client client in buffer)
-                {
-                    client.sendChatMessage("^" + color + ";" + message);
-                }
+                client.sendChatMessage("^" + color + ";" + message);
             }
         }
     }
