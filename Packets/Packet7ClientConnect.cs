@@ -57,7 +57,7 @@ namespace com.avilance.Starrybound.Packets
             }
 
             string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
-            if (reasonExpiry.Length == 2)
+            if (reasonExpiry.Length == 2 && !userPData.getGroup().hasPermission("admin.bypassban"))
             {
                 this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
                 return false;
@@ -105,6 +105,18 @@ namespace com.avilance.Starrybound.Packets
                 {
                     this.client.rejectPreConnected("You may not have special characters in your name on this server.");
                     return false;
+                }
+            }
+
+            if (!this.client.playerData.group.hasPermission("admin.bypassban"))
+            {
+                foreach (string bannedUnamePhrase in StarryboundServer.config.bannedUsernames)
+                {
+                    if (this.client.playerData.name.Contains(bannedUnamePhrase))
+                    {
+                        this.client.rejectPreConnected("Your name contains a phrase that is banned on this server. (" + bannedUnamePhrase + ")");
+                        return false;
+                    }
                 }
             }
 
