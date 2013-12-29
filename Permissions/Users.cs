@@ -90,7 +90,7 @@ namespace com.avilance.Starrybound.Permissions
             }
             else
             {
-                User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, true, true);
+                User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, false, false);
                 Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                 return user;
