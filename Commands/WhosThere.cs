@@ -24,7 +24,7 @@ namespace com.avilance.Starrybound.Commands
             this.HelpText = ": shows a list of all players in this world.";
             
             this.Permission = new List<string>();
-            this.Permission.Add("world.listplayers");
+            this.Permission.Add("client.whosthere");
 
             this.player = client.playerData;
             this.client = client;
@@ -32,6 +32,8 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (!hasPermission()) { permissionError(); return false; }
+
             string list = "";
             var buffer = StarryboundServer.clients.Values.ToList();
             foreach (Client otherClient in buffer)

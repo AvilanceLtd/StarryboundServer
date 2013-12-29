@@ -185,6 +185,16 @@ namespace com.avilance.Starrybound.Packets
                             new GroupC(this.client).doProcess(args);
                             break;
 
+                            /*
+                        case "sethome":
+                            new SetHome(this.client).doProcess(args);
+                            break;
+                             */
+
+                        case "shipaccess":
+                            new ShipAccess(this.client).doProcess(args);
+                            break;
+
                         case "help":
                         case "commands":
                         case "commandlist":

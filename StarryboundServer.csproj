@@ -117,8 +117,10 @@
     <Compile Include="Commands\Kick.cs" />
     <Compile Include="Commands\Mute.cs" />
     <Compile Include="Commands\Home.cs" />
+    <Compile Include="Commands\SetHome.cs" />
     <Compile Include="Commands\Ship.cs" />
     <Compile Include="Commands\List.cs" />
+    <Compile Include="Commands\ShipAccess.cs" />
     <Compile Include="Commands\Shutdown.cs" />
     <Compile Include="Commands\Spawn.cs" />
     <Compile Include="Commands\Uptime.cs" />

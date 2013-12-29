@@ -46,6 +46,10 @@ namespace com.avilance.Starrybound
         public bool isMuted = false;
         public bool canBuild = true;
 
+        public bool privateShip = false;
+        public List<string> shipWhitelist = new List<string>();
+        public List<string> shipBlacklist = new List<string>();
+
         public string formatName 
         {
             get 
@@ -56,7 +60,7 @@ namespace com.avilance.Starrybound
                 if (prefix == null) prefix = "";
                 if (color == null) color = "";
 
-                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name; 
+                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name+"^#656b6a;"; 
             }
             set { return; }
         }
@@ -85,6 +89,20 @@ namespace com.avilance.Starrybound
         public bool isInSameWorldAs(PlayerData otherPlayer)
         {
             return loc.Equals(otherPlayer.loc);
+        }
+
+        public bool canAccessShip(PlayerData otherPlayer)
+        {
+            if (this.hasPermission("admin.ignoreshipaccess")) return true; // Admins can bypass access control
+            if (otherPlayer.shipBlacklist.Contains(this.name)) return false; // Player is in blacklist
+
+            if (otherPlayer.privateShip) // Ship is on private mode
+            {
+                if (otherPlayer.shipWhitelist.Contains(this.name)) return true; // Player is in whitelist
+                else return false; // Player is NOT in whitelist
+            }
+            
+            else return true; // Ship is on public mode
         }
     }
 }

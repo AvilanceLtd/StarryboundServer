@@ -74,10 +74,13 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
-            if (StarryboundServer.clients.ContainsKey(name))
+            foreach (string nameToCheck in StarryboundServer.clients.Keys)
             {
-                this.client.rejectPreConnected("This username is already in use.");
-                return false;
+                if (nameToCheck.ToLower() == name.ToLower())
+                {
+                    this.client.rejectPreConnected("This username is already in use.");
+                    return false;
+                }
             }
 
             if (String.IsNullOrWhiteSpace(this.client.playerData.name))
