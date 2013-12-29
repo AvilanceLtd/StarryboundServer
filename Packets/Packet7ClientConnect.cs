@@ -46,7 +46,7 @@ namespace com.avilance.Starrybound.Packets
             this.client.playerData.name = name;
             this.client.playerData.account = account;
 
-            User userPData = Users.GetUser(name, this.client.playerData.uuid);
+            User userPData = Users.GetUser(name, this.client.playerData.uuid, this.client.playerData.ip);
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
                 if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
