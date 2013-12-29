@@ -60,7 +60,7 @@ namespace com.avilance.Starrybound
                 if (prefix == null) prefix = "";
                 if (color == null) color = "";
 
-                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name+"^#656b6a;"; 
+                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name; 
             }
             set { return; }
         }
