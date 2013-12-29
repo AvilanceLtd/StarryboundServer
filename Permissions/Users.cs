@@ -23,24 +23,27 @@ namespace com.avilance.Starrybound.Permissions
     {
         public string name;
         public string uuid;
-
+        public string lastIp;
         public string groupName;
 
         public bool isMuted = false;
         public bool canBuild = true;
         public bool freeFuel = false;
+        public bool receivedStarterKit = false;
 
         public int lastOnline = 0;
 
-        public User(string name, string uuid, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel)
+        public User(string name, string uuid, string lastIp, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel, bool starterItems)
         {
             this.name = name;
             this.uuid = uuid;
+            this.lastIp = lastIp;
             this.groupName = groupName;
             this.isMuted = isMuted;
             this.canBuild = canBuild;
             this.lastOnline = lastOnline;
             this.freeFuel = freeFuel;
+            this.receivedStarterKit = starterItems;
         }
 
         public Group getGroup()
@@ -66,7 +69,7 @@ namespace com.avilance.Starrybound.Permissions
             if (!Directory.Exists(UsersPath)) Directory.CreateDirectory(UsersPath);
         }
 
-        public static User GetUser(string name, string uuid)
+        public static User GetUser(string name, string uuid, string ip)
         {
             if (File.Exists(Path.Combine(UsersPath, name.ToLower() + ".json")))
             {
@@ -79,7 +82,7 @@ namespace com.avilance.Starrybound.Permissions
                 {
                     StarryboundServer.logError("Player data for user " + name.ToLower() + " with UUID " + uuid + " is corrupt. Re-generating user file");
 
-                    User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, true);
+                    User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, true, true);
                     Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                     return user;
@@ -87,7 +90,7 @@ namespace com.avilance.Starrybound.Permissions
             }
             else
             {
-                User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, false);
+                User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, true, true);
                 Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                 return user;
@@ -98,7 +101,7 @@ namespace com.avilance.Starrybound.Permissions
         {
             try
             {
-                User user = new User(player.name, player.uuid, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel);
+                User user = new User(player.name, player.uuid, player.ip, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel, player.receivedStarterKit);
                 Write(Path.Combine(UsersPath, player.name.ToLower() + ".json"), user);
             }
             catch (Exception e)
@@ -130,7 +133,7 @@ namespace com.avilance.Starrybound.Permissions
             catch (Exception)
             {
                 StarryboundServer.logException("Persistant user storage for " + data[0] + " is corrupt - Creating with default values");
-                return new User(data[0], data[1], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false);
+                return new User(data[0], data[1], data[2], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false, false);
             }
         }
 
