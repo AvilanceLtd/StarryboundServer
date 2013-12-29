@@ -197,8 +197,6 @@ namespace com.avilance.Starrybound
                             {
                                 if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
                                 {
-                                    if (!this.client.playerData.canBuild)
-                                        returnData = false;
                                     if (this.client.playerData.loc != null)
                                     {
                                         if ((StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc)) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
@@ -209,6 +207,8 @@ namespace com.avilance.Starrybound
                                     else
                                         returnData = false;
                                 }
+                                else if (!this.client.playerData.hasPermission("client.build")) returnData = false;
+                                else if (!this.client.playerData.canBuild) returnData = false;
                             }
                             else if (packetID == Packet.EntityCreate)
                             {
