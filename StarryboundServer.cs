@@ -255,12 +255,9 @@ namespace com.avilance.Starrybound
 
                     if (!quick)
                     {
-                        lock (clients)
+                        foreach (Client client in clients.Values.ToList())
                         {
-                            foreach (Client client in clients.Values.ToList())
-                            {
-                                client.delayDisconnect("^#f75d5d;You have been disconnected.");
-                            }
+                            client.delayDisconnect("^#f75d5d;You have been disconnected.");
                         }
 
                         int startWait = Utils.getTimestamp();
@@ -272,12 +269,9 @@ namespace com.avilance.Starrybound
                     }
                     else
                     {
-                        lock (clients)
+                        foreach (Client client in clients.Values.ToList())
                         {
-                            foreach (Client client in clients.Values.ToList())
-                            {
-                                client.closeConnection();
-                            }
+                            client.closeConnection();
                         }
                     }
                 }
