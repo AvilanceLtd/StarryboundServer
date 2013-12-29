@@ -77,7 +77,6 @@ namespace com.avilance.Starrybound
 
                 if (consoleLine.Contains("Info: Server version"))
                 {
-                    ServerConfig.RemovePrivateConfig();
                     string[] versionString = consoleLine.Split('\'');
                     string versionName = versionString[1];
                     int protocolVersion = int.Parse(versionString[3]);
@@ -85,23 +84,25 @@ namespace com.avilance.Starrybound
                     StarryboundServer.starboundVersion.Protocol = protocolVersion;
                     StarryboundServer.starboundVersion.Minor = versionMinor;
                     StarryboundServer.starboundVersion.Name = versionName;
-                    if(protocolVersion != StarryboundServer.ProtocolVersion)
+                    if (protocolVersion != StarryboundServer.ProtocolVersion)
                     {
                         StarryboundServer.logFatal("Detected protcol version [" + protocolVersion + "] != [" + StarryboundServer.ProtocolVersion + "] to expected protocol version!");
                         Thread.Sleep(5000);
                         Environment.Exit(4);
                     }
                 }
-
-                if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
+                else if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
                 {
                     StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
                     StarryboundServer.serverState = ServerState.Crashed;
                 }
-
-                if (consoleLine.Contains("TcpServer listening on: "))
+                else if (consoleLine.Contains("TcpServer listening on: "))
                 {
                     StarryboundServer.serverState = ServerState.StarboundReady;
+                }
+                else if(consoleLine.Contains("Info: Loading Star::Root"))
+                {
+                    ServerConfig.RemovePrivateConfig();
                 }
 
                 if (!this.parseError) Console.WriteLine("[STAR] " + consoleLine);
