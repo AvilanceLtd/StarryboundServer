@@ -221,6 +221,12 @@ namespace com.avilance.Starrybound
                     doRestart();
                     break;
                 }
+                else if(serverState == ServerState.Shutdown)
+                {
+                    logInfo("Full shutdown requested.");
+                    doShutdown(false);
+                    Environment.Exit(0);
+                }
 
                 if (restartTime != 0)
                     Thread.Sleep(1000);
@@ -233,7 +239,7 @@ namespace com.avilance.Starrybound
         {
             doShutdown(false);
             logInfo("Now restarting...");
-            Process.Start(AppDomain.CurrentDomain.FriendlyName);
+            Process.Start(Assembly.GetEntryAssembly().Location);
             Environment.Exit(0);
         }
 
