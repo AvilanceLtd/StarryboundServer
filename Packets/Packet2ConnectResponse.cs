@@ -64,9 +64,9 @@ namespace com.avilance.Starrybound.Packets
             StarryboundServer.clients.Add(player.name, this.client);
             StarryboundServer.clientsById.Add(player.id, this.client);
             string geoip_prefix = "";
-            if (Starrybound.StarryboundServer.config.enableGeoIP)
+            if (StarryboundServer.config.enableGeoIP && StarryboundServer.Geo != null)
             {
-                var code = Starrybound.StarryboundServer.Geo.TryGetCountryCode(IPAddress.Parse(player.ip));
+                var code = StarryboundServer.Geo.TryGetCountryCode(IPAddress.Parse(player.ip));
                 var geo_loc = code == null ? "N/A" : GeoIPCountry.GetCountryNameByCode(code);
                 geoip_prefix = String.Format("({0})", geo_loc);
             }
