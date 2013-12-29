@@ -241,10 +241,19 @@ namespace com.avilance.Starrybound
                                                     returnData = false;
                                                 }
                                             }
+                                            else
+                                            {
+                                                MemoryStream packet = new MemoryStream();
+                                                BinaryWriter packetWrite = new BinaryWriter(packet);
+                                                packetWrite.WriteVarInt32(entityId);
+                                                packetWrite.Write(false);
+                                                this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                                returnData = false;
+                                            }
                                         }
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "][" + returnData + "]");
                                     }
-                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop)
+                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
                                         if (!this.client.playerData.canIBuild())
                                         {
@@ -266,7 +275,7 @@ namespace com.avilance.Starrybound
                                 {
                                     EntityType type = (EntityType)packetData.Read();
                                     if (type == EntityType.EOF) break;
-                                    if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop)
+                                    if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
                                         if (!this.client.playerData.canIBuild()) returnData = false;
                                     }

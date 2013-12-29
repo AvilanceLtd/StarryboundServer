@@ -167,7 +167,11 @@ namespace com.avilance.Starrybound
 
             foreach(string sector in config.sectors)
             {
-                sectors.Add(Encoding.UTF8.GetBytes(sector));
+                byte[] sectorBytes = Encoding.UTF8.GetBytes(sector);
+                byte[] buffer = new byte[sectorBytes.Length + 1];
+                buffer[0] = (byte)sectorBytes.Length;
+                Buffer.BlockCopy(sectorBytes, 0, buffer, 1, sectorBytes.Length);
+                sectors.Add(sectorBytes);
             }
             Bans.ProcessBans();
 
