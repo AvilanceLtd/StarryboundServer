@@ -60,6 +60,8 @@ namespace com.avilance.Starrybound.Extensions
                     throw new IndexOutOfRangeException("WorldCoordinate Satellite out of range: " + satellite);
                 return new WorldCoordinate(sector, x, y, z, planet, satellite);
             }
+            else if (String.IsNullOrEmpty(sector))
+                return new WorldCoordinate("", 0, 0, 0, 0, 0);
             else
                 throw new IndexOutOfRangeException("WorldCoordinate Sector out of range: " + sector);
         }
