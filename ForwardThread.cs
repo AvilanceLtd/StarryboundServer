@@ -131,8 +131,16 @@ namespace com.avilance.Starrybound
                                 }
                                 else if (curState == ClientState.PendingConnectResponse)
                                 {
-                                    this.client.rejectPreConnected("Violated PendingConnectResponse protocol state with " + packetID);
-                                    return;
+                                    int startTime = Utils.getTimestamp();
+                                    while (true)
+                                    {
+                                        if (this.client.state == ClientState.Connected) break;
+                                        if (Utils.getTimestamp() > startTime + 3)
+                                        {
+                                            this.client.rejectPreConnected("Connection Failed: Server did not respond in time.");
+                                            return;
+                                        }
+                                    }
                                 }
                             }
                             #endregion
