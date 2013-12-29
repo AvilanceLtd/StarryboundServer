@@ -113,7 +113,7 @@ namespace com.avilance.Starrybound.Commands
                 }
                 else
                 {
-                    this.client.sendCommandMessage("Player '" + player + "' not found.");
+                    this.client.sendCommandMessage("Player '" + playerName + "' not found.");
                     return false;
                 }
             }
@@ -143,7 +143,7 @@ namespace com.avilance.Starrybound.Commands
                 }
                 else
                 {
-                    this.client.sendCommandMessage("Player '" + player + "' not found.");
+                    this.client.sendCommandMessage("Player '" + playerName + "' not found.");
                     return false;
                 }
             }
