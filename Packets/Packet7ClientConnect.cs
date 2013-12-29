@@ -42,7 +42,7 @@ namespace com.avilance.Starrybound.Packets
             string account = stream.ReadStarString();
 
             // Identify player to server
-            this.client.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
+            this.client.playerData.uuid = Utils.ByteArrayToString(Utils.HashUUID(UUID)).ToLower();
             this.client.playerData.name = name;
             this.client.playerData.account = account;
 
