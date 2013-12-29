@@ -68,19 +68,19 @@ namespace com.avilance.Starrybound.Permissions
 
         public static User GetUser(string name, string uuid)
         {
-            if (File.Exists(Path.Combine(UsersPath, uuid + ".json")))
+            if (File.Exists(Path.Combine(UsersPath, name.ToLower() + ".json")))
             {
                 try
                 {
-                    User user = Read(Path.Combine(UsersPath, uuid + ".json"), new string[] { name, uuid });
+                    User user = Read(Path.Combine(UsersPath, name.ToLower() + ".json"), new string[] { name, uuid });
                     return user;
                 }
                 catch (Exception)
                 {
-                    StarryboundServer.logError("Player data for user " + name + " with UUID " + uuid + " is corrupt. Re-generating user file");
+                    StarryboundServer.logError("Player data for user " + name.ToLower() + " with UUID " + uuid + " is corrupt. Re-generating user file");
 
                     User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, true);
-                    Write(Path.Combine(UsersPath, uuid + ".json"), user);
+                    Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                     return user;
                 }
@@ -88,7 +88,7 @@ namespace com.avilance.Starrybound.Permissions
             else
             {
                 User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, false);
-                Write(Path.Combine(UsersPath, uuid + ".json"), user);
+                Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                 return user;
             }
@@ -99,7 +99,7 @@ namespace com.avilance.Starrybound.Permissions
             try
             {
                 User user = new User(player.name, player.uuid, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel);
-                Write(Path.Combine(UsersPath, player.uuid + ".json"), user);
+                Write(Path.Combine(UsersPath, player.name.ToLower() + ".json"), user);
             }
             catch (Exception e)
             {

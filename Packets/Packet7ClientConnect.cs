@@ -136,9 +136,9 @@ namespace com.avilance.Starrybound.Packets
                 pData.group = userPData.getGroup();
                 pData.freeFuel = userPData.freeFuel;
 
-                if (userPData.name != pData.name)
+                if (userPData.uuid != pData.uuid)
                 {
-                    this.client.rejectPreConnected("Connection Failed: Your server side user data is corrupt.");
+                    this.client.rejectPreConnected("Connection Failed: You cannot use \"" + pData.name + "\" on this server.");
                     return false;
                 }
             }
