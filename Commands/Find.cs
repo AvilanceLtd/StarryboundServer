@@ -24,12 +24,17 @@ namespace com.avilance.Starrybound.Commands
             this.HelpText = " <player (optional)>; Find your world co-ordinates or those of a specified player.";
             this.aliases = new string[] { "where" };
 
+            this.Permission = new List<string>();
+            this.Permission.Add("client.find");
+
             this.client = client;
             this.player = client.playerData;
         }
 
         public override bool doProcess(string[] args)
         {
+            if (!hasPermission()) { permissionError(); return false; }
+
             string player = string.Join(" ", args).Trim();
 
             if (player == null || player.Length < 1)
