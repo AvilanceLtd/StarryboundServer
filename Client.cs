@@ -250,7 +250,7 @@ namespace com.avilance.Starrybound
             }
             try
             {
-                this.sendServerPacket(Packet.ClientDisconnect, new byte[0]);
+                this.sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             }
             catch (Exception) { }
             try
