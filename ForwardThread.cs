@@ -204,6 +204,7 @@ namespace com.avilance.Starrybound
                                     }
                                 }
                                 StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
+                                StarryboundServer.logDebug("WarpCommand::DumpPacket", "[" + this.client.playerData.client + "] " + Utils.ByteArrayToString(ms.ToArray()));
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
