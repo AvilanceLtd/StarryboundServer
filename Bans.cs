@@ -85,6 +85,7 @@ namespace com.avilance.Starrybound
             foreach (Ban ban in bans)
             {
                 allBans.Add(ban.banID, ban);
+                nextBanID = ban.banID + 1;
             }
 
             foreach (Ban lBan in legacyBans.Values)
