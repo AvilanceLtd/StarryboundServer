@@ -64,9 +64,14 @@ namespace com.avilance.Starrybound
                     if (consoleLine.Contains(line)) return;
                 }
 
-                if (consoleLine.StartsWith("Error: "))
+                if (consoleLine.StartsWith("Error: ") || consoleLine.StartsWith("AssetException:"))
                 {
                     this.parseError = true;
+                }
+                else if ((consoleLine.StartsWith("Warn:") || consoleLine.StartsWith("Info:") || consoleLine.StartsWith("Debug:")) && this.parseError)
+                {
+                    logStarboundError(" ");
+                    this.parseError = false;
                 }
                 else if (String.IsNullOrWhiteSpace(consoleLine) && this.parseError)
                 {
