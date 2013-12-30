@@ -96,6 +96,7 @@ namespace com.avilance.Starrybound
                 }
 
                 sSocket = new TcpClient();
+                sSocket.ReceiveTimeout = 5000;
                 IAsyncResult result = sSocket.BeginConnect(IPAddress.Loopback, StarryboundServer.config.serverPort, null, null);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
                 if (!success || !sSocket.Connected)
@@ -219,6 +220,8 @@ namespace com.avilance.Starrybound
         private void doDisconnect(string logMessage)
         {
             if (this.state == ClientState.Disposing) return;
+            bool broadcast = true;
+            if (this.state == ClientState.Connected) broadcast = false;
             this.state = ClientState.Disposing;
             StarryboundServer.logInfo("[" + playerData.client + "] " + logMessage);
             try
@@ -231,7 +234,7 @@ namespace com.avilance.Starrybound
                         StarryboundServer.clientsById.Remove(this.playerData.id);
                         StarryboundServer.clients.Remove(this.playerData.name);
                     }
-                    if (this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
+                    if (this.kickTargetTimestamp == 0 && broadcast) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                 }
             }
             catch (Exception e)

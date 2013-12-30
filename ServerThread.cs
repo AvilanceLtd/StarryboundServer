@@ -13,7 +13,7 @@ namespace com.avilance.Starrybound
     {
 
         public Process process;
-        string[] filterConsole = new string[] { "Slow asset", "does not have a", "Perf: ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <" };
+        string[] filterConsole = new string[] { "Slow asset", " does not have a ", "Debug: Correcting path from ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <", "Sending Handshake Challenge", " accept from ", " Connection received from: ", " UniverseServer: client connection made from " };
 
         bool parseError = false;
 
@@ -80,7 +80,18 @@ namespace com.avilance.Starrybound
                     return;
                 }
 
-                if (consoleLine.Contains("Info: Server version"))
+                if (consoleLine.StartsWith("Warn: Perf: "))
+                {
+                    string[] perf = consoleLine.Remove(0, 12).Split(' ');
+                    string function = perf[0];
+                    float millis = Convert.ToSingle(perf[2]);
+                    if (millis > 5000)
+                    {
+                        StarryboundServer.logWarn("Parent Server [" + function + "] lagged for " + (millis / 1000) + " seconds");
+                    }
+                    return;
+                }
+                else if (consoleLine.Contains("Info: Server version"))
                 {
                     string[] versionString = consoleLine.Split('\'');
                     string versionName = versionString[1];
@@ -98,14 +109,22 @@ namespace com.avilance.Starrybound
                 }
                 else if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
                 {
-                    StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
+                    StarryboundServer.logFatal("Parent Server TcpServer listener thread caught exception, Forcing a restart.");
                     StarryboundServer.serverState = ServerState.Crashed;
                 }
                 else if (consoleLine.Contains("TcpServer listening on: "))
                 {
-                    StarryboundServer.logDebug("ServerThread::TcpServerCheck", "Resetting variables to allow local clients.");
                     StarryboundServer.serverState = ServerState.StarboundReady;
                     ServerConfig.RemovePrivateConfig();
+                }
+                else if (consoleLine.StartsWith("Info: Kicking client "))
+                {
+                    string[] kick = consoleLine.Remove(0, 22).Split(' ');
+                    string user = kick[0];
+                    string id = kick[1];
+                    string ip = kick[2];
+                    StarryboundServer.logWarn("Parent Server disconnected " + user + " " + ip + " for inactivity. This was likely due to a lag spike.");
+                    return;
                 }
 
                 if (!this.parseError) Console.WriteLine("[STAR] " + consoleLine);
