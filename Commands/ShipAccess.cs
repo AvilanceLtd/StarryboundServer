@@ -20,7 +20,7 @@ namespace com.avilance.Starrybound.Commands
     {
         public ShipAccess(Client client)
         {
-            this.name = "ShipAccess";
+            this.name = "shipaccess";
             this.HelpText = ": Allows you to control the access of other players to your ship. Use /shipaccess help for instructions.";
 
             this.Permission = new List<string>();
