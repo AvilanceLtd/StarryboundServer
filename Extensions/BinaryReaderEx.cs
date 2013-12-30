@@ -47,15 +47,15 @@ namespace com.avilance.Starrybound.Extensions
         public static WorldCoordinate ReadStarWorldCoordinate(this BinaryReader read)
         {
             string sector = read.ReadStarString();
+            int x = read.ReadInt32BE();
+            int y = read.ReadInt32BE();
+            int z = read.ReadInt32BE();
+            int planet = read.ReadInt32BE();
+            int satellite = read.ReadInt32BE();
             if (StarryboundServer.config.sectors.Contains(sector))
             {
-                int x = read.ReadInt32BE();
-                int y = read.ReadInt32BE();
-                int z = read.ReadInt32BE();
-                int planet = read.ReadInt32BE();
                 if (planet < 0 || planet > 256)
                     throw new IndexOutOfRangeException("WorldCoordinate Planet out of range: " + planet);
-                int satellite = read.ReadInt32BE();
                 if (satellite < 0 || satellite > 256)
                     throw new IndexOutOfRangeException("WorldCoordinate Satellite out of range: " + satellite);
                 return new WorldCoordinate(sector, x, y, z, planet, satellite);
