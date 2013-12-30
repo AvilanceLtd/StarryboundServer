@@ -241,10 +241,19 @@ namespace com.avilance.Starrybound
                                                     returnData = false;
                                                 }
                                             }
+                                            else
+                                            {
+                                                MemoryStream packet = new MemoryStream();
+                                                BinaryWriter packetWrite = new BinaryWriter(packet);
+                                                packetWrite.WriteVarInt32(entityId);
+                                                packetWrite.Write(false);
+                                                this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                                returnData = false;
+                                            }
                                         }
                                         StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "][" + returnData + "]");
                                     }
-                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop)
+                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
                                         if (!this.client.playerData.canIBuild())
                                         {
@@ -266,11 +275,36 @@ namespace com.avilance.Starrybound
                                 {
                                     EntityType type = (EntityType)packetData.Read();
                                     if (type == EntityType.EOF) break;
-                                    if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop)
+                                    byte[] entityData = packetData.ReadStarByteArray();
+                                    if (type == EntityType.Projectile)
+                                    {
+                                        BinaryReader entity = new BinaryReader(new MemoryStream(entityData));
+                                        string projectileKey = entity.ReadStarString();
+                                        object projParams = entity.ReadStarVariant();
+                                        if (StarryboundServer.config.projectileBlacklist.Contains(projectileKey))
+                                        {
+                                            returnData = false;
+                                        }
+                                        if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
+                                        {
+                                            if (this.client.playerData.loc != null)
+                                            {
+                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) && StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                {
+                                                    returnData = false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                returnData = false;
+                                            }
+                                        }
+                                        StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "][" + projectileKey + "][" + returnData + "]");
+                                    }
+                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
                                         if (!this.client.playerData.canIBuild()) returnData = false;
                                     }
-                                    byte[] entityData = packetData.ReadStarByteArray();
                                     StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "]");
                                 }
                             }
