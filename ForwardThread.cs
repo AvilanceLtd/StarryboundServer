@@ -110,11 +110,6 @@ namespace com.avilance.Starrybound
                     //Return data for packet processor
                     object returnData = true;
 
-                    if(this.client.state != ClientState.Connected)
-                    {
-                        StarryboundServer.logDebug(this.client.state + ":" + this.direction, "[" + this.client.playerData.client + "] Got [" + packetID + "]");
-                    }
-
                     if (packetID != Packet.Heartbeat && packetID != Packet.UniverseTimeUpdate)
                     {
                         if (direction == Direction.Client)
