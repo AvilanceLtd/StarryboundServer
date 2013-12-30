@@ -196,7 +196,7 @@ namespace com.avilance.Starrybound
                                         {
                                             if (!this.client.playerData.canAccessShip(targetPlayer.playerData))
                                             {
-                                                this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to his ship access settings.");
+                                                this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to their ship access settings.");
                                                 StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + targetPlayer.playerData.name + "'s ship.");
                                                 returnData = false;
                                             }
