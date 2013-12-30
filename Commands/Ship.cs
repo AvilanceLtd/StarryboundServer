@@ -74,20 +74,8 @@ namespace com.avilance.Starrybound.Commands
 
             MemoryStream packetWarp = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packetWarp);
-
-            string sector = "";
-            int x = 0;
-            int y = 0;
-            int z = 0;
-            int planet = 0;
-            int satellite = 0;
             packetWrite.WriteBE(warp);
-            packetWrite.WriteStarString(sector);
-            packetWrite.WriteBE(x);
-            packetWrite.WriteBE(y);
-            packetWrite.WriteBE(z);
-            packetWrite.WriteBE(planet);
-            packetWrite.WriteBE(satellite);
+            packetWrite.Write(new WorldCoordinate());
             packetWrite.WriteStarString(player);
             client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
 

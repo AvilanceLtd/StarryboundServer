@@ -198,6 +198,12 @@ namespace com.avilance.Starrybound
                                             {
                                                 this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to their ship access settings.");
                                                 StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + targetPlayer.playerData.name + "'s ship.");
+                                                MemoryStream packetWarp = new MemoryStream();
+                                                BinaryWriter packetWrite = new BinaryWriter(packetWarp);
+                                                packetWrite.WriteBE((ulong)WarpType.WarpToOwnShip);
+                                                packetWrite.Write(new WorldCoordinate());
+                                                packetWrite.WriteStarString(player);
+                                                client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
                                                 returnData = false;
                                             }
                                         }
