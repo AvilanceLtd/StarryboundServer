@@ -47,11 +47,15 @@ namespace com.avilance.Starrybound.Packets
             uint clientID = packetData.ReadVarUInt32();
             string rejectReason = packetData.ReadStarString();
 
+            StarryboundServer.logDebug("ConnectResponse", "Checking duplicates");
+
             if(StarryboundServer.clientsById.ContainsKey(clientID))
             {
                 StarryboundServer.clientsById[clientID].forceDisconnect(direction, "The parent server reclaimed this clientId");
                 return true;
             }
+
+            StarryboundServer.logDebug("ConnectResponse", "Doing check");
 
             this.client.playerData.id = clientID;
             PlayerData player = this.client.playerData;
@@ -61,21 +65,30 @@ namespace com.avilance.Starrybound.Packets
                 this.client.rejectPreConnected("Connection Failed: Rejected by parent server: " + rejectReason);
                 return true;
             }
+
+            StarryboundServer.logDebug("ConnectResponse", "Adding client");
+
             StarryboundServer.clients.Add(player.name, this.client);
+
+            StarryboundServer.logDebug("ConnectResponse", "Adding client 2");
+
             StarryboundServer.clientsById.Add(player.id, this.client);
             string geoip_prefix = "";
             if (StarryboundServer.config.enableGeoIP && StarryboundServer.Geo != null)
             {
+                StarryboundServer.logDebug("ConnectResponse", "GeoIP");
                 var code = StarryboundServer.Geo.TryGetCountryCode(IPAddress.Parse(player.ip));
                 var geo_loc = code == null ? "N/A" : GeoIPCountry.GetCountryNameByCode(code);
                 geoip_prefix = String.Format("({0})", geo_loc);
             }
 
+            StarryboundServer.logDebug("ConnectResponse", "Messaging clients");
             StarryboundServer.sendGlobalMessage(String.Format("{0}{1} has joined the server!", player.name, geoip_prefix));
             this.client.state = ClientState.Connected;
             StarryboundServer.logInfo(String.Format("[{0}][{1}] joined with UUID [{2}]{3}", this.client.playerData.client, this.client.playerData.ip, player.uuid, 
                                       geoip_prefix != "" ? String.Format(" from {0}", geoip_prefix) : ""));
 
+            StarryboundServer.logDebug("ConnectResponse", "Client is connected");
             return true;
         }
 

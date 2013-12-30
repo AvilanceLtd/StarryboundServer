@@ -143,6 +143,10 @@ namespace com.avilance.Starrybound
         public void sendClientPacket(Packet packetID, byte[] packetData)
         {
             if (this.kickTargetTimestamp != 0) return;
+            if (this.state != ClientState.Connected)
+            {
+                StarryboundServer.logDebug(this.state + ":Client", "[" + this.playerData.client + "] Injecting [" + packetID + "]");
+            }
             try
             {
                 this.cOut.WriteVarUInt32((uint)packetID);
@@ -158,6 +162,10 @@ namespace com.avilance.Starrybound
 
         public void sendServerPacket(Packet packetID, byte[] packetData)
         {
+            if (this.state != ClientState.Connected)
+            {
+                StarryboundServer.logDebug(this.state + ":Server", "[" + this.playerData.client + "] Injecting [" + packetID + "]");
+            }
             try
             {
                 this.sOut.WriteVarUInt32((uint)packetID);

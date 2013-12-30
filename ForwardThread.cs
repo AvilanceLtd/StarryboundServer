@@ -112,7 +112,7 @@ namespace com.avilance.Starrybound
 
                     if(this.client.state != ClientState.Connected)
                     {
-                        StarryboundServer.logDebug("PendingConnect:" + this.direction, "[" + this.client.playerData.client + "][" + this.client.state + "] Got [" + packetID + "]");
+                        StarryboundServer.logDebug(this.client.state + ":" + this.direction, "[" + this.client.playerData.client + "] Got [" + packetID + "]");
                     }
 
                     if (packetID != Packet.Heartbeat && packetID != Packet.UniverseTimeUpdate)
@@ -538,6 +538,11 @@ namespace com.avilance.Starrybound
                             this.client.forceDisconnect(direction, "Command processor requested to drop client");
                             return;
                         }
+                    }
+
+                    if (this.client.state != ClientState.Connected || packetID == Packet.ConnectResponse)
+                    {
+                        StarryboundServer.logDebug(this.client.state + ":" + this.direction, "[" + this.client.playerData.client + "] Fowarding [" + packetID + "]");
                     }
 
                     #region Forward Packet
