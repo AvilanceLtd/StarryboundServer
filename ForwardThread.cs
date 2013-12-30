@@ -189,9 +189,9 @@ namespace com.avilance.Starrybound
                                 string player = packetData.ReadStarString();
                                 if (cmd == WarpType.WarpToPlayerShip)
                                 {
-                                    if (StarryboundServer.clients.ContainsKey(player.ToLower()))
+                                    if (StarryboundServer.clients.ContainsKey(player))
                                     {
-                                        Client targetPlayer = StarryboundServer.clients[player.ToLower()];
+                                        Client targetPlayer = StarryboundServer.clients[player];
                                         if (targetPlayer != null)
                                         {
                                             if (!this.client.playerData.canAccessShip(targetPlayer.playerData))
@@ -204,7 +204,6 @@ namespace com.avilance.Starrybound
                                     }
                                 }
                                 StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
-                                StarryboundServer.logDebug("WarpCommand::DumpPacket", "[" + this.client.playerData.client + "] " + Utils.ByteArrayToString(ms.ToArray()));
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {

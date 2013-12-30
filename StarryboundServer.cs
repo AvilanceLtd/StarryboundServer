@@ -44,7 +44,7 @@ namespace com.avilance.Starrybound
         public static string authCode;
         
         // Dictionary<string, ClientThread>
-        // string           Username        Unique username for client, MUST be lowercase
+        // string           Username        Unique username for client, MUST be exactcase
         // ClientThread     ClientThread    Invidivual thread for client, used to access client specific functions
         public static Dictionary<string, Client> clients = new Dictionary<string, Client>();
         public static Dictionary<uint, Client> clientsById = new Dictionary<uint, Client>();
