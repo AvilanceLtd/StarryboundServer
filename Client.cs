@@ -97,6 +97,7 @@ namespace com.avilance.Starrybound
 
                 sSocket = new TcpClient();
                 sSocket.ReceiveTimeout = 5000;
+                sSocket.SendTimeout = 5000;
                 IAsyncResult result = sSocket.BeginConnect(IPAddress.Loopback, StarryboundServer.config.serverPort, null, null);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
                 if (!success || !sSocket.Connected)
