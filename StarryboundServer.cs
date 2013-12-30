@@ -81,8 +81,8 @@ namespace com.avilance.Starrybound
 
         static void ProcessExit(object sender, EventArgs e)
         {
-            serverState = ServerState.GracefulShutdown;
-            while (true) { }
+            doShutdown(true);
+            Environment.Exit(0);
         }
 
         static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
@@ -92,7 +92,6 @@ namespace com.avilance.Starrybound
             {
                 logFatal("Unhandled Exception Occurred: " + e.ToString());
                 serverState = ServerState.Shutdown;
-                while (true) { }
             }
             catch (Exception ex) 
             {
@@ -103,8 +102,9 @@ namespace com.avilance.Starrybound
 
         internal static bool ConsoleCtrlCheck()
         {
-            serverState = ServerState.GracefulShutdown;
-            while (true) { }
+            doShutdown(true);
+            Environment.Exit(0);
+            return true;
         }
 
         static void Main(string[] args)
