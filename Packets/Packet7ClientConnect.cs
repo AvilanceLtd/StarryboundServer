@@ -42,11 +42,11 @@ namespace com.avilance.Starrybound.Packets
             string account = stream.ReadStarString();
 
             // Identify player to server
-            this.client.playerData.uuid = Utils.ByteArrayToString(UUID).ToLower();
+            this.client.playerData.uuid = Utils.ByteArrayToString(Utils.HashUUID(UUID)).ToLower();
             this.client.playerData.name = name;
             this.client.playerData.account = account;
 
-            User userPData = Users.GetUser(name, this.client.playerData.uuid);
+            User userPData = Users.GetUser(name, this.client.playerData.uuid, this.client.playerData.ip);
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
                 if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
@@ -57,7 +57,7 @@ namespace com.avilance.Starrybound.Packets
             }
 
             string[] reasonExpiry = Bans.checkForBan(new string[] { name, this.client.playerData.uuid, this.client.playerData.ip });
-            if (reasonExpiry.Length == 2)
+            if (reasonExpiry.Length == 2 && !userPData.getGroup().hasPermission("admin.bypassban"))
             {
                 this.client.rejectPreConnected("You are " + ((reasonExpiry[1] == "0") ? "permanently" : "temporarily") + " banned from this server.\nReason: " + reasonExpiry[0]);
                 return false;
@@ -108,6 +108,18 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
+            if (userPData.getGroup().hasPermission("admin.bypassban"))
+            {
+                foreach (string bannedUnamePhrase in StarryboundServer.config.bannedUsernames)
+                {
+                    if (this.client.playerData.name.Contains(bannedUnamePhrase))
+                    {
+                        this.client.rejectPreConnected("Your name contains a phrase that is banned on this server. (" + bannedUnamePhrase + ")");
+                        return false;
+                    }
+                }
+            }
+
             if(!String.IsNullOrEmpty(account))
             {
                 this.client.rejectPreConnected("You need clear the server account field of all text.");
@@ -123,10 +135,11 @@ namespace com.avilance.Starrybound.Packets
                 pData.lastOnline = userPData.lastOnline;
                 pData.group = userPData.getGroup();
                 pData.freeFuel = userPData.freeFuel;
+                pData.receivedStarterKit = userPData.receivedStarterKit;
 
-                if (userPData.name != pData.name)
+                if (userPData.uuid != pData.uuid)
                 {
-                    this.client.rejectPreConnected("Connection Failed: Your server side user data is corrupt.");
+                    this.client.rejectPreConnected("Connection Failed: You cannot use \"" + pData.name + "\" on this server.");
                     return false;
                 }
             }

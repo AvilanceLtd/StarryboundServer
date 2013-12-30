@@ -13,7 +13,7 @@ namespace com.avilance.Starrybound
     {
 
         public Process process;
-        string[] filterConsole = new string[] { "Slow asset", "does not have a", "Perf: ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <" };
+        string[] filterConsole = new string[] { "Slow asset", " does not have a ", "Debug: Correcting path from ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <", "Sending Handshake Challenge", " accept from ", " Connection received from: ", " UniverseServer: client connection made from " };
 
         bool parseError = false;
 
@@ -64,9 +64,14 @@ namespace com.avilance.Starrybound
                     if (consoleLine.Contains(line)) return;
                 }
 
-                if (consoleLine.StartsWith("Error: "))
+                if (consoleLine.StartsWith("Error: ") || consoleLine.StartsWith("AssetException:"))
                 {
                     this.parseError = true;
+                }
+                else if ((consoleLine.StartsWith("Warn:") || consoleLine.StartsWith("Info:") || consoleLine.StartsWith("Debug:")) && this.parseError)
+                {
+                    logStarboundError(" ");
+                    this.parseError = false;
                 }
                 else if (String.IsNullOrWhiteSpace(consoleLine) && this.parseError)
                 {
@@ -75,7 +80,18 @@ namespace com.avilance.Starrybound
                     return;
                 }
 
-                if (consoleLine.Contains("Info: Server version"))
+                if (consoleLine.StartsWith("Warn: Perf: "))
+                {
+                    string[] perf = consoleLine.Remove(0, 12).Split(' ');
+                    string function = perf[0];
+                    float millis = Convert.ToSingle(perf[2]);
+                    if (millis > 5000)
+                    {
+                        StarryboundServer.logWarn("Parent Server [" + function + "] lagged for " + (millis / 1000) + " seconds");
+                    }
+                    return;
+                }
+                else if (consoleLine.Contains("Info: Server version"))
                 {
                     string[] versionString = consoleLine.Split('\'');
                     string versionName = versionString[1];
@@ -84,25 +100,31 @@ namespace com.avilance.Starrybound
                     StarryboundServer.starboundVersion.Protocol = protocolVersion;
                     StarryboundServer.starboundVersion.Minor = versionMinor;
                     StarryboundServer.starboundVersion.Name = versionName;
-                    if(protocolVersion != StarryboundServer.ProtocolVersion)
+                    if (protocolVersion != StarryboundServer.ProtocolVersion)
                     {
                         StarryboundServer.logFatal("Detected protcol version [" + protocolVersion + "] != [" + StarryboundServer.ProtocolVersion + "] to expected protocol version!");
                         Thread.Sleep(5000);
                         Environment.Exit(4);
                     }
                 }
-
-                if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
+                else if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
                 {
-                    StarryboundServer.logFatal("Starbound TcpServer has closed, no new clients will be accepted - Forcing a restart in 30 seconds.");
-                    StarryboundServer.sendGlobalMessage("ATTENTION: The server will be restarted in 30 seconds.");
-                    StarryboundServer.restartTime = Utils.getTimestamp() + 30;
+                    StarryboundServer.logFatal("Parent Server TcpServer listener thread caught exception, Forcing a restart.");
                     StarryboundServer.serverState = ServerState.Crashed;
                 }
-
-                if (consoleLine.Contains("TcpServer listening on: "))
+                else if (consoleLine.Contains("TcpServer listening on: "))
                 {
-                    StarryboundServer.serverState = ServerState.Ready;
+                    StarryboundServer.serverState = ServerState.StarboundReady;
+                    ServerConfig.RemovePrivateConfig();
+                }
+                else if (consoleLine.StartsWith("Info: Kicking client "))
+                {
+                    string[] kick = consoleLine.Remove(0, 21).Split(' ');
+                    string user = kick[0];
+                    string id = kick[1];
+                    string ip = kick[2];
+                    StarryboundServer.logWarn("Parent Server disconnected " + user + " " + ip + " for inactivity.");
+                    return;
                 }
 
                 if (!this.parseError) Console.WriteLine("[STAR] " + consoleLine);

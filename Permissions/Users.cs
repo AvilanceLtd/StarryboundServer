@@ -23,24 +23,34 @@ namespace com.avilance.Starrybound.Permissions
     {
         public string name;
         public string uuid;
-
+        public string lastIp;
         public string groupName;
 
         public bool isMuted = false;
         public bool canBuild = true;
         public bool freeFuel = false;
+        public bool receivedStarterKit = false;
+
+        public bool privateShip = false;
+        public List<string> shipWhitelist = new List<string>();
+        public List<string> shipBlacklist = new List<string>();
 
         public int lastOnline = 0;
 
-        public User(string name, string uuid, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel)
+        public User(string name, string uuid, string lastIp, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel, bool starterItems, bool privateShip, List<string> shipWhitelist, List<string> shipBlacklist)
         {
             this.name = name;
             this.uuid = uuid;
+            this.lastIp = lastIp;
             this.groupName = groupName;
             this.isMuted = isMuted;
             this.canBuild = canBuild;
             this.lastOnline = lastOnline;
             this.freeFuel = freeFuel;
+            this.receivedStarterKit = starterItems;
+            this.privateShip = privateShip;
+            this.shipBlacklist = shipBlacklist;
+            this.shipWhitelist = shipWhitelist;
         }
 
         public Group getGroup()
@@ -63,32 +73,64 @@ namespace com.avilance.Starrybound.Permissions
 
         public static void SetupUsers()
         {
-            if (!Directory.Exists(UsersPath)) Directory.CreateDirectory(UsersPath);
+            if (!Directory.Exists(UsersPath))
+            {
+                Directory.CreateDirectory(UsersPath);
+                GenerateSAKey();
+            }
+            else if (!Directory.EnumerateFileSystemEntries(UsersPath).Any()) GenerateSAKey();
+            else if (File.Exists(Path.Combine(StarryboundServer.SavePath, "authcode.txt"))) GenerateSAKey();
         }
 
-        public static User GetUser(string name, string uuid)
+        public static void GenerateSAKey()
         {
-            if (File.Exists(Path.Combine(UsersPath, uuid + ".json")))
+            if (!File.Exists(Path.Combine(StarryboundServer.SavePath, "authcode.txt")))
+            {
+                var r = new Random((int)DateTime.Now.ToBinary());
+                StarryboundServer.authCode = r.Next(100000, 10000000).ToString();
+
+                using (var tw = new StreamWriter(Path.Combine(StarryboundServer.SavePath, "authcode.txt")))
+                {
+                    tw.WriteLine(StarryboundServer.authCode);
+                }
+            }
+            else
+            {
+                using (var tr = new StreamReader(Path.Combine(StarryboundServer.SavePath, "authcode.txt")))
+                {
+                    StarryboundServer.authCode = tr.ReadLine();
+                }
+            }
+
+            StarryboundServer.logWarn("************************************************************************");
+            StarryboundServer.logWarn("Important notice: To become SuperAdmin, you need to join the game and type /auth " + StarryboundServer.authCode);
+            StarryboundServer.logWarn("This token will display until disabled by verification and is usable by any player.");
+            StarryboundServer.logWarn("************************************************************************");
+        }
+
+        public static User GetUser(string name, string uuid, string ip)
+        {
+            if (File.Exists(Path.Combine(UsersPath, name.ToLower() + ".json")))
             {
                 try
                 {
-                    User user = Read(Path.Combine(UsersPath, uuid + ".json"), new string[] { name, uuid });
+                    User user = Read(Path.Combine(UsersPath, name.ToLower() + ".json"), new string[] { name, uuid });
                     return user;
                 }
                 catch (Exception)
                 {
-                    StarryboundServer.logError("Player data for user " + name + " with UUID " + uuid + " is corrupt. Re-generating user file");
+                    StarryboundServer.logError("Player data for user " + name.ToLower() + " with UUID " + uuid + " is corrupt. Re-generating user file");
 
-                    User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, true);
-                    Write(Path.Combine(UsersPath, uuid + ".json"), user);
+                    User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, true, true, false, new List<string>(), new List<string>());
+                    Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                     return user;
                 }
             }
             else
             {
-                User user = new User(name, uuid, StarryboundServer.defaultGroup, false, true, 0, false);
-                Write(Path.Combine(UsersPath, uuid + ".json"), user);
+                User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, false, false, false, new List<string>(), new List<string>());
+                Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                 return user;
             }
@@ -98,8 +140,8 @@ namespace com.avilance.Starrybound.Permissions
         {
             try
             {
-                User user = new User(player.name, player.uuid, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel);
-                Write(Path.Combine(UsersPath, player.uuid + ".json"), user);
+                User user = new User(player.name, player.uuid, player.ip, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel, player.receivedStarterKit, player.privateShip, player.shipWhitelist, player.shipBlacklist);
+                Write(Path.Combine(UsersPath, player.name.ToLower() + ".json"), user);
             }
             catch (Exception e)
             {
@@ -130,7 +172,7 @@ namespace com.avilance.Starrybound.Permissions
             catch (Exception)
             {
                 StarryboundServer.logException("Persistant user storage for " + data[0] + " is corrupt - Creating with default values");
-                return new User(data[0], data[1], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false);
+                return new User(data[0], data[1], data[2], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false, false, false, new List<string>(), new List<string>());
             }
         }
 

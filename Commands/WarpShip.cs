@@ -25,9 +25,8 @@ namespace com.avilance.Starrybound.Commands
         {
             this.name = "warpship";
             this.HelpText = " <name>: Sends your ship to another player's ship location.";
-
             this.Permission = new List<string>();
-            this.Permission.Add("client.warpship");
+            this.Permission.Add("world.warpship");
 
             this.client = client;
             this.player = client.playerData;

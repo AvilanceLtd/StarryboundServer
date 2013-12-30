@@ -40,9 +40,11 @@ namespace com.avilance.Starrybound
         public static StarboundVersion starboundVersion = new StarboundVersion();
         public static GeoIPCountry Geo;
         public static int parentProcessId;
+
+        public static string authCode;
         
         // Dictionary<string, ClientThread>
-        // string           Username        Unique username for client, MUST be lowercase
+        // string           Username        Unique username for client, MUST be exactcase
         // ClientThread     ClientThread    Invidivual thread for client, used to access client specific functions
         public static Dictionary<string, Client> clients = new Dictionary<string, Client>();
         public static Dictionary<uint, Client> clientsById = new Dictionary<uint, Client>();
@@ -51,6 +53,7 @@ namespace com.avilance.Starrybound
         public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
 
         public static ServerThread sbServer;
+        public static ListenerThread tcpListener;
         static Thread sbServerThread;
         static Thread listenerThread;
         static Thread monitorThread;
@@ -59,9 +62,9 @@ namespace com.avilance.Starrybound
 
         public static int failedConnections;
         public static ServerState serverState;
-
         public static int startTime;
         public static int restartTime = 0;
+        private static bool shuttingDown = false;
 
         public static string defaultGroup = null;
 
@@ -78,23 +81,35 @@ namespace com.avilance.Starrybound
 
         static void ProcessExit(object sender, EventArgs e)
         {
+            logDebug("ProcessExit", "Hello");
             doShutdown(true);
+            logDebug("ProcessExit", "Goodbye");
         }
 
         static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
+            logDebug("UnhandledException", "Hello");
             Exception e = (Exception)args.ExceptionObject;
             try
             {
                 logFatal("Unhandled Exception Occurred: " + e.ToString());
-                doShutdown(true);
-                Environment.Exit(1);
+                serverState = ServerState.Shutdown;
             }
             catch (Exception ex) 
             {
                 Console.WriteLine("[FATAL ERROR] Unhandled Exception Occurred: " + e.ToString());
                 Console.WriteLine("[EXCEPTION] Unhandled Exception Handler Failed: " + ex.ToString());
             }
+            logDebug("UnhandledException", "Goodbye");
+        }
+
+        internal static bool ConsoleCtrlCheck()
+        {
+            logDebug("ConsoleCtrlCheck", "Hello");
+            doShutdown(true);
+            logDebug("ConsoleCtrlCheck", "Goodbye");
+            Environment.Exit(0);
+            return true;
         }
 
         static void Main(string[] args)
@@ -106,6 +121,9 @@ namespace com.avilance.Starrybound
             serverState = ServerState.Starting;
             Console.Title = "Loading... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
 
+            monitorThread = new Thread(new ThreadStart(crashMonitor));
+            monitorThread.Start();
+
             if (IsMono)
                 Environment.CurrentDirectory = Path.GetDirectoryName(typeof(StarryboundServer).Assembly.Location);
 
@@ -113,7 +131,7 @@ namespace com.avilance.Starrybound
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException);
 
             if (!IsMono)
-                NativeMethods.SetConsoleCtrlHandler(new NativeMethods.HandlerRoutine(NativeMethods.ConsoleCtrlCheck), true);
+                NativeMethods.SetConsoleCtrlHandler(new NativeMethods.HandlerRoutine(ConsoleCtrlCheck), true);
 
             BootstrapConfig.SetupConfig();
 
@@ -154,40 +172,30 @@ namespace com.avilance.Starrybound
 
             foreach(string sector in config.sectors)
             {
-                sectors.Add(Encoding.UTF8.GetBytes(sector));
+                byte[] sectorBytes = Encoding.UTF8.GetBytes(sector);
+                byte[] buffer = new byte[sectorBytes.Length + 1];
+                buffer[0] = (byte)sectorBytes.Length;
+                Buffer.BlockCopy(sectorBytes, 0, buffer, 1, sectorBytes.Length);
+                sectors.Add(sectorBytes);
             }
             Bans.ProcessBans();
 
             logInfo("Starrybound Server initialization complete.");
 
-            monitorThread = new Thread(new ThreadStart(crashMonitor));
-            monitorThread.Start();
-
-            listenerThread = new Thread(new ThreadStart(new ListenerThread().run));
+            tcpListener = new ListenerThread();
+            listenerThread = new Thread(new ThreadStart(tcpListener.run));
             listenerThread.Start();
+            while (serverState != ServerState.ListenerReady) { }
+            if ((int)serverState > 3) return;
+
+            Console.Title = "Starting... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
 #if !NOSERVER
+            logInfo("Starting parent Starbound server - This may take a few moments...");
             sbServer = new ServerThread();
             sbServerThread = new Thread(new ThreadStart(sbServer.run));
             sbServerThread.Start();
-
-            Console.Title = "Starting... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
-            logInfo("Starting parent Starbound server - This may take a few moments...");
-            while (serverState != ServerState.Ready) 
-            {
-                if (serverState == ServerState.Crashed)
-                {
-                    try
-                    {
-                        Process proc = Process.GetProcessById(parentProcessId);
-                        proc.Kill();
-                        File.Delete("starbound_server.pid");
-                    }
-                    catch (Exception) { }
-                    logFatal("Parent Starbound Server failed to start!");
-                    Thread.Sleep(5000);
-                    Environment.Exit(2);
-                }
-            }
+            while (serverState != ServerState.StarboundReady) { }
+            if ((int)serverState > 3) return;
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
             serverState = ServerState.Running;
@@ -197,7 +205,7 @@ namespace com.avilance.Starrybound
                 runCallback();
         }
 
-        public static void crashMonitor()
+        private static void crashMonitor()
         {
             int lastCount = -1;
             while (true)
@@ -211,85 +219,138 @@ namespace com.avilance.Starrybound
                     if (remaining < 0) 
                         doRestart();
                     else if ((remaining % 5 == 0 || remaining < 5) && remaining != 0)
+                    {
+                        logWarn("The server will restart in " + remaining + " seconds.");
                         sendGlobalMessage("^#f75d5d;The server will restart in " + remaining + " seconds.");
+                    }
                 }
 
                 if (serverState == ServerState.Crashed)
                 {
-                    logFatal("The server has encountered a fatal error and cannot continue. Restarting in 10 seconds.");
-                    Thread.Sleep(10000);
+                    logFatal("The server has encountered a fatal error and cannot continue. Restarting in 5 seconds.");
+                    Thread.Sleep(5000);
                     doRestart();
-                    break;
+                    return;
+                }
+                else if(serverState == ServerState.Shutdown)
+                {
+                    logFatal("OS, or Unhandled Exception requested immediate shutdown.");
+                    doShutdown(true);
+                    Environment.Exit(0);
+                }
+                else if(serverState == ServerState.GracefulShutdown)
+                {
+                    logWarn("User or Console requested graceful shutdown.");
+                    doShutdown(false);
+                    Environment.Exit(0);
                 }
 
                 if (restartTime != 0)
                     Thread.Sleep(1000);
                 else
-                    Thread.Sleep(3000);
+                    Thread.Sleep(2000);
             }
         }
 
-        public static void doRestart()
+        private static void doRestart()
         {
             doShutdown(false);
+            if (IsMono)
+            {
+                logWarn("Auto Restarter doesn't support Mono. Exiting.");
+                Environment.Exit(0);
+            }
             logInfo("Now restarting...");
-            Process.Start(AppDomain.CurrentDomain.FriendlyName);
+            Thread.Sleep(2500);
+            if (serverState == ServerState.Shutdown || serverState == ServerState.GracefulShutdown)
+            {
+                logWarn("Something requested shutdown while restarting. Exiting.");
+                Environment.Exit(1);
+            }
+            Process.Start(Assembly.GetEntryAssembly().Location);
             Environment.Exit(0);
         }
 
-        public static void doShutdown(bool quick)
+        private static void doShutdown(bool quick)
         {
-            if (serverState == ServerState.DoShutdown) return;
-            serverState = ServerState.DoShutdown;
+            if (shuttingDown) return;
+            shuttingDown = true;
             Console.Title = "Shutting Down... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
             logInfo("Starting graceful shutdown...");
             try
             {
-                if (Geo != null)
-                    Geo.Dispose();
+                try { Geo.Dispose(); }
+                catch (Exception) { }
 
-                if (listenerThread != null) 
-                    listenerThread.Abort();
-
-                if (clients != null)
+                try
                 {
-
                     if (!quick)
                     {
+                        logDebug("Shutdown", "Disconnect all clients.");
                         foreach (Client client in clients.Values.ToList())
                         {
-                            client.delayDisconnect("^#f75d5d;You have been disconnected.");
+                            client.delayDisconnect("You have been disconnected. The server is being shut down.");
                         }
 
+                        logInfo("Waiting 10 seconds for all clients to leave.");
                         int startWait = Utils.getTimestamp();
                         while (clientCount > 0)
                         {
-                            if (Utils.getTimestamp() > startWait + 7) break;
+                            if (Utils.getTimestamp() > startWait + 10)
+                            {
+                                logDebug("Shutdown", "Forcefully disconnecting all clients. Timeout exceeded.");
+                                foreach (Client client in clients.Values.ToList())
+                                {
+                                    client.closeConnection();
+                                }
+                                break;
+                            }
                             Thread.Sleep(500);
                         }
                     }
                     else
                     {
+                        logDebug("Shutdown", "Quick, Disconnect all clients.");
                         foreach (Client client in clients.Values.ToList())
                         {
                             client.closeConnection();
                         }
                     }
                 }
+                catch (Exception) { }
+
+                logDebug("Shutdown", "Requesting starbound_server close.");
 
                 try { sbServer.process.CloseMainWindow(); }
                 catch (Exception) { }
 
-                Thread.Sleep(500);
+                logDebug("Shutdown", "Waiting for starbound_server to close.");
+
+                Thread.Sleep(2000);
+
+                logDebug("Shutdown", "Aborting server thread.");
 
                 try { sbServerThread.Abort(); }
                 catch (Exception) { }
+
+                logDebug("Shutdown", "Killing starbound_server process.");
 
                 try
                 {
                     Process proc = Process.GetProcessById(parentProcessId);
                     proc.Kill();
                     File.Delete("starbound_server.pid");
+                }
+                catch (Exception) { }
+
+                logDebug("Shutdown", "Aborting TCP listener.");
+                try 
+                {
+                    lock (tcpListener.tcpSocket)
+                    {
+                        tcpListener.tcpSocket.Stop();
+                        listenerThread.Abort();
+                    }
                 }
                 catch (Exception) { }
 
@@ -306,6 +367,7 @@ namespace com.avilance.Starrybound
                 }
                 catch (Exception) { }
             }
+            logDebug("Shutdown", "Goodbye.");
         }
 
         public static void logDebug(string source, string message) { writeLog("[" + source + "]:" + message, LogType.Debug); }
@@ -391,7 +453,7 @@ namespace com.avilance.Starrybound
             }
         }
 
-        public static void runCallback()
+        private static void runCallback()
         {
             while (true)
             {

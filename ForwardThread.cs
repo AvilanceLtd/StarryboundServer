@@ -131,8 +131,16 @@ namespace com.avilance.Starrybound
                                 }
                                 else if (curState == ClientState.PendingConnectResponse)
                                 {
-                                    this.client.rejectPreConnected("Violated PendingConnectResponse protocol state with " + packetID);
-                                    return;
+                                    int startTime = Utils.getTimestamp();
+                                    while (true)
+                                    {
+                                        if (this.client.state == ClientState.Connected) break;
+                                        if (Utils.getTimestamp() > startTime + 3)
+                                        {
+                                            this.client.rejectPreConnected("Connection Failed: Server did not respond in time.");
+                                            return;
+                                        }
+                                    }
                                 }
                             }
                             #endregion
@@ -171,44 +179,36 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.WarpCommand)
                             {
-                                uint warp = packetData.ReadUInt32BE();
+                                WarpType cmd = (WarpType)packetData.ReadUInt32BE();
                                 WorldCoordinate coord = packetData.ReadStarWorldCoordinate();
                                 string player = packetData.ReadStarString();
-                                WarpType cmd = (WarpType)warp;
                                 if (cmd == WarpType.WarpToPlayerShip)
                                 {
-                                    if (StarryboundServer.clients.ContainsKey(player.ToLower()))
+                                    if (StarryboundServer.clients.ContainsKey(player))
                                     {
-                                        Client targetPlayer = StarryboundServer.clients[player.ToLower()];
+                                        Client targetPlayer = StarryboundServer.clients[player];
                                         if (targetPlayer != null)
                                         {
                                             if (!this.client.playerData.canAccessShip(targetPlayer.playerData))
                                             {
-                                                this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to his ship access settings.");
+                                                this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to their ship access settings.");
                                                 StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + targetPlayer.playerData.name + "'s ship.");
+                                                MemoryStream packetWarp = new MemoryStream();
+                                                BinaryWriter packetWrite = new BinaryWriter(packetWarp);
+                                                packetWrite.WriteBE((ulong)WarpType.WarpToOwnShip);
+                                                packetWrite.Write(new WorldCoordinate());
+                                                packetWrite.WriteStarString(player);
+                                                client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
                                                 returnData = false;
                                             }
                                         }
                                     }
                                 }
-                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + warp + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
+                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
-                                if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
-                                {
-                                    if (!this.client.playerData.canBuild)
-                                        returnData = false;
-                                    if (this.client.playerData.loc != null)
-                                    {
-                                        if ((StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc)) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
-                                        {
-                                            returnData = false;
-                                        }
-                                    }
-                                    else
-                                        returnData = false;
-                                }
+                                if(!this.client.playerData.canIBuild()) returnData = false;
                             }
                             else if (packetID == Packet.EntityCreate)
                             {
@@ -246,21 +246,66 @@ namespace com.avilance.Starrybound
                                                     returnData = false;
                                                 }
                                             }
+                                            else
+                                            {
+                                                MemoryStream packet = new MemoryStream();
+                                                BinaryWriter packetWrite = new BinaryWriter(packet);
+                                                packetWrite.WriteVarInt32(entityId);
+                                                packetWrite.Write(false);
+                                                this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                                returnData = false;
+                                            }
                                         }
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "][" + returnData + "]");
                                     }
-                                    else if (type != EntityType.Effect)
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
+                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
+                                    {
+                                        if (!this.client.playerData.canIBuild())
+                                        {
+                                            MemoryStream packet = new MemoryStream();
+                                            BinaryWriter packetWrite = new BinaryWriter(packet);
+                                            packetWrite.WriteVarInt32(entityId);
+                                            packetWrite.Write(false);
+                                            this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                            returnData = false;
+                                        }
+                                    }
                                 }
                             }
                             else if (packetID == Packet.SpawnEntity)
                             {
                                 while(true)
                                 {
-                                    int type = packetData.Read();
-                                    if (type == -1) break;
+                                    EntityType type = (EntityType)packetData.Read();
+                                    if (type == EntityType.EOF) break;
                                     byte[] entityData = packetData.ReadStarByteArray();
-                                    StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "]");
+                                    if (type == EntityType.Projectile)
+                                    {
+                                        BinaryReader entity = new BinaryReader(new MemoryStream(entityData));
+                                        string projectileKey = entity.ReadStarString();
+                                        object projParams = entity.ReadStarVariant();
+                                        if (StarryboundServer.config.projectileBlacklist.Contains(projectileKey))
+                                        {
+                                            returnData = false;
+                                        }
+                                        if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
+                                        {
+                                            if (this.client.playerData.loc != null)
+                                            {
+                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) && StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                {
+                                                    returnData = false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                returnData = false;
+                                            }
+                                        }
+                                    }
+                                    else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
+                                    {
+                                        if (!this.client.playerData.canIBuild()) returnData = false;
+                                    }
                                 }
                             }
                         }
@@ -320,6 +365,10 @@ namespace com.avilance.Starrybound
                                 if (!this.client.playerData.sentMotd)
                                 {
                                     this.client.sendChatMessage(Config.GetMotd());
+
+                                    if (!this.client.playerData.hasPermission("client.build"))
+                                        this.client.sendChatMessage("^#f75d5d;" + StarryboundServer.config.buildErrorMessage);
+
                                     this.client.playerData.sentMotd = true;
                                 }
 
@@ -457,10 +506,8 @@ namespace com.avilance.Starrybound
                                     {
                                         byte[] buffer = new byte[16];
                                         Buffer.BlockCopy(entityData, 0, buffer, 0, 16);
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "] Old:[" + Utils.ByteArrayToString(buffer) + "]");
                                         buffer = Utils.HashUUID(buffer);
                                         Buffer.BlockCopy(buffer, 0, entityData, 0, 16);
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "] New:[" + Utils.ByteArrayToString(buffer) + "]");
                                         returnData = test = false;
                                     }
                                     sendWriter.Write((byte)type);
@@ -492,6 +539,11 @@ namespace com.avilance.Starrybound
                             this.client.forceDisconnect(direction, "Command processor requested to drop client");
                             return;
                         }
+                    }
+
+                    if (this.client.state != ClientState.Connected || packetID == Packet.ConnectResponse)
+                    {
+                        StarryboundServer.logDebug(this.client.state + ":" + this.direction, "[" + this.client.playerData.client + "] Fowarding [" + packetID + "]");
                     }
 
                     #region Forward Packet

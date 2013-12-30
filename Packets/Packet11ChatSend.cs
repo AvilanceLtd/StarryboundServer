@@ -89,6 +89,10 @@ namespace com.avilance.Starrybound.Packets
                             new Fuel(this.client).doProcess(args);
                             break;
 
+                        case "starteritems":
+                            new StarterItems(this.client).doProcess(args);
+                            break;
+
                         case "admin":
                             new AdminChat(this.client).doProcess(args);
                             break;
@@ -200,6 +204,11 @@ namespace com.avilance.Starrybound.Packets
                         case "commandlist":
                         case "?":
                             new Help(this.client).doProcess(args);
+                            break;
+
+                        case "auth":
+                            if (String.IsNullOrWhiteSpace(StarryboundServer.authCode)) goto default;
+                            else new Auth(this.client).doProcess(args);
                             break;
 
                         default:

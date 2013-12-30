@@ -62,6 +62,13 @@ namespace com.avilance.Starrybound
                 Environment.Exit(8);
             }
         }
+
+        public static void RemovePrivateConfig()
+        {
+            StarryboundServer.serverConfig.serverPasswords = new string[] { "" };
+            StarryboundServer.serverConfig.gamePort = 21025;
+            StarryboundServer.serverConfig.Write(ConfigPath);
+        }
     }
 
     [DataContract]

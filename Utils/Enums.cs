@@ -244,10 +244,12 @@ namespace com.avilance.Starrybound.Util
     public enum ServerState
     {
         Starting = 0,
-        Ready = 1,
-        Running = 2,
-        DoShutdown = 3,
+        ListenerReady = 1,
+        StarboundReady = 2,
+        Running = 3,
         Crashed = 4,
+        Shutdown = 5,
+        GracefulShutdown = 6,
     }
 
     public enum WarpType
@@ -267,7 +269,7 @@ namespace com.avilance.Starrybound.Util
         Object = 3,
         ItemDrop = 4,
         Projectile = 5,
-        Planet = 6,
+        Plant = 6,
         PlantDrop = 7,
         Effect = 8,
     }

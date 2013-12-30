@@ -31,6 +31,7 @@ namespace com.avilance.Starrybound
 
         public bool sentMotd = false;
         public bool freeFuel = false;
+        public bool receivedStarterKit = false;
 
         public Group group;
 
@@ -60,7 +61,7 @@ namespace com.avilance.Starrybound
                 if (prefix == null) prefix = "";
                 if (color == null) color = "";
 
-                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name+"^#656b6a;"; 
+                return ((prefix != "") ? prefix + " " : "") + ((color != "") ? "^" + color + ";" : "") + this.name; 
             }
             set { return; }
         }
@@ -89,6 +90,23 @@ namespace com.avilance.Starrybound
         public bool isInSameWorldAs(PlayerData otherPlayer)
         {
             return loc.Equals(otherPlayer.loc);
+        }
+
+        public bool canIBuild()
+        {
+            if (StarryboundServer.serverConfig.useDefaultWorldCoordinate && StarryboundServer.config.spawnWorldProtection)
+            {
+                if (loc != null)
+                {
+                    if ((StarryboundServer.spawnPlanet.Equals(loc)) && !group.hasPermission("admin.spawnbuild") && !inPlayerShip)
+                        return false;
+                }
+                else
+                    return false;
+            }
+            else if (!hasPermission("world.build")) return false;
+            else if (!canBuild) return false;
+            return true;
         }
 
         public bool canAccessShip(PlayerData otherPlayer)

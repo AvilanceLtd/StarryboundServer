@@ -39,11 +39,11 @@ namespace com.avilance.Starrybound.Commands
             var buffer = StarryboundServer.clients.Values.ToList();
             foreach (Client user in buffer)
             {
-                list = list + user.playerData.formatName;
+                list = list + user.playerData.formatName+"^#5dc4f4;";
                 if (i != noOfUsers - 1) list = list + ", ";
                 i++;
             }
-            this.client.sendCommandMessage(noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s): " + list);
+            this.client.sendChatMessage("^#5dc4f4;" + noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s): " + list);
             return true;
         }
     }

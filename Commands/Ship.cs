@@ -51,34 +51,31 @@ namespace com.avilance.Starrybound.Commands
             }
             else
             {
-                PlayerData targetPlayer = StarryboundServer.clients[player].playerData;
                 if (!hasPermission(true)) { permissionError(2); return false; }
-                if (!this.player.canAccessShip(targetPlayer))
+
+                if (StarryboundServer.clients.ContainsKey(player))
                 {
-                    this.client.sendCommandMessage("You cannot access this player's ship due to their ship's access settings.");
+                    PlayerData targetPlayer = StarryboundServer.clients[player].playerData;
+                    if (!this.player.canAccessShip(targetPlayer))
+                    {
+                        this.client.sendCommandMessage("You cannot access this player's ship due to their ship's access settings.");
+                        return false;
+                    }
+                    this.client.sendCommandMessage("Teleporting to " + player + " ship!");
+
+                    warp = (uint)WarpType.WarpToPlayerShip;
+                }
+                else
+                {
+                    this.client.sendCommandMessage("Player '" + player + "' not found.");
                     return false;
                 }
-                this.client.sendCommandMessage("Teleporting to " + player + " ship!");
-
-                warp = (uint)WarpType.WarpToPlayerShip;
             }
 
             MemoryStream packetWarp = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packetWarp);
-
-            string sector = "";
-            int x = 0;
-            int y = 0;
-            int z = 0;
-            int planet = 0;
-            int satellite = 0;
             packetWrite.WriteBE(warp);
-            packetWrite.WriteStarString(sector);
-            packetWrite.WriteBE(x);
-            packetWrite.WriteBE(y);
-            packetWrite.WriteBE(z);
-            packetWrite.WriteBE(planet);
-            packetWrite.WriteBE(satellite);
+            packetWrite.Write(new WorldCoordinate());
             packetWrite.WriteStarString(player);
             client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
 

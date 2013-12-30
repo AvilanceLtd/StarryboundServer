@@ -23,6 +23,13 @@ namespace com.avilance.Starrybound.Extensions
         public int _planet;
         public int _satellite;
 
+        public WorldCoordinate()
+        {
+            _syscoord = new SystemCoordinate("", 0, 0, 0);
+            _planet = 0;
+            _satellite = 0;
+        }
+
         public WorldCoordinate(string sector, int x, int y, int z, int planet, int satellite)
         {
             _syscoord = new SystemCoordinate(sector, x, y, z);
