@@ -33,6 +33,13 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
+            if (args.Length < 1)
+            {
+                this.client.sendCommandMessage("Incorrect auth code. This incident has been logged.");
+                StarryboundServer.logWarn(this.client.playerData.name + " (IP: " + this.client.playerData.ip + ") attempted to use /auth even though it was disabled.");
+                return false;
+            }
+
             string code = args[0];
 
             if (code != StarryboundServer.authCode)

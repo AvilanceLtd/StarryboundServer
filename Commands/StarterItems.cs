@@ -11,7 +11,7 @@ namespace com.avilance.Starrybound.Commands
     {
         public StarterItems(Client client)
         {
-            this.name = "StarterItems";
+            this.name = "starteritems";
             this.HelpText = ": Gives you a kit of items for beginners as specified by the server.";
 
             this.client = client;
