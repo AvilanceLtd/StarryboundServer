@@ -220,8 +220,6 @@ namespace com.avilance.Starrybound
         private void doDisconnect(string logMessage)
         {
             if (this.state == ClientState.Disposing) return;
-            bool broadcast = true;
-            if (this.state == ClientState.Connected) broadcast = false;
             this.state = ClientState.Disposing;
             StarryboundServer.logInfo("[" + playerData.client + "] " + logMessage);
             try
@@ -233,8 +231,8 @@ namespace com.avilance.Starrybound
                         Users.SaveUser(this.playerData);
                         StarryboundServer.clientsById.Remove(this.playerData.id);
                         StarryboundServer.clients.Remove(this.playerData.name);
+                        if (this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                     }
-                    if (this.kickTargetTimestamp == 0 && broadcast) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                 }
             }
             catch (Exception e)
