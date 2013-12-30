@@ -103,10 +103,8 @@ namespace com.avilance.Starrybound
                 }
                 else if (consoleLine.Contains("TcpServer listening on: "))
                 {
+                    StarryboundServer.logDebug("ServerThread::TcpServerCheck", "Resetting variables to allow local clients.");
                     StarryboundServer.serverState = ServerState.StarboundReady;
-                }
-                else if(consoleLine.Contains("Info: Loading Star::Root"))
-                {
                     ServerConfig.RemovePrivateConfig();
                 }
 
