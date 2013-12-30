@@ -119,11 +119,11 @@ namespace com.avilance.Starrybound
                 }
                 else if (consoleLine.StartsWith("Info: Kicking client "))
                 {
-                    string[] kick = consoleLine.Remove(0, 22).Split(' ');
+                    string[] kick = consoleLine.Remove(0, 21).Split(' ');
                     string user = kick[0];
                     string id = kick[1];
                     string ip = kick[2];
-                    StarryboundServer.logWarn("Parent Server disconnected " + user + " " + ip + " for inactivity. This was likely due to a lag spike.");
+                    StarryboundServer.logWarn("Parent Server disconnected " + user + " " + ip + " for inactivity.");
                     return;
                 }
 

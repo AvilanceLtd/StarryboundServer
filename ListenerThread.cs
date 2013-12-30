@@ -41,6 +41,7 @@ namespace com.avilance.Starrybound
                     while (true)
                     {
                         TcpClient clientSocket = tcpSocket.AcceptTcpClient();
+                        clientSocket.ReceiveTimeout = 15000;
                         new Thread(new ThreadStart(new Client(clientSocket).run)).Start();
                     }
                 }

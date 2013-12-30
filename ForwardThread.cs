@@ -251,7 +251,6 @@ namespace com.avilance.Starrybound
                                                 returnData = false;
                                             }
                                         }
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "][" + projectileKey + "][" + returnData + "]");
                                     }
                                     else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
@@ -265,8 +264,6 @@ namespace com.avilance.Starrybound
                                             returnData = false;
                                         }
                                     }
-                                    else if (type != EntityType.Effect)
-                                        StarryboundServer.logDebug("EntityCreate", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + ":" + entityId + "]");
                                 }
                             }
                             else if (packetID == Packet.SpawnEntity)
@@ -299,13 +296,11 @@ namespace com.avilance.Starrybound
                                                 returnData = false;
                                             }
                                         }
-                                        StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "][" + projectileKey + "][" + returnData + "]");
                                     }
                                     else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
                                         if (!this.client.playerData.canIBuild()) returnData = false;
                                     }
-                                    StarryboundServer.logDebug("SpawnEntity", "[" + this.client.playerData.client + "][" + type + ":" + entityData.Length + "]");
                                 }
                             }
                         }
