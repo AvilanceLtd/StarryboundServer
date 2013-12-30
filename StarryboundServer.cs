@@ -81,12 +81,14 @@ namespace com.avilance.Starrybound
 
         static void ProcessExit(object sender, EventArgs e)
         {
+            logDebug("ProcessExit", "Hello");
             doShutdown(true);
-            Environment.Exit(0);
+            logDebug("ProcessExit", "Goodbye");
         }
 
         static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
+            logDebug("UnhandledException", "Hello");
             Exception e = (Exception)args.ExceptionObject;
             try
             {
@@ -98,11 +100,14 @@ namespace com.avilance.Starrybound
                 Console.WriteLine("[FATAL ERROR] Unhandled Exception Occurred: " + e.ToString());
                 Console.WriteLine("[EXCEPTION] Unhandled Exception Handler Failed: " + ex.ToString());
             }
+            logDebug("UnhandledException", "Goodbye");
         }
 
         internal static bool ConsoleCtrlCheck()
         {
+            logDebug("ConsoleCtrlCheck", "Hello");
             doShutdown(true);
+            logDebug("ConsoleCtrlCheck", "Goodbye");
             Environment.Exit(0);
             return true;
         }
