@@ -104,7 +104,7 @@ namespace com.avilance.Starrybound
                 else
                     return false;
             }
-            else if (!hasPermission("client.build")) return false;
+            else if (!hasPermission("world.build")) return false;
             else if (!canBuild) return false;
             return true;
         }
