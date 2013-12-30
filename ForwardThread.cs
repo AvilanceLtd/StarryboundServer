@@ -179,10 +179,9 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.WarpCommand)
                             {
-                                uint warp = packetData.ReadUInt32BE();
+                                WarpType cmd = (WarpType)packetData.ReadUInt32BE();
                                 WorldCoordinate coord = packetData.ReadStarWorldCoordinate();
                                 string player = packetData.ReadStarString();
-                                WarpType cmd = (WarpType)warp;
                                 if (cmd == WarpType.WarpToPlayerShip)
                                 {
                                     if (StarryboundServer.clients.ContainsKey(player.ToLower()))
@@ -199,7 +198,7 @@ namespace com.avilance.Starrybound
                                         }
                                     }
                                 }
-                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + warp + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
+                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
