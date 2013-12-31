@@ -437,11 +437,7 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage (string message) 
         {
-            var buffer = clients.Values.ToList();
-            foreach (Client client in buffer)
-            {
-                client.sendChatMessage("^#5dc4f4;" + message);
-            }
+            sendGlobalMessage(message, "^#5dc4f4;");
         }
 
         public static void sendGlobalMessage(string message, string color)

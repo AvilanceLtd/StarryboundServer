@@ -195,9 +195,9 @@ namespace com.avilance.Starrybound
                                                 StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + targetPlayer.playerData.name + "'s ship.");
                                                 MemoryStream packetWarp = new MemoryStream();
                                                 BinaryWriter packetWrite = new BinaryWriter(packetWarp);
-                                                packetWrite.WriteBE((ulong)WarpType.WarpToOwnShip);
+                                                packetWrite.WriteBE((uint)WarpType.WarpToOwnShip);
                                                 packetWrite.Write(new WorldCoordinate());
-                                                packetWrite.WriteStarString(player);
+                                                packetWrite.WriteStarString("");
                                                 client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
                                                 returnData = false;
                                             }
@@ -366,7 +366,7 @@ namespace com.avilance.Starrybound
                                 {
                                     this.client.sendChatMessage(Config.GetMotd());
 
-                                    if (!this.client.playerData.hasPermission("client.build"))
+                                    if (!this.client.playerData.canIBuild())
                                         this.client.sendChatMessage("^#f75d5d;" + StarryboundServer.config.buildErrorMessage);
 
                                     this.client.playerData.sentMotd = true;
@@ -539,11 +539,6 @@ namespace com.avilance.Starrybound
                             this.client.forceDisconnect(direction, "Command processor requested to drop client");
                             return;
                         }
-                    }
-
-                    if (this.client.state != ClientState.Connected || packetID == Packet.ConnectResponse)
-                    {
-                        StarryboundServer.logDebug(this.client.state + ":" + this.direction, "[" + this.client.playerData.client + "] Fowarding [" + packetID + "]");
                     }
 
                     #region Forward Packet

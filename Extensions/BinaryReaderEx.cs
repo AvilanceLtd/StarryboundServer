@@ -61,7 +61,7 @@ namespace com.avilance.Starrybound.Extensions
                 return new WorldCoordinate(sector, x, y, z, planet, satellite);
             }
             else if (String.IsNullOrEmpty(sector))
-                return new WorldCoordinate("", 0, 0, 0, 0, 0);
+                return new WorldCoordinate();
             else
                 throw new IndexOutOfRangeException("WorldCoordinate Sector out of range: " + sector);
         }
