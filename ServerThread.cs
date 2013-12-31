@@ -19,15 +19,6 @@ namespace com.avilance.Starrybound
 
         public void run()
         {
-            try
-            {
-                int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
-                Process proc = Process.GetProcessById(processId);
-                proc.Kill();
-                File.Delete("starbound_server.pid");
-            }
-            catch (Exception) { }
-
             var executableName = "starbound_server" + (StarryboundServer.IsMono ? "" : ".exe");
             try
             {

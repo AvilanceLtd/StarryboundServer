@@ -93,7 +93,8 @@ namespace com.avilance.Starrybound
             try
             {
                 logFatal("Unhandled Exception Occurred: " + e.ToString());
-                serverState = ServerState.Shutdown;
+                doShutdown(true);
+                Environment.Exit(1);
             }
             catch (Exception ex) 
             {
@@ -120,6 +121,15 @@ namespace com.avilance.Starrybound
             startTime = Utils.getTimestamp();
             serverState = ServerState.Starting;
             Console.Title = "Loading... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
+
+            try
+            {
+                int processId = Convert.ToInt32(File.ReadAllText("starbound_server.pid"));
+                Process proc = Process.GetProcessById(processId);
+                proc.Kill();
+                File.Delete("starbound_server.pid");
+            }
+            catch (Exception) { }
 
             monitorThread = new Thread(new ThreadStart(crashMonitor));
             monitorThread.Start();
