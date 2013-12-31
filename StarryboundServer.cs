@@ -447,7 +447,7 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage(string message) 
         {
-            sendGlobalMessage(message, "^#5dc4f4;");
+            sendGlobalMessage(message, "#5dc4f4");
         }
 
         public static void sendGlobalMessage(string message, string color)
@@ -455,7 +455,7 @@ namespace com.avilance.Starrybound
             var buffer = clients.Values.ToList();
             foreach (Client client in buffer)
             {
-                client.sendChatMessage(color + message);
+                client.sendChatMessage("^" + color + ";" + message);
             }
         }
 
