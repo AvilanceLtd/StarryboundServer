@@ -366,7 +366,7 @@ namespace com.avilance.Starrybound
                                 {
                                     this.client.sendChatMessage(Config.GetMotd());
 
-                                    if (!this.client.playerData.canIBuild())
+                                    if (!this.client.playerData.group.hasPermission("world.build"))
                                         this.client.sendChatMessage("^#f75d5d;" + StarryboundServer.config.buildErrorMessage);
 
                                     this.client.playerData.sentMotd = true;
