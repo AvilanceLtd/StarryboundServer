@@ -435,7 +435,7 @@ namespace com.avilance.Starrybound
             public string Name;
         }
 
-        public static void sendGlobalMessage (string message) 
+        public static void sendGlobalMessage(string message) 
         {
             sendGlobalMessage(message, "^#5dc4f4;");
         }

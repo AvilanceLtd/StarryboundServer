@@ -146,10 +146,17 @@ namespace com.avilance.Starrybound
             if (this.kickTargetTimestamp != 0) return;
             try
             {
-                this.cOut.WriteVarUInt32((uint)packetID);
-                this.cOut.WriteVarInt32((int)packetData.Length);
-                this.cOut.Write(packetData);
-                this.cOut.Flush();
+                if (this.cOut.BaseStream.CanWrite)
+                {
+                    this.cOut.WriteVarUInt32((uint)packetID);
+                    this.cOut.WriteVarInt32((int)packetData.Length);
+                    this.cOut.Write(packetData);
+                    this.cOut.Flush();
+                }
+                else
+                {
+                    this.forceDisconnect(Direction.Client, "Cannot write to stream.");
+                }
             }
             catch (Exception e)
             {
@@ -161,10 +168,17 @@ namespace com.avilance.Starrybound
         {
             try
             {
-                this.sOut.WriteVarUInt32((uint)packetID);
-                this.sOut.WriteVarInt32((int)packetData.Length);
-                this.sOut.Write(packetData);
-                this.sOut.Flush();
+                if (this.sOut.BaseStream.CanWrite)
+                {
+                    this.sOut.WriteVarUInt32((uint)packetID);
+                    this.sOut.WriteVarInt32((int)packetData.Length);
+                    this.sOut.Write(packetData);
+                    this.sOut.Flush();
+                }
+                else
+                {
+                    this.forceDisconnect(Direction.Server, "Cannot write to stream.");
+                }
             }
             catch (Exception e)
             {
