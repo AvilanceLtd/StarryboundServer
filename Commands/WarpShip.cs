@@ -47,9 +47,10 @@ namespace com.avilance.Starrybound.Commands
             }
             else
             {
-                if (StarryboundServer.clients.ContainsKey(player))
+                Client target = StarryboundServer.getClient(player);
+                if (target != null)
                 {
-                    loc = StarryboundServer.clients[player].playerData.loc;
+                    loc = target.playerData.loc;
                     if (loc == null)
                     {
                         this.client.sendCommandMessage("Unable to find an exact location for " + player + ".");

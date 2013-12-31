@@ -74,15 +74,6 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
-            foreach (string nameToCheck in StarryboundServer.clients.Keys)
-            {
-                if (nameToCheck.ToLower() == name.ToLower())
-                {
-                    this.client.rejectPreConnected("This username is already in use.");
-                    return false;
-                }
-            }
-
             if (String.IsNullOrWhiteSpace(this.client.playerData.name))
             {
                 this.client.rejectPreConnected("You may not have a blank name.");
@@ -137,7 +128,7 @@ namespace com.avilance.Starrybound.Packets
                 pData.freeFuel = userPData.freeFuel;
                 pData.receivedStarterKit = userPData.receivedStarterKit;
 
-                if (userPData.uuid != pData.uuid)
+                if (userPData.uuid != pData.uuid && userPData.groupName != StarryboundServer.defaultGroup)
                 {
                     this.client.rejectPreConnected("Connection Failed: You cannot use \"" + pData.name + "\" on this server.");
                     return false;
@@ -147,6 +138,20 @@ namespace com.avilance.Starrybound.Packets
             {
                 this.client.rejectPreConnected("Connection Failed: A internal server error occurred (2)");
                 return false;
+            }
+
+            foreach (Client checkClient in StarryboundServer.getClients())
+            {
+                if (checkClient.playerData.name.ToLower() == name.ToLower())
+                {
+                    if (userPData.groupName != StarryboundServer.defaultGroup)
+                    {
+                        checkClient.delayDisconnect("Someone else is attempting to connect with your name. Disconnecting.");
+                        this.client.rejectPreConnected("We have disconnected the old player on the server. Please try again in 15 seconds.");
+                    }
+                    else
+                        this.client.rejectPreConnected("Someone is already logged in with this name.");
+                }
             }
 
             return null;

@@ -135,7 +135,7 @@ namespace com.avilance.Starrybound
                                     while (true)
                                     {
                                         if (this.client.state == ClientState.Connected) break;
-                                        if (Utils.getTimestamp() > startTime + 3)
+                                        if (Utils.getTimestamp() > startTime + StarryboundServer.config.connectTimeout)
                                         {
                                             this.client.rejectPreConnected("Connection Failed: Server did not respond in time.");
                                             return;
@@ -184,23 +184,20 @@ namespace com.avilance.Starrybound
                                 string player = packetData.ReadStarString();
                                 if (cmd == WarpType.WarpToPlayerShip)
                                 {
-                                    if (StarryboundServer.clients.ContainsKey(player))
+                                    Client target = StarryboundServer.getClient(player);
+                                    if (target != null)
                                     {
-                                        Client targetPlayer = StarryboundServer.clients[player];
-                                        if (targetPlayer != null)
+                                        if (!this.client.playerData.canAccessShip(target.playerData))
                                         {
-                                            if (!this.client.playerData.canAccessShip(targetPlayer.playerData))
-                                            {
-                                                this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to their ship access settings.");
-                                                StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + targetPlayer.playerData.name + "'s ship.");
-                                                MemoryStream packetWarp = new MemoryStream();
-                                                BinaryWriter packetWrite = new BinaryWriter(packetWarp);
-                                                packetWrite.WriteBE((uint)WarpType.WarpToOwnShip);
-                                                packetWrite.Write(new WorldCoordinate());
-                                                packetWrite.WriteStarString("");
-                                                client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
-                                                returnData = false;
-                                            }
+                                            this.client.sendChatMessage("^#5dc4f4;You cannot access this player's ship due to their ship access settings.");
+                                            StarryboundServer.logDebug("ShipAccess", "Preventing " + this.client.playerData.name + " from accessing " + target.playerData.name + "'s ship.");
+                                            MemoryStream packetWarp = new MemoryStream();
+                                            BinaryWriter packetWrite = new BinaryWriter(packetWarp);
+                                            packetWrite.WriteBE((uint)WarpType.WarpToOwnShip);
+                                            packetWrite.Write(new WorldCoordinate());
+                                            packetWrite.WriteStarString("");
+                                            client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
+                                            returnData = false;
                                         }
                                     }
                                 }
@@ -291,9 +288,12 @@ namespace com.avilance.Starrybound
                                         {
                                             if (this.client.playerData.loc != null)
                                             {
-                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) && StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) ^ StarryboundServer.config.projectileSpawnListIsWhitelist)
                                                 {
-                                                    returnData = false;
+                                                    if (StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                    {
+                                                        returnData = false;
+                                                    }
                                                 }
                                             }
                                             else
@@ -352,7 +352,7 @@ namespace com.avilance.Starrybound
                                 while (true) 
                                 {
                                     if (this.client.state == ClientState.PendingConnectResponse) break;
-                                    if (Utils.getTimestamp() > startTime + 3)
+                                    if (Utils.getTimestamp() > startTime + StarryboundServer.config.connectTimeout)
                                     {
                                         this.client.rejectPreConnected("Connection Failed: Client did not respond with handshake.");
                                         return;

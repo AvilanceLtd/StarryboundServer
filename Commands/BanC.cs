@@ -42,10 +42,9 @@ namespace com.avilance.Starrybound.Commands
             int remainStuff = player.Length + expiry.Length;
             string reason = string.Join(" ", args).Substring(remainStuff + 2).Trim();
 
-            if (StarryboundServer.clients.ContainsKey(player))
+            Client target = StarryboundServer.getClient(player);
+            if (target != null)
             {
-                Client target = StarryboundServer.clients[player];
-
                 string uuid = target.playerData.uuid;
                 string name = target.playerData.name;
                 string ip = target.playerData.ip;

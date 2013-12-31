@@ -96,8 +96,8 @@ namespace com.avilance.Starrybound
                 }
 
                 sSocket = new TcpClient();
-                sSocket.ReceiveTimeout = 5000;
-                sSocket.SendTimeout = 5000;
+                sSocket.ReceiveTimeout = StarryboundServer.config.internalSocketTimeout;
+                sSocket.SendTimeout = StarryboundServer.config.internalSocketTimeout;
                 IAsyncResult result = sSocket.BeginConnect(IPAddress.Loopback, StarryboundServer.config.serverPort, null, null);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
                 if (!success || !sSocket.Connected)
@@ -238,11 +238,11 @@ namespace com.avilance.Starrybound
             {
                 if (this.playerData.name != null)
                 {
-                    if (StarryboundServer.clients.ContainsKey(this.playerData.name))
+                    Client target = StarryboundServer.getClient(this.playerData.name);
+                    if (target != null)
                     {
                         Users.SaveUser(this.playerData);
-                        StarryboundServer.clientsById.Remove(this.playerData.id);
-                        StarryboundServer.clients.Remove(this.playerData.name);
+                        StarryboundServer.removeClient(this);
                         if (this.kickTargetTimestamp == 0) StarryboundServer.sendGlobalMessage(this.playerData.name + " has left the server.");
                     }
                 }
@@ -274,7 +274,7 @@ namespace com.avilance.Starrybound
         {
             if (kickTargetTimestamp != 0) return;
             sendChatMessage("^#f75d5d;" + reason);
-            kickTargetTimestamp = Utils.getTimestamp() + 7;
+            kickTargetTimestamp = Utils.getTimestamp() + 6;
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + reason);
         }
@@ -283,7 +283,7 @@ namespace com.avilance.Starrybound
         {
             if (kickTargetTimestamp != 0) return;
             sendChatMessage("^#f75d5d;" + reason);
-            kickTargetTimestamp = Utils.getTimestamp() + 7;
+            kickTargetTimestamp = Utils.getTimestamp() + 6;
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             StarryboundServer.sendGlobalMessage("^#f75d5d;" + message);
             StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + message);

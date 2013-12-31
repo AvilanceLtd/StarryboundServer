@@ -36,8 +36,7 @@ namespace com.avilance.Starrybound.Commands
             int noOfUsers = StarryboundServer.clientCount;
             int i = 0;
 
-            var buffer = StarryboundServer.clients.Values.ToList();
-            foreach (Client user in buffer)
+            foreach (Client user in StarryboundServer.getClients())
             {
                 list = list + user.playerData.formatName+"^#5dc4f4;";
                 if (i != noOfUsers - 1) list = list + ", ";

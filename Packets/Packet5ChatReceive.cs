@@ -36,10 +36,11 @@ namespace com.avilance.Starrybound.Packets
             string name = stream.ReadStarString();
             string message = stream.ReadStarString();
 
-            if (StarryboundServer.clientsById.ContainsKey(clientID))
+            Client target = StarryboundServer.getClient(clientID);
+            if (target != null)
             {
-                StarryboundServer.clientsById[clientID].playerData.serverName = name;
-                string formatName = StarryboundServer.clientsById[clientID].playerData.formatName;
+                target.playerData.serverName = name;
+                string formatName = target.playerData.formatName;
                 if (!String.IsNullOrEmpty(formatName))
                 {
                     client.sendChatMessage((ChatReceiveContext)context, world, clientID, formatName, message);

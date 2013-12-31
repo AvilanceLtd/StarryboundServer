@@ -47,9 +47,10 @@ namespace com.avilance.Starrybound.Packets
             uint clientID = packetData.ReadVarUInt32();
             string rejectReason = packetData.ReadStarString();
 
-            if(StarryboundServer.clientsById.ContainsKey(clientID))
+            Client target = StarryboundServer.getClient(clientID);
+            if(target != null)
             {
-                StarryboundServer.clientsById[clientID].forceDisconnect(direction, "The parent server reclaimed this clientId");
+                target.forceDisconnect(direction, "The parent server reclaimed this clientId");
                 return true;
             }
 
@@ -62,8 +63,7 @@ namespace com.avilance.Starrybound.Packets
                 return true;
             }
 
-            StarryboundServer.clients.Add(player.name, this.client);
-            StarryboundServer.clientsById.Add(player.id, this.client);
+            StarryboundServer.removeClient(this.client);
 
             string geoip_prefix = "";
             if (StarryboundServer.config.enableGeoIP && StarryboundServer.Geo != null)

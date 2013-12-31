@@ -38,9 +38,10 @@ namespace com.avilance.Starrybound.Commands
 
             if (player == null || player.Length < 1) { showHelpText(); return false; }
 
-            if (StarryboundServer.clients.ContainsKey(player))
+            Client target = StarryboundServer.getClient(player);
+            if (target != null)
             {
-                StarryboundServer.clients[player].kickClient(null);
+                target.kickClient(null);
                 return true;
             }
             else

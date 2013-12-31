@@ -46,8 +46,8 @@ namespace com.avilance.Starrybound
         // Dictionary<string, ClientThread>
         // string           Username        Unique username for client, MUST be exactcase
         // ClientThread     ClientThread    Invidivual thread for client, used to access client specific functions
-        public static Dictionary<string, Client> clients = new Dictionary<string, Client>();
-        public static Dictionary<uint, Client> clientsById = new Dictionary<uint, Client>();
+        private static Dictionary<string, Client> clients = new Dictionary<string, Client>();
+        private static Dictionary<uint, Client> clientsById = new Dictionary<uint, Client>();
         public static int clientCount { get { return clients.Count; } set { return; } }
 
         public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
@@ -452,11 +452,54 @@ namespace com.avilance.Starrybound
 
         public static void sendGlobalMessage(string message, string color)
         {
-            var buffer = clients.Values.ToList();
-            foreach (Client client in buffer)
+            Task sendMessages = Task.Factory.StartNew(() =>
             {
-                client.sendChatMessage("^" + color + ";" + message);
+                var buffer = clients.Values.ToList();
+                foreach (Client client in buffer)
+                {
+                    client.sendChatMessage("^" + color + ";" + message);
+                }
+            });
+        }
+
+        public static List<Client> getClients()
+        {
+            List<Client> result = new List<Client>();
+            foreach(Client client in clients.Values.ToList())
+            {
+                result.Add(client);
             }
+            return result;
+        }
+
+        public static Client getClient(string name)
+        {
+            Client result;
+            if (clients.TryGetValue(name, out result))
+                return result;
+            else
+                return null;
+        }
+
+        public static Client getClient(uint id)
+        {
+            Client result;
+            if (clientsById.TryGetValue(id, out result))
+                return result;
+            else
+                return null;
+        }
+
+        public static void addClient(Client client)
+        {
+            clients.Add(client.playerData.name, client);
+            clientsById.Add(client.playerData.id, client);
+        }
+
+        public static void removeClient(Client client)
+        {
+            clients.Remove(client.playerData.name);
+            clientsById.Remove(client.playerData.id);
         }
 
         private static void runCallback()

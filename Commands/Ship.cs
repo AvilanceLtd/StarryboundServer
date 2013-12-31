@@ -53,9 +53,10 @@ namespace com.avilance.Starrybound.Commands
             {
                 if (!hasPermission(true)) { permissionError(2); return false; }
 
-                if (StarryboundServer.clients.ContainsKey(player))
+                Client target = StarryboundServer.getClient(player);
+                if (target != null)
                 {
-                    PlayerData targetPlayer = StarryboundServer.clients[player].playerData;
+                    PlayerData targetPlayer = target.playerData;
                     if (!this.player.canAccessShip(targetPlayer))
                     {
                         this.client.sendCommandMessage("You cannot access this player's ship due to their ship's access settings.");

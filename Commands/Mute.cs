@@ -38,9 +38,10 @@ namespace com.avilance.Starrybound.Commands
 
             if (player == null || player.Length < 1) { showHelpText(); return false; }
 
-            if (StarryboundServer.clients.ContainsKey(player))
+            Client target = StarryboundServer.getClient(player);
+            if (target != null)
             {
-                PlayerData pData = StarryboundServer.clients[player].playerData;
+                PlayerData pData = target.playerData;
 
                 pData.isMuted = !pData.isMuted;
 

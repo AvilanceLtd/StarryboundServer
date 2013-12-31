@@ -94,11 +94,12 @@ namespace com.avilance.Starrybound.Commands
                     return false;
                 }
 
-                if (StarryboundServer.clients.ContainsKey(playerName))
+                Client target = StarryboundServer.getClient(playerName);
+                if (target != null)
                 {
                     if (StarryboundServer.groups.ContainsKey(groupName))
                     {
-                        PlayerData playerData = StarryboundServer.clients[playerName].playerData;
+                        PlayerData playerData = target.playerData;
                         playerData.group = StarryboundServer.groups[groupName];
                         this.client.sendCommandMessage("Player " + playerName + " has been added to group " + groupName + ".");
                         StarryboundServer.sendGlobalMessage(playerName + " has been assigned the group " + groupName);
@@ -132,9 +133,10 @@ namespace com.avilance.Starrybound.Commands
                     return false;
                 }
 
-                if (StarryboundServer.clients.ContainsKey(playerName))
+                Client target = StarryboundServer.getClient(playerName);
+                if (target != null)
                 {
-                    PlayerData playerData = StarryboundServer.clients[playerName].playerData;
+                    PlayerData playerData = target.playerData;
                     playerData.group = StarryboundServer.groups[StarryboundServer.defaultGroup];
                     this.client.sendCommandMessage("Player " + playerName + " has had their access revoked.");
                     StarryboundServer.sendGlobalMessage(playerName + " has been demoted to " + StarryboundServer.defaultGroup);

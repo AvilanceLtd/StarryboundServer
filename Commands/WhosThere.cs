@@ -35,8 +35,7 @@ namespace com.avilance.Starrybound.Commands
             if (!hasPermission()) { permissionError(); return false; }
 
             string list = "";
-            var buffer = StarryboundServer.clients.Values.ToList();
-            foreach (Client otherClient in buffer)
+            foreach (Client otherClient in StarryboundServer.getClients())
             {
                 PlayerData otherPlayer = otherClient.playerData;
                 if (this.player.isInSameWorldAs(otherPlayer) && this.player.name != otherPlayer.name)
