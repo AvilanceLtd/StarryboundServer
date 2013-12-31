@@ -149,6 +149,7 @@ namespace com.avilance.Starrybound.Permissions
             aPerms.Add("admin.chat", true);
             aPerms.Add("client.*", true);
             aPerms.Add("chat.*", true);
+            aPerms.Add("world.*", true);
             Group admin = new Group("admin", "#ba0123", "[A]", aPerms);
             groups.Add(admin);
 
@@ -160,18 +161,21 @@ namespace com.avilance.Starrybound.Permissions
             mPerms.Add("admin.chat", true);
             mPerms.Add("client.*", true);
             mPerms.Add("chat.*", true);
+            mPerms.Add("world.*", true);
             Group mod = new Group("moderator", "#ea6207", "[M]", mPerms);
             groups.Add(mod);
 
             Dictionary<string, bool> pPerms = new Dictionary<string, bool>();
             pPerms.Add("client.*", true);
             pPerms.Add("chat.*", true);
+            pPerms.Add("world.build", true);
             Group player = new Group("player", null, null, pPerms);
             groups.Add(player);
 
             Dictionary<string, bool> gPerms = new Dictionary<string, bool>();
             gPerms.Add("client.*", true);
             gPerms.Add("chat.*", true);
+            gPerms.Add("world.build", true);
             Group guest = new Group("guest", null, null, gPerms, true);
             groups.Add(guest);
 

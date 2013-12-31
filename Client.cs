@@ -146,10 +146,17 @@ namespace com.avilance.Starrybound
             if (this.kickTargetTimestamp != 0) return;
             try
             {
-                this.cOut.WriteVarUInt32((uint)packetID);
-                this.cOut.WriteVarInt32((int)packetData.Length);
-                this.cOut.Write(packetData);
-                this.cOut.Flush();
+                if (this.cOut.BaseStream.CanWrite)
+                {
+                    this.cOut.WriteVarUInt32((uint)packetID);
+                    this.cOut.WriteVarInt32((int)packetData.Length);
+                    this.cOut.Write(packetData);
+                    this.cOut.Flush();
+                }
+                else
+                {
+                    this.forceDisconnect(Direction.Client, "Cannot write to stream.");
+                }
             }
             catch (Exception e)
             {
@@ -161,10 +168,17 @@ namespace com.avilance.Starrybound
         {
             try
             {
-                this.sOut.WriteVarUInt32((uint)packetID);
-                this.sOut.WriteVarInt32((int)packetData.Length);
-                this.sOut.Write(packetData);
-                this.sOut.Flush();
+                if (this.sOut.BaseStream.CanWrite)
+                {
+                    this.sOut.WriteVarUInt32((uint)packetID);
+                    this.sOut.WriteVarInt32((int)packetData.Length);
+                    this.sOut.Write(packetData);
+                    this.sOut.Flush();
+                }
+                else
+                {
+                    this.forceDisconnect(Direction.Server, "Cannot write to stream.");
+                }
             }
             catch (Exception e)
             {
@@ -174,25 +188,22 @@ namespace com.avilance.Starrybound
 
         public void sendCommandMessage(string message)
         {
-            sendChatMessage(ChatReceiveContext.CommandResult, "", message);
+            sendChatMessage(ChatReceiveContext.CommandResult, "", 0, "", message);
         }
 
         public void sendChatMessage(string message)
         {
-            sendChatMessage("", message);
+            sendChatMessage(ChatReceiveContext.Broadcast, "", 0, "", message);
         }
 
         public void sendChatMessage(string name, string message)
         {
-            sendChatMessage(ChatReceiveContext.Broadcast, "", message);
+            sendChatMessage(ChatReceiveContext.Broadcast, "", 0, name, message);
         }
 
         public void sendChatMessage(ChatReceiveContext context, string name, string message)
         {
-            if (state != ClientState.Connected) return;
-            Packet11ChatSend packet = new Packet11ChatSend(this, Util.Direction.Client);
-            packet.prepare(context, "", 0, name, message);
-            packet.onSend();
+            sendChatMessage(context, "", 0, name, message);
         }
 
         public void sendChatMessage(ChatReceiveContext context, string world, uint clientID, string name, string message)
