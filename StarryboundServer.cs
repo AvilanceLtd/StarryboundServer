@@ -455,7 +455,7 @@ namespace com.avilance.Starrybound
             var buffer = clients.Values.ToList();
             foreach (Client client in buffer)
             {
-                client.sendChatMessage("^" + color + ";" + message);
+                client.sendChatMessage(color + message);
             }
         }
 
