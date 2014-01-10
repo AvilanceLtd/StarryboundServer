@@ -209,10 +209,7 @@ namespace com.avilance.Starrybound
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
             serverState = ServerState.Running;
-
-            //Keep this last!
-            if (config.enableCallback)
-                runCallback();
+            
         }
 
         private static void crashMonitor()
@@ -502,35 +499,5 @@ namespace com.avilance.Starrybound
             clientsById.Remove(client.playerData.id);
         }
 
-        private static void runCallback()
-        {
-            while (true)
-            {
-                logInfo("Sending callback data to master server.");
-                try
-                {
-                    string json = "json={\"version\":\"" + VersionNum + "\"," +
-                                  "\"protocol\":\"" + ProtocolVersion + "\"," +
-                                  "\"mono\":\"" + IsMono + "\"," +
-                                  "\"proxyPort\":\"" + config.proxyPort + "\"," +
-                                  "\"maxSlots\":\"" + config.maxClients + "\"," +
-                                  "\"clientCount\":\"" + clientCount + "\"}";
-                    byte[] buffer = Encoding.UTF8.GetBytes(json);
-
-                    WebRequest request = WebRequest.Create("http://callback.avilance.com/");
-                    request.ContentType = "application/x-www-form-urlencoded";
-                    request.Method = "POST";
-                    request.ContentLength = buffer.Length;
-                    Stream streamWriter = request.GetRequestStream();
-                    streamWriter.Write(buffer, 0, buffer.Length);
-                    streamWriter.Close();
-                }
-                catch (Exception e)
-                {
-                    logDebug("Callback", e.ToString());
-                }
-                Thread.Sleep(1000 * 60 * 15);
-            }
-        }
     }
 }
