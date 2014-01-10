@@ -1,6 +1,11 @@
 StarryboundServer
 =================
 
+** THIS PROJECT IS NO LONGER SUPPORTED **
+All support has been dropped for Starrybound due to a ruling by Chucklefish. Please see http://www.reddit.com/r/starbound/comments/1ut6qq/ama_starrybound_public_statement/celq1v6 for information. Thank you for sticking with us throughout our time and goodbye. All licenses will remain in place and in effect for an indefinate period.
+
+- Crashdoom (crashdoom[at]avilance.com)
+
 Starrybound Proxy Wrapper for Starbound Servers.
 
 Licensed under the GPL v3 http://www.gnu.org/licenses/gpl.html
