@@ -118,7 +118,6 @@ namespace com.avilance.Starrybound
         public int internalSocketTimeout = 5;
         public int clientSocketTimeout = 15;
 
-        public bool enableCallback = true;
         
         public static ConfigFile Read(string path) {
             if (!File.Exists(path))
