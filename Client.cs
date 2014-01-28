@@ -221,6 +221,16 @@ namespace com.avilance.Starrybound
             this.packetQueue.Add(packet);
         }
 
+        public void flushChatQueue()
+        {
+            foreach (Packet11ChatSend chatPacket in this.packetQueue)
+            {
+                chatPacket.onSend();
+            }
+
+            this.packetQueue = new List<Packet11ChatSend>();
+        }
+
         public void banClient(string reason)
         {
             delayDisconnect("You have been banned from the server for " + reason + ".", this.playerData.name + " has been banned from the server for " + reason + "!");
@@ -281,6 +291,7 @@ namespace com.avilance.Starrybound
         {
             if (kickTargetTimestamp != 0) return;
             sendChatMessage("^#f75d5d;" + reason);
+            flushChatQueue();
             kickTargetTimestamp = Utils.getTimestamp() + 6;
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + reason);
@@ -290,6 +301,7 @@ namespace com.avilance.Starrybound
         {
             if (kickTargetTimestamp != 0) return;
             sendChatMessage("^#f75d5d;" + reason);
+            flushChatQueue();
             kickTargetTimestamp = Utils.getTimestamp() + 6;
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             StarryboundServer.sendGlobalMessage("^#f75d5d;" + message);
