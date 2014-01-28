@@ -22,7 +22,7 @@ namespace com.avilance.Starrybound.Commands
         public Kick(Client client)
         {
             this.name = "kick";
-            this.HelpText = " <username>: Kicks the user from the server.";
+            this.HelpText = " <username> (reason): Kicks the user from the server for specified or, if not defined, default reason.";
             this.Permission = new List<string>();
             this.Permission.Add("admin.kick");
 
@@ -34,14 +34,33 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
-            string player = string.Join(" ", args).Trim();
+            string player;
+            string reason;
+
+            if (args.Length > 1)
+            {
+                player = args[0].Trim();
+                reason = string.Join(" ", args).Substring(player.Length + 1).Trim();
+            }
+            else
+            {
+                player = string.Join(" ", args).Trim();
+                reason = "breaking the rules";
+            }
 
             if (player == null || player.Length < 1) { showHelpText(); return false; }
 
             Client target = StarryboundServer.getClient(player);
+
+            if (!this.player.group.canTarget(target.playerData.group))
+            {
+                this.client.sendCommandMessage("^#f75d5d;You do not have permission to target this user.");
+                return false;
+            }
+
             if (target != null)
             {
-                target.kickClient(null);
+                target.kickClient(reason);
                 return true;
             }
             else

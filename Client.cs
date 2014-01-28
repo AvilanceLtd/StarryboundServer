@@ -42,8 +42,12 @@ namespace com.avilance.Starrybound
         private Thread ServerForwarder;
         private Thread ClientForwarder;
 
+        public int connectedTime = 0;
+
         public int kickTargetTimestamp = 0;
         public bool connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected && this.state != ClientState.Disposing) return true; else return false; } }
+
+        public List<Packet11ChatSend> packetQueue = new List<Packet11ChatSend>();
 
         public Client(TcpClient aClient)
         {
@@ -96,9 +100,9 @@ namespace com.avilance.Starrybound
                 }
 
                 sSocket = new TcpClient();
-                sSocket.ReceiveTimeout = StarryboundServer.config.internalSocketTimeout;
-                sSocket.SendTimeout = StarryboundServer.config.internalSocketTimeout;
-                IAsyncResult result = sSocket.BeginConnect(IPAddress.Loopback, StarryboundServer.config.serverPort, null, null);
+                sSocket.ReceiveTimeout = StarryboundServer.config.internalSocketTimeout * 1000;
+                sSocket.SendTimeout = StarryboundServer.config.internalSocketTimeout * 1000;
+                IAsyncResult result = sSocket.BeginConnect((StarryboundServer.config.proxyIP.Equals("0.0.0.0") ? IPAddress.Loopback : IPAddress.Parse(StarryboundServer.config.proxyIP)), StarryboundServer.config.serverPort, null, null);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
                 if (!success || !sSocket.Connected)
                 {
@@ -118,6 +122,8 @@ namespace com.avilance.Starrybound
 
                 this.sIn = new BinaryReader(this.sSocket.GetStream());
                 this.sOut = new BinaryWriter(this.sSocket.GetStream());
+
+                this.connectedTime = Utils.getTimestamp();
 
                 // Forwarding for data from SERVER (sIn) to CLIENT (cOut)
                 this.ServerForwarder = new Thread(new ThreadStart(new ForwardThread(this, this.sIn, this.cOut, Direction.Server).run));
@@ -211,7 +217,18 @@ namespace com.avilance.Starrybound
             if (state != ClientState.Connected) return;
             Packet11ChatSend packet = new Packet11ChatSend(this, Util.Direction.Client);
             packet.prepare(context, world, clientID, name, message);
-            packet.onSend();
+
+            this.packetQueue.Add(packet);
+        }
+
+        public void flushChatQueue()
+        {
+            foreach (Packet11ChatSend chatPacket in this.packetQueue)
+            {
+                chatPacket.onSend();
+            }
+
+            this.packetQueue = new List<Packet11ChatSend>();
         }
 
         public void banClient(string reason)
@@ -221,7 +238,7 @@ namespace com.avilance.Starrybound
 
         public void kickClient(string reason)
         {
-            delayDisconnect("You have been kicked from the server for " + reason + ".", this.playerData.name + " has been kicked from the server!");
+            delayDisconnect("You have been kicked from the server for " + reason + ".", this.playerData.name + " has been kicked from the server for " + reason + "!");
         }
 
         public void kickClient()
@@ -274,6 +291,7 @@ namespace com.avilance.Starrybound
         {
             if (kickTargetTimestamp != 0) return;
             sendChatMessage("^#f75d5d;" + reason);
+            flushChatQueue();
             kickTargetTimestamp = Utils.getTimestamp() + 6;
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             StarryboundServer.logInfo("[" + playerData.client + "] is being kicked for " + reason);
@@ -283,6 +301,7 @@ namespace com.avilance.Starrybound
         {
             if (kickTargetTimestamp != 0) return;
             sendChatMessage("^#f75d5d;" + reason);
+            flushChatQueue();
             kickTargetTimestamp = Utils.getTimestamp() + 6;
             sendServerPacket(Packet.ClientDisconnect, new byte[1]);
             StarryboundServer.sendGlobalMessage("^#f75d5d;" + message);

@@ -64,7 +64,7 @@ namespace com.avilance.Starrybound
                     #region Process Packet
                     //Packet ID and Vaildity Check.
                     uint temp = this.incoming.ReadVarUInt32();
-                    if (temp < 1 || temp > 48)
+                    if (temp < 0 || temp > 46)
                     {
                         this.client.forceDisconnect(direction, "Sent invalid packet ID [" + temp + "].");
                         return;
@@ -199,9 +199,12 @@ namespace com.avilance.Starrybound
                                             client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
                                             returnData = false;
                                         }
+                                        else this.client.playerData.inPlayerShip = true;
                                     }
                                 }
-                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
+                                else if (cmd == WarpType.WarpToOwnShip) this.client.playerData.inPlayerShip = true;
+                                else this.client.playerData.inPlayerShip = false;
+                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "] inPlayerShip:" + this.client.playerData.inPlayerShip);
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
@@ -372,15 +375,14 @@ namespace com.avilance.Starrybound
                                     this.client.playerData.sentMotd = true;
                                 }
 
-                                byte[] planet = packetData.ReadStarByteArray();
-                                byte[] worldStructure = packetData.ReadStarByteArray();
-                                byte[] sky = packetData.ReadStarByteArray();
-                                byte[] serverWeather = packetData.ReadStarByteArray();
+                                var unk4 = packetData.ReadStarVariant();
+                                var unk3 = packetData.ReadStarVariant();
+                                byte[] unk1 = packetData.ReadStarByteArray();
+                                byte[] unk2 = packetData.ReadStarByteArray();
                                 float spawnX = packetData.ReadSingleBE();
                                 float spawnY = packetData.ReadSingleBE();
-                                uint mapParamsSize = packetData.ReadVarUInt32();
-                                Dictionary<string, object> mapParams = new Dictionary<string, object>();
-                                int isPlayerShip = 0;
+                                var mapParamsSize = packetData.ReadStarVariant();
+                                /*
                                 for (int i = 0; i < mapParamsSize; i++)
                                 {
                                     string key = packetData.ReadStarString();
@@ -396,16 +398,17 @@ namespace com.avilance.Starrybound
                                     }
                                 }
                                 this.client.playerData.inPlayerShip = (isPlayerShip == 2);
+                                */
                                 uint clientID = packetData.ReadUInt32BE();
-                                bool bool1 = packetData.ReadBoolean();
-                                WorldCoordinate coords = Utils.findGlobalCoords(sky);
+                                bool interpolation = packetData.ReadBoolean();
+                                WorldCoordinate coords = Utils.findGlobalCoords(unk1);
                                 if (coords != null)
                                 {
                                     this.client.playerData.loc = coords;
-                                    StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + bool1 + ":" + clientID + "] CurLoc:[" + this.client.playerData.loc.ToString() + "][" + this.client.playerData.inPlayerShip + "]");
+                                    StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + interpolation + ":" + clientID + "] CurLoc:[" + this.client.playerData.loc.ToString() + "][" + this.client.playerData.inPlayerShip + "]");
                                 }
                                 else
-                                    StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + bool1 + ":" + clientID + "] InPlayerShip:[" + this.client.playerData.inPlayerShip + "]");
+                                    StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + interpolation + ":" + clientID + "] InPlayerShip:[" + this.client.playerData.inPlayerShip + "]");
                             }
                             else if (packetID == Packet.WorldStop)
                             {
@@ -555,6 +558,15 @@ namespace com.avilance.Starrybound
                         this.outgoing.Write(dataBuffer, 0, packetSize);
                     }
                     this.outgoing.Flush();
+                    #endregion
+
+                    #region Inject from Packet Queue
+                    foreach (Packet11ChatSend chatPacket in this.client.packetQueue)
+                    {
+                        chatPacket.onSend();
+                    }
+
+                    this.client.packetQueue = new List<Packet11ChatSend>();
                     #endregion
 
                     //If disconnect was forwarded to client, lets disconnect.

@@ -49,7 +49,7 @@ namespace com.avilance.Starrybound.Packets
             User userPData = Users.GetUser(name, this.client.playerData.uuid, this.client.playerData.ip);
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
-                if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
+                if (!userPData.getGroup().hasPermission("admin.reservedlist") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
                 {
                     this.client.rejectPreConnected("The server is full. Please try again later.");
                     return false;
@@ -99,11 +99,11 @@ namespace com.avilance.Starrybound.Packets
                 }
             }
 
-            if (userPData.getGroup().hasPermission("admin.bypassban"))
+            if (!userPData.getGroup().hasPermission("admin.bypassban"))
             {
                 foreach (string bannedUnamePhrase in StarryboundServer.config.bannedUsernames)
                 {
-                    if (this.client.playerData.name.Contains(bannedUnamePhrase))
+                    if (this.client.playerData.name.ToLower().Contains(bannedUnamePhrase.ToLower()))
                     {
                         this.client.rejectPreConnected("Your name contains a phrase that is banned on this server. (" + bannedUnamePhrase + ")");
                         return false;
@@ -127,6 +127,9 @@ namespace com.avilance.Starrybound.Packets
                 pData.group = userPData.getGroup();
                 pData.freeFuel = userPData.freeFuel;
                 pData.receivedStarterKit = userPData.receivedStarterKit;
+                pData.privateShip = userPData.privateShip;
+                pData.shipBlacklist = userPData.shipBlacklist;
+                pData.shipWhitelist = userPData.shipWhitelist;
 
                 if (userPData.uuid != pData.uuid && userPData.groupName != StarryboundServer.defaultGroup)
                 {

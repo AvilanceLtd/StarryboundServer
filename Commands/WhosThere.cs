@@ -34,11 +34,18 @@ namespace com.avilance.Starrybound.Commands
         {
             if (!hasPermission()) { permissionError(); return false; }
 
+            if (this.client.playerData.loc == null)
+            {
+                this.client.sendCommandMessage("Unable to find your exact location at this time.");
+                return false;
+            }
+
             string list = "";
             foreach (Client otherClient in StarryboundServer.getClients())
             {
                 PlayerData otherPlayer = otherClient.playerData;
-                if (this.player.isInSameWorldAs(otherPlayer) && this.player.name != otherPlayer.name)
+                if (otherPlayer.loc == null) continue;
+                else if (this.player.isInSameWorldAs(otherPlayer) && this.player.name != otherPlayer.name)
                 {
                     list += otherPlayer.name + ", ";
                 }

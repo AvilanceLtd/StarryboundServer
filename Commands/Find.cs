@@ -39,6 +39,11 @@ namespace com.avilance.Starrybound.Commands
 
             if (player == null || player.Length < 1)
             {
+                if (this.client.playerData.loc == null)
+                {
+                    this.client.sendCommandMessage("Unable to find your exact location at this time.");
+                    return false;
+                }
                 this.client.sendCommandMessage("You are located [" + this.player.loc.ToString() + "]");
                 return true;
             }

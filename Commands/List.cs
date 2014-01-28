@@ -10,6 +10,7 @@
 */
 
 using com.avilance.Starrybound.Packets;
+using com.avilance.Starrybound.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,9 @@ namespace com.avilance.Starrybound.Commands
 {
     class List : CommandBase
     {
+        List<Client> staffList = new List<Client>();
+        List<Client> userList = new List<Client>();
+
         public List(Client client)
         {
             this.name = "players";
@@ -31,18 +35,47 @@ namespace com.avilance.Starrybound.Commands
 
         public override bool doProcess(string[] args)
         {
-            string list = "";
+            string staffListO = "";
+            string userListO = "";
 
             int noOfUsers = StarryboundServer.clientCount;
             int i = 0;
 
-            foreach (Client user in StarryboundServer.getClients())
+            foreach (Group group in StarryboundServer.groups.Values)
             {
-                list = list + user.playerData.formatName+"^#5dc4f4;";
-                if (i != noOfUsers - 1) list = list + ", ";
+                if (group.isStaff)
+                {
+                    List<Client> clients = StarryboundServer.getClients(group.name);
+                    foreach (Client client in clients) { this.staffList.Add(client); }
+                }
+                else
+                {
+                    List<Client> clients = StarryboundServer.getClients(group.name);
+                    foreach (Client client in clients) { this.userList.Add(client); }
+                }
+            }
+
+            this.client.sendChatMessage("^#5dc4f4;There are " + noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s) online.");
+
+            foreach (Client staffMember in this.staffList)
+            {
+                staffListO = staffListO + "^shadow,yellow;" + staffMember.playerData.formatName + "^#5dc4f4;";
+                if (i != staffList.Count - 1) staffListO = staffListO + ", ";
                 i++;
             }
-            this.client.sendChatMessage("^#5dc4f4;" + noOfUsers + "/" + StarryboundServer.config.maxClients + " player(s): " + list);
+
+            i = 0;
+
+            foreach (Client player in this.userList)
+            {
+                userListO = userListO + "^shadow,yellow;" + player.playerData.formatName + "^#5dc4f4;";
+                if (i != userList.Count - 1) userListO = userListO + ", ";
+                i++;
+            }
+
+            if (staffList.Count > 0) this.client.sendChatMessage("Staff: " + staffListO);
+            if (userList.Count > 0) this.client.sendChatMessage("Players: " + userListO);
+
             return true;
         }
     }
