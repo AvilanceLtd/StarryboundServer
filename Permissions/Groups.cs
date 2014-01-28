@@ -158,10 +158,6 @@ namespace com.avilance.Starrybound.Permissions
                 foreach (Group group in groupList)
                 {
                     StarryboundServer.groups.Add(group.name, group);
-                    if (!String.IsNullOrWhiteSpace(group.parent))
-                    {
-                        if (!StarryboundServer.groups.ContainsKey(group.parent)) throw new RankException("Parent (" + group.parent + ") for group " + group.name + " does not exist!");
-                    }
                     if (group.isDefault) defaultGroup = group.name;
                 }
 
@@ -170,6 +166,14 @@ namespace com.avilance.Starrybound.Permissions
                     StarryboundServer.logFatal("Default user group flag (isDefault) is not set for any groups - Please set this in the groups.json!");
                     Thread.Sleep(5000);
                     Environment.Exit(5);
+                }
+
+                foreach (Group groupCheck in StarryboundServer.groups.Values)
+                {
+                    if (!String.IsNullOrWhiteSpace(groupCheck.parent))
+                    {
+                        if (!StarryboundServer.groups.ContainsKey(groupCheck.parent)) throw new RankException("Parent (" + groupCheck.parent + ") for group " + groupCheck.name + " does not exist!");
+                    }
                 }
 
                 StarryboundServer.defaultGroup = defaultGroup;
