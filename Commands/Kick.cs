@@ -51,6 +51,13 @@ namespace com.avilance.Starrybound.Commands
             if (player == null || player.Length < 1) { showHelpText(); return false; }
 
             Client target = StarryboundServer.getClient(player);
+
+            if (!this.player.group.canTarget(target.playerData.group))
+            {
+                this.client.sendCommandMessage("^#f75d5d;You do not have permission to target this user.");
+                return false;
+            }
+
             if (target != null)
             {
                 target.kickClient(reason);

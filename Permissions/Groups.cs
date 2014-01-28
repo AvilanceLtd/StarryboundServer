@@ -24,11 +24,13 @@ namespace com.avilance.Starrybound.Permissions
         public string name;
         public string nameColor;
         public string prefix;
+        public int targetPower;
         public bool isDefault = false;
         public bool isStaff = false;
+        public string parent = null;
         public Dictionary<string, bool> permissions;
 
-        public Group(string name, string nameColor, string prefix, Dictionary<string, bool> permissions, bool isDefault = false, bool isStaff = false)
+        public Group(string name, string nameColor, string prefix, Dictionary<string, bool> permissions, bool isDefault = false, bool isStaff = false, int targetpower = 1, string parent = null)
         {
             this.name = name;
             this.nameColor = nameColor;
@@ -36,6 +38,8 @@ namespace com.avilance.Starrybound.Permissions
             this.permissions = permissions;
             this.isDefault = isDefault;
             this.isStaff = isStaff;
+            this.targetPower = targetpower;
+            this.parent = parent;
         }
 
         public bool hasPermission(string node)
@@ -57,7 +61,15 @@ namespace com.avilance.Starrybound.Permissions
                 }
             }
 
+            if (!String.IsNullOrWhiteSpace(this.parent)) return StarryboundServer.groups[this.parent].hasPermission(node);
+
             return false;
+        }
+
+        public bool canTarget(Group group)
+        {
+            if (this.targetPower > group.targetPower) return true;
+            else return false;
         }
 
         public bool givePermission(string node)
@@ -139,24 +151,37 @@ namespace com.avilance.Starrybound.Permissions
     {
         public static void ProcessGroups(List<Group> groupList)
         {
-            string defaultGroup = null;
-
-            foreach (Group group in groupList)
+            try
             {
-                StarryboundServer.groups.Add(group.name, group);
-                if (group.isDefault) defaultGroup = group.name;
+                string defaultGroup = null;
+
+                foreach (Group group in groupList)
+                {
+                    StarryboundServer.groups.Add(group.name, group);
+                    if (!String.IsNullOrWhiteSpace(group.parent))
+                    {
+                        if (!StarryboundServer.groups.ContainsKey(group.parent)) throw new RankException("Parent (" + group.parent + ") for group " + group.name + " does not exist!");
+                    }
+                    if (group.isDefault) defaultGroup = group.name;
+                }
+
+                if (String.IsNullOrWhiteSpace(defaultGroup))
+                {
+                    StarryboundServer.logFatal("Default user group flag (isDefault) is not set for any groups - Please set this in the groups.json!");
+                    Thread.Sleep(5000);
+                    Environment.Exit(5);
+                }
+
+                StarryboundServer.defaultGroup = defaultGroup;
+
+                StarryboundServer.logInfo("Loaded " + StarryboundServer.groups.Count + " group(s). Default group is " + defaultGroup);
             }
-
-            if (String.IsNullOrWhiteSpace(defaultGroup))
+            catch (RankException e)
             {
-                StarryboundServer.logFatal("Default user group flag (isDefault) is not set for any groups - Please set this in the groups.json!");
+                StarryboundServer.logFatal("A fatal exception occurred while processing the groups (Groups::ProcessGroups): " + e.ToString());
                 Thread.Sleep(5000);
                 Environment.Exit(5);
             }
-
-            StarryboundServer.defaultGroup = defaultGroup;
-
-            StarryboundServer.logInfo("Loaded " + StarryboundServer.groups.Count + " group(s). Default group is " + defaultGroup);
         }
 
         public static object getGroup(string name)
@@ -177,22 +202,14 @@ namespace com.avilance.Starrybound.Permissions
 
             Dictionary<string, bool> saPerms = new Dictionary<string,bool>();
             saPerms.Add("*", true);
-            Group superAdmin = new Group("superadmin", "#9801ba", "[SA]", saPerms, false, true);
+            Group superAdmin = new Group("superadmin", "#9801ba", "[SA]", saPerms, false, true, 20);
             groups.Add(superAdmin);
 
             Dictionary<string, bool> aPerms = new Dictionary<string, bool>();
-            aPerms.Add("admin.kick", true);
-            aPerms.Add("admin.mute", true);
-            aPerms.Add("admin.ban", true);
             aPerms.Add("admin.unban", true);
-            aPerms.Add("admin.build", true);
             aPerms.Add("admin.give", true);
             aPerms.Add("admin.broadcast", true);
-            aPerms.Add("admin.chat", true);
-            aPerms.Add("client.*", true);
-            aPerms.Add("chat.*", true);
-            aPerms.Add("world.*", true);
-            Group admin = new Group("admin", "#ba0123", "[A]", aPerms, false, true);
+            Group admin = new Group("admin", "#ba0123", "[A]", aPerms, false, true, 10, "moderator");
             groups.Add(admin);
 
             Dictionary<string, bool> mPerms = new Dictionary<string, bool>();
@@ -201,24 +218,22 @@ namespace com.avilance.Starrybound.Permissions
             mPerms.Add("admin.ban", true);
             mPerms.Add("admin.build", true);
             mPerms.Add("admin.chat", true);
-            mPerms.Add("client.*", true);
-            mPerms.Add("chat.*", true);
             mPerms.Add("world.*", true);
-            Group mod = new Group("moderator", "#ea6207", "[M]", mPerms, false, true);
+            Group mod = new Group("moderator", "#ea6207", "[M]", mPerms, false, true, 5, "player");
             groups.Add(mod);
 
             Dictionary<string, bool> pPerms = new Dictionary<string, bool>();
             pPerms.Add("client.*", true);
             pPerms.Add("chat.*", true);
             pPerms.Add("world.build", true);
-            Group player = new Group("player", null, null, pPerms);
+            Group player = new Group("player", null, null, pPerms, false, false, 1, "guest");
             groups.Add(player);
 
             Dictionary<string, bool> gPerms = new Dictionary<string, bool>();
             gPerms.Add("client.*", true);
             gPerms.Add("chat.*", true);
             gPerms.Add("world.build", true);
-            Group guest = new Group("guest", null, null, gPerms, true);
+            Group guest = new Group("guest", null, null, gPerms, true, false);
             groups.Add(guest);
 
             return groups;

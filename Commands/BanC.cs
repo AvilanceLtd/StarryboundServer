@@ -45,6 +45,12 @@ namespace com.avilance.Starrybound.Commands
             Client target = StarryboundServer.getClient(player);
             if (target != null)
             {
+                if (!this.player.group.canTarget(target.playerData.group))
+                {
+                    this.client.sendCommandMessage("^#f75d5d;You do not have permission to target this user.");
+                    return false;
+                }
+
                 string uuid = target.playerData.uuid;
                 string name = target.playerData.name;
                 string ip = target.playerData.ip;
