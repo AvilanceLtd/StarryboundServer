@@ -199,9 +199,12 @@ namespace com.avilance.Starrybound
                                             client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
                                             returnData = false;
                                         }
+                                        else this.client.playerData.inPlayerShip = true;
                                     }
                                 }
-                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "]");
+                                else if (cmd == WarpType.WarpToOwnShip) this.client.playerData.inPlayerShip = true;
+                                else this.client.playerData.inPlayerShip = false;
+                                StarryboundServer.logDebug("WarpCommand", "[" + this.client.playerData.client + "][" + cmd + "]" + (coord != null ? "[" + coord.ToString() + "]" : "") + "[" + player + "] inPlayerShip:" + this.client.playerData.inPlayerShip);
                             }
                             else if (packetID == Packet.ModifyTileList || packetID == Packet.DamageTileGroup || packetID == Packet.DamageTile || packetID == Packet.ConnectWire || packetID == Packet.DisconnectAllWires)
                             {
