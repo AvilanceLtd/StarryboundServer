@@ -561,7 +561,8 @@ namespace com.avilance.Starrybound
                     #endregion
 
                     #region Inject from Packet Queue
-                    foreach (Packet11ChatSend chatPacket in this.client.packetQueue)
+                    var chatbuffer = this.client.packetQueue;
+                    foreach (Packet11ChatSend chatPacket in chatbuffer)
                     {
                         chatPacket.onSend();
                     }
