@@ -49,7 +49,7 @@ namespace com.avilance.Starrybound.Packets
             User userPData = Users.GetUser(name, this.client.playerData.uuid, this.client.playerData.ip);
             if (StarryboundServer.config.maxClients <= StarryboundServer.clientCount)
             {
-                if (!userPData.getGroup().hasPermission("admin.chat") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
+                if (!userPData.getGroup().hasPermission("admin.reservedlist") || StarryboundServer.clientCount == (StarryboundServer.serverConfig.maxPlayers - 1))
                 {
                     this.client.rejectPreConnected("The server is full. Please try again later.");
                     return false;
