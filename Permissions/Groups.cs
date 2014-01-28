@@ -89,6 +89,46 @@ namespace com.avilance.Starrybound.Permissions
             }
         }
 
+        public static string ReloadGroups()
+        {
+            try
+            {
+                Dictionary<string, Group> tmpDict = new Dictionary<string, Group>();
+
+                List<Group> groupList = GroupFile.Read(GroupsPath);
+                string defaultGroup = null;
+
+                foreach (Group group in groupList)
+                {
+                    tmpDict.Add(group.name, group);
+                    if (group.isDefault) defaultGroup = group.name;
+                }
+
+                if (String.IsNullOrWhiteSpace(defaultGroup))
+                {
+                    StarryboundServer.logFatal("Default user group flag (isDefault) is not set for any groups - Please set this in the groups.json!");
+                    return "isDefault flag is not set for any group!";
+                }
+
+                var buffer = StarryboundServer.getClients();
+                foreach (Client client in buffer)
+                {
+                    if (!tmpDict.ContainsKey(client.playerData.group.name))
+                    {
+                        StarryboundServer.logInfo("Updating user " + client.playerData.name + " to default group (" + defaultGroup + ") as old group " + client.playerData.group.name + " has been deleted.");
+                        client.playerData.group = tmpDict[defaultGroup];
+                    }
+                }
+
+                StarryboundServer.defaultGroup = defaultGroup;
+                StarryboundServer.groups = tmpDict;
+
+                StarryboundServer.logInfo("Loaded " + StarryboundServer.groups.Count + " group(s). Default group is " + defaultGroup);
+                return null;
+            }
+            catch (Exception) { return "Command handler threw an exception!"; }
+        }
+
         public static void SaveGroups()
         {
             GroupFile.Write(GroupsPath);

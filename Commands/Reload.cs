@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.avilance.Starrybound.Permissions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,6 +38,7 @@ namespace com.avilance.Starrybound.Commands
                     this.client.sendChatMessage("^#5dc4f4;/reload motd - reloads the MOTD file.");
                     this.client.sendChatMessage("^#5dc4f4;/reload rules - reloads the rules file.");
                     this.client.sendChatMessage("^#5dc4f4;/reload config - reloads the configuration file.");
+                    this.client.sendChatMessage("^#5dc4f4;/reload groups - reloads the user groups file.");
                     break;
 
                 case "all":
@@ -63,6 +65,13 @@ namespace com.avilance.Starrybound.Commands
                     else this.client.sendCommandMessage("^#f75d5d;Reload has failed, the config.json file is missing or corrupt. Reload failed with errors.");
                     break;
 
+                case "groups":
+                    this.client.sendCommandMessage("Reloading groups, this may take a moment...");
+                    string result = Groups.ReloadGroups();
+                    if (String.IsNullOrWhiteSpace(result)) this.client.sendCommandMessage("Reload successful.");
+                    else this.client.sendCommandMessage("^#f75d5d;Reload has failed, the error was: " + result);
+                    break;
+
                 case "bans":
                     this.client.sendCommandMessage("Reloading all bans from file, this may take a moment...");
                     reloadBans();
@@ -86,7 +95,12 @@ namespace com.avilance.Starrybound.Commands
         private bool reloadAll()
         {
             this.reloadBans();
-            if (!Config.ReloadMOTD() || !Config.ReloadRules() || !Config.ReloadConfig()) return false;
+            string result = Groups.ReloadGroups();
+            if (!String.IsNullOrWhiteSpace(result))
+            {
+                this.client.sendCommandMessage("^#f75d5d;Groups failed to reload, the error was: " + result);
+                return false;
+            } else if (!Config.ReloadMOTD() || !Config.ReloadRules() || !Config.ReloadConfig()) return false;
             else return true;
         }
     }
