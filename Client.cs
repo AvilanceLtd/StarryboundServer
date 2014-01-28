@@ -223,7 +223,8 @@ namespace com.avilance.Starrybound
 
         public void flushChatQueue()
         {
-            foreach (Packet11ChatSend chatPacket in this.packetQueue)
+            var buffer = this.packetQueue;
+            foreach (Packet11ChatSend chatPacket in buffer)
             {
                 chatPacket.onSend();
             }
