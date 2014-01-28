@@ -232,10 +232,13 @@ namespace com.avilance.Starrybound.Extensions
 
         private static long Decode(long value)
         {
-            if ((value & 1) == 0x00)
-                return (value >> 1);
-            else
-                return -(value >> 1);
+            bool negative = value % 2 == 1;
+            if (negative)
+                value += 1;
+            value /= 2;
+            if (negative)
+                return -value;
+            return value;
         }
 
         private static ulong ToTarget(BinaryReader read, int sizeBites)

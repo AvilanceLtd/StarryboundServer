@@ -51,6 +51,7 @@ namespace com.avilance.Starrybound.Packets
             if(target != null)
             {
                 target.forceDisconnect(direction, "The parent server reclaimed this clientId");
+                StarryboundServer.logError("[" + this.client.playerData.name + "] " + direction + ": The parent server reclaimed this clientId (" + clientID + ")");
                 return true;
             }
 
@@ -63,7 +64,7 @@ namespace com.avilance.Starrybound.Packets
                 return true;
             }
 
-            StarryboundServer.removeClient(this.client);
+            StarryboundServer.addClient(this.client);
 
             string geoip_prefix = "";
             if (StarryboundServer.config.enableGeoIP && StarryboundServer.Geo != null)

@@ -78,30 +78,6 @@ namespace com.avilance.Starrybound.Commands
         }
     }
 
-    class BanReloadCommand : CommandBase
-    {
-        public BanReloadCommand(Client client)
-        {
-            this.name = "banreload";
-            this.HelpText = "Reloads the banned-players.txt file";
-            this.Permission = new List<string>();
-            this.Permission.Add("admin.reload");
-
-            this.client = client;
-            this.player = client.playerData;
-        }
-
-        public override bool doProcess(string[] args)
-        {
-            if (!hasPermission()) { permissionError(); return false; }
-            this.client.sendChatMessage("Attempting to reload all server bans from banned-players.txt");
-            Bans.allBans = new Dictionary<int, Ban>();
-            Bans.ProcessBans();
-            this.client.sendChatMessage(Bans.allBans.Count + " ban(s) have been loaded.");
-            return true;
-        }
-    }
-
     class UnbanCommand : CommandBase
     {
         public UnbanCommand(Client client)

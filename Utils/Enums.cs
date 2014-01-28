@@ -19,21 +19,21 @@ namespace com.avilance.Starrybound.Util
 {
     public enum Packet
     {
-        ProtocolVersion = 1, //Done
-        ConnectResponse = 2, //Done
-        ServerDisconnect = 3, //Done
-        HandshakeChallenge = 4, //Done
-        ChatReceive = 5, //Done
-        UniverseTimeUpdate = 6, //Not Needed
-        ClientConnect = 7, //Done
-        ClientDisconnect = 8, //Done
-        HandshakeResponse = 9, //Done
-        WarpCommand = 10, //Done
-        ChatSend = 11, //Done
-        ClientContextUpdate = 12, //In Progress - NetStateDelta
-        WorldStart = 13, //Done
-        WorldStop = 14, //Done
-        TileArrayUpdate = 15,
+        ProtocolVersion = 0, //Done
+        ConnectResponse = 1, //Done
+        ServerDisconnect = 2, //Done
+        HandshakeChallenge = 3, //Done
+        ChatReceive = 4, //Done
+        UniverseTimeUpdate = 5, //Not Needed
+        ClientConnect = 6, //Done
+        ClientDisconnect = 7, //Done
+        HandshakeResponse = 8, //Done
+        WarpCommand = 9, //Done
+        ChatSend = 10, //Done
+        ClientContextUpdate = 11, //In Progress - NetStateDelta
+        WorldStart = 12, //Done
+        WorldStop = 13, //Done
+        TileArrayUpdate = 14,
         /*
          * VLQI X
          * VLQI T
@@ -43,20 +43,20 @@ namespace com.avilance.Starrybound.Util
          * Star::NetTile
          * }
          */
-        TileUpdate = 16,
+        TileUpdate = 15,
         /*
          * int X
          * int Y
          * Star::NetTile
          */
-        TileLiquidUpdate = 17,
+        TileLiquidUpdate = 16,
         /*
          * VLQI X
          * VLQI Y
          * uchar
          * uchar
          */
-        TileDamageUpdate = 18,
+        TileDamageUpdate = 17,
         /*
          * int X
          * int Y
@@ -70,27 +70,27 @@ namespace com.avilance.Starrybound.Util
          * float
          * }
          */
-        TileModificationFailure = 19,
+        TileModificationFailure = 18,
         /*
          * VLQU Size
          * {
          * ???
          * }
          */
-        GiveItem = 20, //Done
-        SwapInContainerResult = 22,
-        EnvironmentUpdate = 23,
+        GiveItem = 19, //Done
+        SwapInContainerResult = 20,
+        EnvironmentUpdate = 21,
         /*
          * ByteArray
          * ByteArray
          */
-        EntityInteractResult = 24,
+        EntityInteractResult = 22,
         /*
          * uint ClientId
          * int EntityId
          * Star::Variant
          */
-        ModifyTileList = 25,
+        ModifyTileList = 23,
         /*
          * VLQU Size
          * {
@@ -98,7 +98,7 @@ namespace com.avilance.Starrybound.Util
          * }
          * bool
          */
-        DamageTile = 26,
+        DamageTile = 24,
         /*
          * int X
          * int Y
@@ -107,7 +107,7 @@ namespace com.avilance.Starrybound.Util
          * uchar
          * float
          */
-        DamageTileGroup = 27,
+        DamageTileGroup = 25,
         /*
          * VLQU
          * {
@@ -120,22 +120,22 @@ namespace com.avilance.Starrybound.Util
          * uchar
          * float
          */
-        RequestDrop = 28,
+        RequestDrop = 26,
         /*
          * VLQI SlotId?
          */
-        SpawnEntity = 29,
+        SpawnEntity = 27,
         /*
          * uchar Type
          * ByteArray loadArray
          */
-        EntityInteract = 30,
+        EntityInteract = 28,
         /*
          * int EntityId
          * float, float
          * float, float
          */
-        ConnectWire = 31,
+        ConnectWire = 29,
         /*
          * VLQI
          * VLQI
@@ -146,49 +146,49 @@ namespace com.avilance.Starrybound.Util
          * VLQI
          * VLQI
          */
-        DisconnectAllWires = 32,
+        DisconnectAllWires = 30,
         /*
          * VLQI
          * VLQI
          * VLQI
          * VLQI
          */
-        OpenContainer = 33,
-        CloseContainer = 34,
-        SwapInContainer = 35,
-        ItemApplyInContainer = 36,
-        StartCraftingInContainer = 37,
-        StopCraftingInContainer = 38,
-        BurnContainer = 39,
-        ClearContainer = 40,
-        WorldClientStateUpdate = 41,  //In Progress - NetStateDelta
-        EntityCreate = 42,
+        OpenContainer = 31,
+        CloseContainer = 32,
+        SwapInContainer = 33,
+        ItemApplyInContainer = 34,
+        StartCraftingInContainer = 35,
+        StopCraftingInContainer = 36,
+        BurnContainer = 37,
+        ClearContainer = 38,
+        WorldClientStateUpdate = 39,  //In Progress - NetStateDelta
+        EntityCreate = 40,
         /*
          * uchar Type
          * ByteArray loadArray
          * VLQI EntityId
          */
-        EntityUpdate = 43,
+        EntityUpdate = 41,
         /*
          * VLQI EntityId
          * ByteArray loadDeltaArray
          */
-        EntityDestroy = 44,
+        EntityDestroy = 42,
         /*
          * VLQI EntityId
          * bool
          */
-        DamageNotification = 45,
+        DamageNotification = 43,
         /*
          * Star::DamageNotification
          * [
          * ]
          */
-        StatusEffectRequest = 46,
+        StatusEffectRequest = 44,
         /*
          * Star::StatusEffectRequest
          */
-        UpdateWorldProperties = 47,
+        UpdateWorldProperties = 45,
         /*
          * VLQU
          * {
@@ -196,7 +196,7 @@ namespace com.avilance.Starrybound.Util
          * Star::Variant
          * }
          */
-        Heartbeat = 48, //Not Needed
+        Heartbeat = 46, //Not Needed
     }
 
     public enum Direction
@@ -264,14 +264,14 @@ namespace com.avilance.Starrybound.Util
     public enum EntityType
     {
         EOF = -1, //Not actually valid
-        Player = 1,
-        Monster = 2,
-        Object = 3,
-        ItemDrop = 4,
-        Projectile = 5,
-        Plant = 6,
-        PlantDrop = 7,
-        Effect = 8,
+        Player = 0,
+        Monster = 1,
+        Object = 2,
+        ItemDrop = 3,
+        Projectile = 4,
+        Plant = 5,
+        PlantDrop = 6,
+        Effect = 7,
     }
     /*
      * string ProjectileKey

@@ -35,7 +35,7 @@ namespace com.avilance.Starrybound
         public static ConfigFile config = new ConfigFile();
         public static ServerFile serverConfig = new ServerFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly int ProtocolVersion = 628;
+        public static readonly int ProtocolVersion = 635;
         public static readonly string unmoddedClientDigest = "515E04DF26D1E9777FCFB32D7789DDAF6EF733EFC3BEB798454DAB3BE6668719";
         public static StarboundVersion starboundVersion = new StarboundVersion();
         public static GeoIPCountry Geo;
@@ -53,9 +53,10 @@ namespace com.avilance.Starrybound
         public static Dictionary<string, Group> groups = new Dictionary<string, Group>();
 
         public static ServerThread sbServer;
-        public static ListenerThread tcpListener;
+        public static ListenerThread listener;
         static Thread sbServerThread;
         static Thread listenerThread;
+        static Thread udpThread;
         static Thread monitorThread;
 
         public static string privatePassword;
@@ -73,6 +74,8 @@ namespace com.avilance.Starrybound
 
         public static List<byte[]> sectors = new List<byte[]>();
         public static WorldCoordinate spawnPlanet;
+
+        public static List<string> logWriteBuffer = new List<string>();
 
         public static bool IsMono
         {
@@ -192,9 +195,13 @@ namespace com.avilance.Starrybound
 
             logInfo("Starrybound Server initialization complete.");
 
-            tcpListener = new ListenerThread();
-            listenerThread = new Thread(new ThreadStart(tcpListener.run));
+            listener = new ListenerThread();
+            listenerThread = new Thread(new ThreadStart(listener.runTcp));
             listenerThread.Start();
+
+            udpThread = new Thread(new ThreadStart(listener.runUdp));
+            udpThread.Start();
+
             while (serverState != ServerState.ListenerReady) { }
             if ((int)serverState > 3) return;
 
@@ -209,7 +216,6 @@ namespace com.avilance.Starrybound
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
             serverState = ServerState.Running;
-            
         }
 
         private static void crashMonitor()
@@ -218,7 +224,26 @@ namespace com.avilance.Starrybound
             while (true)
             {
                 if (lastCount != clientCount && serverState == ServerState.Running)
-                    Console.Title = serverConfig.serverName + " (" + clientCount + "/" + config.maxClients + ") - Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")"; 
+                    Console.Title = serverConfig.serverName + " (" + clientCount + "/" + config.maxClients + ") - Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
+
+                if (logWriteBuffer.Count > 0)
+                {
+                    try
+                    {
+                        using (StreamWriter w = File.AppendText(Path.Combine(SavePath, "log.txt")))
+                        {
+                            for (int i = 0; i < logWriteBuffer.Count; i++)
+                            {
+                                w.WriteLine(logWriteBuffer[i]);
+                                logWriteBuffer.RemoveAt(i);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (config.logLevel == LogType.Debug) Console.WriteLine("[DEBUG] Logger Exception: " + e.ToString());
+                    }
+                }
 
                 if (restartTime != 0)
                 {
@@ -262,11 +287,9 @@ namespace com.avilance.Starrybound
         private static void doRestart()
         {
             doShutdown(false);
-            if (IsMono)
-            {
-                logWarn("Auto Restarter doesn't support Mono. Exiting.");
-                Environment.Exit(0);
-            }
+
+            if (!config.attemptAutoRestart) Environment.Exit(0);
+
             logInfo("Now restarting...");
             Thread.Sleep(2500);
             if (serverState == ServerState.Shutdown || serverState == ServerState.GracefulShutdown)
@@ -274,7 +297,16 @@ namespace com.avilance.Starrybound
                 logWarn("Something requested shutdown while restarting. Exiting.");
                 Environment.Exit(1);
             }
-            Process.Start(Assembly.GetEntryAssembly().Location);
+
+            try
+            {
+                Process.Start(Assembly.GetEntryAssembly().Location);
+            }
+            catch (Exception e)
+            {
+                if (IsMono) logWarn("Auto Restarter was unable to complete successfully via this version of Mono. Exception: " + e.ToString());
+                else logWarn("Auto Restarter encountered an error while attempting to restart. Exception: " + e.ToString());
+            }
             Environment.Exit(0);
         }
 
@@ -353,15 +385,30 @@ namespace com.avilance.Starrybound
                 logDebug("Shutdown", "Aborting TCP listener.");
                 try 
                 {
-                    lock (tcpListener.tcpSocket)
+                    lock (listener.tcpSocket)
                     {
-                        tcpListener.tcpSocket.Stop();
+                        listener.tcpSocket.Stop();
+                    }
+
+                    lock (listener.udpSocket)
+                    {
+                        listener.udpSocket.Close();
                         listenerThread.Abort();
                     }
                 }
                 catch (Exception) { }
 
                 logInfo("Graceful shutdown complete.");
+
+                logDebug("Shutdown", "Flushing all pending log data to file (If any)");
+                using (StreamWriter w = File.AppendText(Path.Combine(SavePath, "log.txt")))
+                {
+                    for (int i = 0; i < logWriteBuffer.Count; i++)
+                    {
+                        w.WriteLine(logWriteBuffer[i]);
+                        logWriteBuffer.RemoveAt(i);
+                    }
+                }
             }
             catch(Exception e)
             {
@@ -420,17 +467,7 @@ namespace com.avilance.Starrybound
                     break;
             }
 
-            try
-            {
-                using (StreamWriter w = File.AppendText(Path.Combine(SavePath, "log.txt")))
-                {
-                    w.WriteLine(message);
-                }                
-            }
-            catch(Exception e) 
-            {
-                if (config.logLevel == LogType.Debug) Console.WriteLine("[DEBUG] Logger Exception: " + e.ToString());
-            }
+            logWriteBuffer.Add(message);
 
             if ((int)logType >= (int)config.logLevel) Console.WriteLine(message);
         }
@@ -469,6 +506,16 @@ namespace com.avilance.Starrybound
             return result;
         }
 
+        public static List<Client> getClients(string groupName)
+        {
+            List<Client> result = new List<Client>();
+            foreach (Client client in clients.Values.ToList())
+            {
+                if (client.playerData.group.name.Equals(groupName)) result.Add(client);
+            }
+            return result;
+        }
+
         public static Client getClient(string name)
         {
             Client result;
@@ -498,6 +545,5 @@ namespace com.avilance.Starrybound
             clients.Remove(client.playerData.name);
             clientsById.Remove(client.playerData.id);
         }
-
     }
 }

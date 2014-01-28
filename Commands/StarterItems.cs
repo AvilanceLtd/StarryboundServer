@@ -32,6 +32,8 @@ namespace com.avilance.Starrybound.Commands
                 return false;
             }
 
+            int awardedItems = 0;
+
             foreach (string item in StarryboundServer.config.starterItems)
             {
                 if (String.IsNullOrEmpty(item) || String.IsNullOrWhiteSpace(item))
@@ -59,6 +61,14 @@ namespace com.avilance.Starrybound.Commands
                 packetWrite.WriteVarUInt32(amount+1);
                 packetWrite.Write((byte)0);
                 client.sendClientPacket(Packet.GiveItem, packet.ToArray());
+
+                awardedItems++;
+            }
+
+            if (awardedItems == 0)
+            {
+                client.sendCommandMessage("Sorry! This server does not provide any starting items.");
+                return false;
             }
 
             client.sendCommandMessage("You have been given a few starting items to help you on your journey. Good luck!");

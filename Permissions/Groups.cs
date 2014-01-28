@@ -25,15 +25,17 @@ namespace com.avilance.Starrybound.Permissions
         public string nameColor;
         public string prefix;
         public bool isDefault = false;
+        public bool isStaff = false;
         public Dictionary<string, bool> permissions;
 
-        public Group(string name, string nameColor, string prefix, Dictionary<string, bool> permissions, bool isDefault = false)
+        public Group(string name, string nameColor, string prefix, Dictionary<string, bool> permissions, bool isDefault = false, bool isStaff = false)
         {
             this.name = name;
             this.nameColor = nameColor;
             this.prefix = prefix;
             this.permissions = permissions;
             this.isDefault = isDefault;
+            this.isStaff = isStaff;
         }
 
         public bool hasPermission(string node)
@@ -135,7 +137,7 @@ namespace com.avilance.Starrybound.Permissions
 
             Dictionary<string, bool> saPerms = new Dictionary<string,bool>();
             saPerms.Add("*", true);
-            Group superAdmin = new Group("superadmin", "#9801ba", "[SA]", saPerms);
+            Group superAdmin = new Group("superadmin", "#9801ba", "[SA]", saPerms, false, true);
             groups.Add(superAdmin);
 
             Dictionary<string, bool> aPerms = new Dictionary<string, bool>();
@@ -150,7 +152,7 @@ namespace com.avilance.Starrybound.Permissions
             aPerms.Add("client.*", true);
             aPerms.Add("chat.*", true);
             aPerms.Add("world.*", true);
-            Group admin = new Group("admin", "#ba0123", "[A]", aPerms);
+            Group admin = new Group("admin", "#ba0123", "[A]", aPerms, false, true);
             groups.Add(admin);
 
             Dictionary<string, bool> mPerms = new Dictionary<string, bool>();
@@ -162,7 +164,7 @@ namespace com.avilance.Starrybound.Permissions
             mPerms.Add("client.*", true);
             mPerms.Add("chat.*", true);
             mPerms.Add("world.*", true);
-            Group mod = new Group("moderator", "#ea6207", "[M]", mPerms);
+            Group mod = new Group("moderator", "#ea6207", "[M]", mPerms, false, true);
             groups.Add(mod);
 
             Dictionary<string, bool> pPerms = new Dictionary<string, bool>();

@@ -54,6 +54,26 @@ namespace com.avilance.Starrybound
             return StarryboundServer.rulesData;
         }
 
+        public static int[] GetSpamSettings()
+        {
+            if (!StarryboundServer.config.enableSpamProtection) return new int[] { 0, 0 };
+
+            string[] spamSplit = StarryboundServer.config.spamInterval.Split(':');
+
+            try
+            {
+                int numMessages = int.Parse(spamSplit[0]);
+                int numSeconds = int.Parse(spamSplit[1]);
+
+                return new int[] { numMessages, numSeconds };
+            }
+            catch (Exception)
+            {
+                StarryboundServer.logError("Unable to read settings for anti-spam system - Is it in numMessages:numSeconds format?");
+                return new int[] { 0, 0 };
+            }
+        }
+
         public static void SetupConfig()
         {
             CreateIfNot(RulesPath, "1) Respect all players 2) No griefing/hacking 3) Have fun!");
@@ -77,6 +97,82 @@ namespace com.avilance.Starrybound
             StarryboundServer.logDebug("SetupConfig", "This was compiled in DEBUG, forcing debug logging!");
 #endif
         }
+
+        public static bool ReloadMOTD()
+        {
+            try
+            {
+                StarryboundServer.motdData = ReadConfigFile(MotdPath);
+                return true;
+            }
+            catch (Exception) { return false; }
+        }
+
+        public static bool ReloadRules()
+        {
+            try
+            {
+                StarryboundServer.rulesData = ReadConfigFile(RulesPath);
+                return true;
+            }
+            catch (Exception) { return false; }
+        }
+
+        public static bool ReloadConfig()
+        {
+            try
+            {
+                ConfigFile config;
+
+                if (File.Exists(ConfigPath)) config = ConfigFile.Read(ConfigPath);
+                else throw new FileNotFoundException();
+
+                if (config.Equals(new ConfigFile())) return false;
+
+                return true;
+            }
+            catch (Exception) { return false; }
+        }
+    }
+
+    class SpamAction
+    {
+        public string actionName;
+        public string reason;
+        public int length;
+        public int countToTrigger;
+
+        public bool checkTrigger(int count, Client client)
+        {
+            if (count == countToTrigger)
+            {
+                PlayerData player = client.playerData;
+
+                switch (actionName)
+                {
+                    case "mute":
+                        player.isMuted = true;
+                        StarryboundServer.sendGlobalMessage("^#f75d5d;" + player.name + " has been muted automatically for spamming.");
+                        break;
+
+                    case "kick":
+                        client.kickClient(reason);
+                        break;
+
+                    case "ban":
+                        if (length != 0) length = Utils.getTimestamp() + (length * 60);
+
+                        Bans.addNewBan(player.name, player.uuid, player.ip, Utils.getTimestamp(), "[SYSTEM]", length, reason);
+
+                        client.banClient(reason);
+                        break;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
     }
 
     class ConfigFile
@@ -93,25 +189,34 @@ namespace com.avilance.Starrybound
         public string logFile = "proxy.log";
         public LogType logLevel = LogType.Info;
 
+        public string serverName = "Starrybound Server";
+
         public bool allowSpaces = true;
         public bool allowSymbols = false;
         public string[] bannedUsernames = new string[] { "admin", "developer", "moderator", "owner" };
 
+        public bool enableSpamProtection = true;
+        public string spamInterval = "3:2";
+
         public bool freeFuelForNewPlayers = true;
-        public string[] starterItems = new string[] { "" };
+        public string[] starterItems = new string[] { };
 
         public bool spawnWorldProtection = false;
+        public string defaultSpawnCoordinates = "";
         public string buildErrorMessage = "You do not have permission to build on this server. You can apply for build rights on our forum.";
 
         public string[] sectors = new string[] { "alpha", "beta", "gamma", "delta", "sectorx" };
 
         public bool allowModdedClients = true;
 
+        public bool attemptAutoRestart = true;
+
         public bool enableGeoIP = false;
         public int maxFailedConnections = 3;
 
-        public string[] projectileBlacklist = new string[] { "" };
-        public string[] projectileBlacklistSpawn = new string[] { "" };
+        public string[] projectileBlacklist = new string[] { };
+        public string[] projectileBlacklistSpawn = new string[] { };
+        public string[] projectileGreylist = new string[] { };
         public bool projectileSpawnListIsWhitelist = false;
 
         public int connectTimeout = 5;

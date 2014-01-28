@@ -78,10 +78,11 @@ namespace com.avilance.Starrybound.Extensions
 
         private static ulong Encode(long value)
         {
+            ulong toWrite = (ulong)Math.Abs(value);
+            toWrite *= 2;
             if (value < 0)
-                return (ulong)(-2 * value + 1);
-            else
-                return (ulong)(2 * value);
+                toWrite -= 1;
+            return toWrite;
         }
 
         public static void WriteVarUInt64(this BinaryWriter write, ulong value)

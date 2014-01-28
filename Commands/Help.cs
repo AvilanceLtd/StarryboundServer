@@ -30,7 +30,7 @@ namespace com.avilance.Starrybound.Commands
             this.player = client.playerData;
             commands =  new CommandBase[] {
                 new BanC(client),
-                new BanReloadCommand(client),
+                new Reload(client),
                 new Broadcast(client), 
                 new Build(client), 
                 new Find(client),
