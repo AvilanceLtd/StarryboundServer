@@ -62,7 +62,8 @@ namespace com.avilance.Starrybound
         public static string privatePassword;
 
         public static int failedConnections;
-        public static ServerState serverState;
+        private static ServerState aServerState;
+        public static ServerState serverState { get { return aServerState; } set { return; } } 
         public static int startTime;
         public static int restartTime = 0;
         private static bool shuttingDown = false;
@@ -122,7 +123,7 @@ namespace com.avilance.Starrybound
             config.logLevel = LogType.Debug;
 #endif
             startTime = Utils.getTimestamp();
-            serverState = ServerState.Starting;
+            changeState(ServerState.Starting, "StarryboundServer::Main");
             Console.Title = "Loading... Starrybound Server (" + VersionNum + ") (" + ProtocolVersion + ")";
 
             try
@@ -215,7 +216,7 @@ namespace com.avilance.Starrybound
             if ((int)serverState > 3) return;
 #endif
             logInfo("Parent Starbound server is ready. Starrybound Server now accepting connections.");
-            serverState = ServerState.Running;
+            changeState(ServerState.Running, "StarryboundServer::Main");
         }
 
         private static void crashMonitor()
@@ -282,6 +283,28 @@ namespace com.avilance.Starrybound
                 else
                     Thread.Sleep(2000);
             }
+        }
+
+        public static void changeState(ServerState aState, string caller, string reason = "Not Specified")
+        {
+            string format = "StateChange requested by {0} to {1}: {2}";
+
+            switch (aState)
+            {
+                case ServerState.Crashed:
+                    logWarn(string.Format(format, caller, aState, reason));
+                    break;
+
+                case ServerState.GracefulShutdown:
+                    logWarn(string.Format(format, caller, aState, reason));
+                    break;
+
+                default:
+                    logDebug("StarryboundServer::changeState", string.Format(format, caller, aState, reason));
+                    break;
+            }
+
+            aServerState = aState;
         }
 
         private static void doRestart()

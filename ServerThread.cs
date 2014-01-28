@@ -36,13 +36,13 @@ namespace com.avilance.Starrybound
                 process.ErrorDataReceived += (sender, e) => logStarboundError("ErrorDataReceived from starbound_server.exe: " + e.Data);
                 process.BeginOutputReadLine();
                 process.WaitForExit();
-                StarryboundServer.serverState = ServerState.Crashed;
+
+                StarryboundServer.changeState(ServerState.Crashed, "ServerThread::run", "starbound_server.exe process has exited.");
             }
             catch (ThreadAbortException) { }
             catch (Exception e)
             {
-                StarryboundServer.logException("Unable to start starbound_server.exe, is this file in the same directory? " + e.ToString());
-                StarryboundServer.serverState = ServerState.Crashed;
+                StarryboundServer.changeState(ServerState.Crashed, "ServerThread::run::Exception", e.ToString());
             }
         }
 
@@ -101,11 +101,11 @@ namespace com.avilance.Starrybound
                 else if (consoleLine.Contains("TcpServer will close, listener thread caught exception"))
                 {
                     StarryboundServer.logFatal("Parent Server TcpServer listener thread caught exception, Forcing a restart.");
-                    StarryboundServer.serverState = ServerState.Crashed;
+                    StarryboundServer.changeState(ServerState.Crashed, "ServerThread::parseOutput", "Starbound Tcp listener has crashed");
                 }
                 else if (consoleLine.Contains("TcpServer listening on: "))
                 {
-                    StarryboundServer.serverState = ServerState.StarboundReady;
+                    StarryboundServer.changeState(ServerState.StarboundReady, "ServerThread::parseOutput");
                     ServerConfig.RemovePrivateConfig();
                 }
                 else if (consoleLine.StartsWith("Info: Kicking client "))

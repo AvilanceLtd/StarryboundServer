@@ -40,7 +40,7 @@ namespace com.avilance.Starrybound
                 tcpSocket.Start();
 
                 StarryboundServer.logInfo("Proxy server has been started on " + localAdd.ToString() + ":" + StarryboundServer.config.proxyPort);
-                StarryboundServer.serverState = ServerState.ListenerReady;
+                StarryboundServer.changeState(ServerState.ListenerReady, "ListenerThread::runTcp");
 
                 try
                 {
@@ -52,16 +52,19 @@ namespace com.avilance.Starrybound
                         new Thread(new ThreadStart(new Client(clientSocket).run)).Start();
                     }
                 }
-                catch (ThreadAbortException) { }
+                catch (ThreadAbortException) 
+                {
+                    StarryboundServer.changeState(ServerState.Crashed, "ListenerThread::runTcp", "Thread has been aborted");
+                }
                 catch (Exception e)
                 {
                     if ((int)StarryboundServer.serverState > 3) return;
                     StarryboundServer.logException("ListenerThread Exception: " + e.ToString());
+                    StarryboundServer.changeState(ServerState.Crashed, "ListenerThread::runTcp", e.ToString());
                 }
 
                 tcpSocket.Stop();
                 StarryboundServer.logFatal("ListenerThread has failed - No new connections will be possible.");
-                StarryboundServer.serverState = ServerState.Crashed;
             }
             catch (ThreadAbortException) { }
             catch(SocketException e)
