@@ -236,14 +236,17 @@ namespace com.avilance.Starrybound
                                         {
                                             if (this.client.playerData.loc != null)
                                             {
-                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) && StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                if (StarryboundServer.config.projectileBlacklistSpawn.Contains(projectileKey) ^ StarryboundServer.config.projectileSpawnListIsWhitelist)
                                                 {
-                                                    MemoryStream packet = new MemoryStream();
-                                                    BinaryWriter packetWrite = new BinaryWriter(packet);
-                                                    packetWrite.WriteVarInt32(entityId);
-                                                    packetWrite.Write(false);
-                                                    this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
-                                                    returnData = false;
+                                                    if (StarryboundServer.spawnPlanet.Equals(this.client.playerData.loc) && !this.client.playerData.group.hasPermission("admin.spawnbuild") && !this.client.playerData.inPlayerShip)
+                                                    {
+                                                        MemoryStream packet = new MemoryStream();
+                                                        BinaryWriter packetWrite = new BinaryWriter(packet);
+                                                        packetWrite.WriteVarInt32(entityId);
+                                                        packetWrite.Write(false);
+                                                        this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                                        returnData = false;
+                                                    }
                                                 }
                                             }
                                             else
