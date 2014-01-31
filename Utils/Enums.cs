@@ -199,6 +199,22 @@ namespace com.avilance.Starrybound.Util
         Heartbeat = 46, //Not Needed
     }
 
+    public enum ProtectionTypes
+    {
+        Public = 0,
+        Whitelist = 1,
+        Private = 2,
+    }
+
+    public enum PlanetAccess
+    {
+        Banned = -1,
+        ReadOnly = 0,
+        Builder = 1,
+        Moderator = 2,
+        Owner = 3,
+    }
+
     public enum Direction
     {
         Server = 0,

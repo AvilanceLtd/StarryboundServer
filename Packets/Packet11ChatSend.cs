@@ -73,6 +73,14 @@ namespace com.avilance.Starrybound.Packets
                             new BanC(this.client).doProcess(args);
                             break;
 
+                        case "claim":
+                            new ClaimCommand(this.client).doProcess(args);
+                            break;
+
+                        case "manage":
+                            new ManageCommand(this.client).doProcess(args);
+                            break;
+
                         case "unban":
                             new UnbanCommand(this.client).doProcess(args);
                             break;

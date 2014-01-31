@@ -9,6 +9,7 @@
  * You should have received a copy of the GNU General Public License along with Starrybound Server. If not, see http://www.gnu.org/licenses/.
 */
 
+using com.avilance.Starrybound.Extensions;
 using com.avilance.Starrybound.Util;
 using Newtonsoft.Json;
 using System;
@@ -35,9 +36,11 @@ namespace com.avilance.Starrybound.Permissions
         public List<string> shipWhitelist = new List<string>();
         public List<string> shipBlacklist = new List<string>();
 
+        public string claimedPlanet;
+
         public int lastOnline = 0;
 
-        public User(string name, string uuid, string lastIp, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel, bool starterItems, bool privateShip, List<string> shipWhitelist, List<string> shipBlacklist)
+        public User(string name, string uuid, string lastIp, string groupName, bool isMuted, bool canBuild, int lastOnline, bool freeFuel, bool starterItems, bool privateShip, List<string> shipWhitelist, List<string> shipBlacklist, string claimedPlanet)
         {
             this.name = name;
             this.uuid = uuid;
@@ -51,6 +54,7 @@ namespace com.avilance.Starrybound.Permissions
             this.privateShip = privateShip;
             this.shipBlacklist = shipBlacklist;
             this.shipWhitelist = shipWhitelist;
+            this.claimedPlanet = claimedPlanet;
         }
 
         public Group getGroup()
@@ -121,7 +125,7 @@ namespace com.avilance.Starrybound.Permissions
                 {
                     StarryboundServer.logError("Player data for user " + name.ToLower() + " with UUID " + uuid + " is corrupt. Re-generating user file");
 
-                    User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, true, true, false, new List<string>(), new List<string>());
+                    User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, true, true, false, new List<string>(), new List<string>(), null);
                     Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                     return user;
@@ -129,7 +133,7 @@ namespace com.avilance.Starrybound.Permissions
             }
             else
             {
-                User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, false, false, false, new List<string>(), new List<string>());
+                User user = new User(name, uuid, ip, StarryboundServer.defaultGroup, false, true, 0, false, false, false, new List<string>(), new List<string>(), null);
                 Write(Path.Combine(UsersPath, name.ToLower() + ".json"), user);
 
                 return user;
@@ -140,7 +144,7 @@ namespace com.avilance.Starrybound.Permissions
         {
             try
             {
-                User user = new User(player.name, player.uuid, player.ip, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel, player.receivedStarterKit, player.privateShip, player.shipWhitelist, player.shipBlacklist);
+                User user = new User(player.name, player.uuid, player.ip, player.group.name, player.isMuted, player.canBuild, Utils.getTimestamp(), player.freeFuel, player.receivedStarterKit, player.privateShip, player.shipWhitelist, player.shipBlacklist, player.claimedPlanet);
                 Write(Path.Combine(UsersPath, player.name.ToLower() + ".json"), user);
             }
             catch (Exception e)
@@ -172,7 +176,7 @@ namespace com.avilance.Starrybound.Permissions
             catch (Exception)
             {
                 StarryboundServer.logException("Persistant user storage for " + data[0] + " is corrupt - Creating with default values");
-                return new User(data[0], data[1], data[2], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false, false, false, new List<string>(), new List<string>());
+                return new User(data[0], data[1], data[2], StarryboundServer.defaultGroup, false, true, Utils.getTimestamp(), false, false, false, new List<string>(), new List<string>(), null);
             }
         }
 

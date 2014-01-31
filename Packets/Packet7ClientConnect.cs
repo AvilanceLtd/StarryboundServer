@@ -130,6 +130,7 @@ namespace com.avilance.Starrybound.Packets
                 pData.privateShip = userPData.privateShip;
                 pData.shipBlacklist = userPData.shipBlacklist;
                 pData.shipWhitelist = userPData.shipWhitelist;
+                pData.claimedPlanet = userPData.claimedPlanet;
 
                 if (userPData.uuid != pData.uuid && userPData.groupName != StarryboundServer.defaultGroup)
                 {

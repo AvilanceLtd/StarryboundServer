@@ -74,6 +74,11 @@ namespace com.avilance.Starrybound.Packets
                 geoip_prefix = String.Format("({0})", geo_loc);
             }
 
+            if (StarryboundServer.planets.planetOwners.ContainsKey(player.uuid)) player.claimedPlanet = StarryboundServer.planets.planetOwners[player.uuid];
+
+            if (player.claimedPlanet != null) 
+                if (!StarryboundServer.planets.protectedPlanets.ContainsKey(player.claimedPlanet)) player.claimedPlanet = null;
+
             StarryboundServer.sendGlobalMessage(String.Format("{0}{1} has joined the server!", player.name, geoip_prefix));
             this.client.state = ClientState.Connected;
             StarryboundServer.logInfo(String.Format("[{0}][{1}] joined with UUID [{2}]{3}", this.client.playerData.client, this.client.playerData.ip, player.uuid, 

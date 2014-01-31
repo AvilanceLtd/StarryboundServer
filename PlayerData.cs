@@ -17,6 +17,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using com.avilance.Starrybound.Extensions;
+using com.avilance.Starrybound.Util;
 
 namespace com.avilance.Starrybound
 {
@@ -46,6 +47,8 @@ namespace com.avilance.Starrybound
 
         public bool isMuted = false;
         public bool canBuild = true;
+
+        public string claimedPlanet;
 
         public bool privateShip = false;
         public List<string> shipWhitelist = new List<string>();
@@ -104,8 +107,22 @@ namespace com.avilance.Starrybound
                 else
                     return false;
             }
-            else if (!hasPermission("world.build")) return false;
-            else if (!canBuild) return false;
+
+            if (StarryboundServer.planets.protectedPlanets.ContainsKey(loc.ToString()) && !inPlayerShip)
+            {
+                Planet planetInfo = StarryboundServer.planets.protectedPlanets[loc.ToString()];
+                PlanetAccess access = planetInfo.canAccess(uuid);
+
+                if (access == PlanetAccess.ReadOnly && planetInfo.accessType != (int)ProtectionTypes.Public)
+                {
+                    return false;
+                }
+            }
+            
+            if (!hasPermission("world.build")) return false;
+            
+            if (!canBuild) return false;
+
             return true;
         }
 

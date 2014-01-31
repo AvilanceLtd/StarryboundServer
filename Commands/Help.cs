@@ -36,6 +36,8 @@ namespace com.avilance.Starrybound.Commands
                 new Find(client),
                 new GroupC(client),
                 new UnbanCommand(client),
+                new ClaimCommand(client),
+                new ManageCommand(client),
                 new Home(client), 
                 new Item(client),
                 new Kick(client), 

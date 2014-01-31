@@ -34,6 +34,7 @@ namespace com.avilance.Starrybound
         public static BootstrapFile bootstrapConfig = new BootstrapFile();
         public static ConfigFile config = new ConfigFile();
         public static ServerFile serverConfig = new ServerFile();
+        public static Planets planets = new Planets();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly int ProtocolVersion = 636;
         public static readonly string unmoddedClientDigest = "515E04DF26D1E9777FCFB32D7789DDAF6EF733EFC3BEB798454DAB3BE6668719";
@@ -164,6 +165,7 @@ namespace com.avilance.Starrybound
             ServerConfig.SetupConfig();
             Groups.SetupGroups();
             Users.SetupUsers();
+            Planets.SetupPlanets();
 #if !DEBUG
             if (config.logLevel == LogType.Debug)
             {

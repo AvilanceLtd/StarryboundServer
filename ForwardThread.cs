@@ -20,6 +20,7 @@ using com.avilance.Starrybound.Extensions;
 using Ionic.Zlib;
 using com.avilance.Starrybound.Packets;
 using System.Threading;
+using com.avilance.Starrybound.Permissions;
 
 namespace com.avilance.Starrybound
 {
@@ -50,7 +51,6 @@ namespace com.avilance.Starrybound
                         return;
                     }
 
-
                     if (this.client.kickTargetTimestamp != 0)
                     {
                         if (this.client.kickTargetTimestamp < Utils.getTimestamp())
@@ -60,6 +60,8 @@ namespace com.avilance.Starrybound
                         }
                         continue;
                     }
+
+                    ClientState curState = this.client.state;
 
                     #region Process Packet
                     //Packet ID and Vaildity Check.
@@ -116,7 +118,6 @@ namespace com.avilance.Starrybound
                         #region Handle Client Packets
                         {
                             #region Protocol State Security
-                            ClientState curState = this.client.state;
                             if (curState != ClientState.Connected)
                             {
                                 if (curState == ClientState.PendingConnect && packetID != Packet.ClientConnect)
@@ -259,6 +260,24 @@ namespace com.avilance.Starrybound
                                                 returnData = false;
                                             }
                                         }
+                                        else if (this.client.playerData.loc != null)
+                                        {
+                                            if (StarryboundServer.planets.protectedPlanets.ContainsKey(this.client.playerData.loc.ToString()) && !this.client.playerData.inPlayerShip)
+                                            {
+                                                Planet planetInfo = StarryboundServer.planets.protectedPlanets[this.client.playerData.loc.ToString()];
+                                                PlanetAccess access = planetInfo.canAccess(this.client.playerData.uuid);
+
+                                                if (access == PlanetAccess.ReadOnly && planetInfo.accessType != (int)ProtectionTypes.Public)
+                                                {
+                                                    MemoryStream packet = new MemoryStream();
+                                                    BinaryWriter packetWrite = new BinaryWriter(packet);
+                                                    packetWrite.WriteVarInt32(entityId);
+                                                    packetWrite.Write(false);
+                                                    this.client.sendClientPacket(Packet.EntityDestroy, packet.ToArray());
+                                                    returnData = false;
+                                                }
+                                            }
+                                        }
                                     }
                                     else if (type == EntityType.Object || type == EntityType.Plant || type == EntityType.PlantDrop || type == EntityType.Monster)
                                     {
@@ -305,6 +324,19 @@ namespace com.avilance.Starrybound
                                             else
                                             {
                                                 returnData = false;
+                                            }
+                                        }
+                                        else if (this.client.playerData.loc != null)
+                                        {
+                                            if (StarryboundServer.planets.protectedPlanets.ContainsKey(this.client.playerData.loc.ToString()) && !this.client.playerData.inPlayerShip)
+                                            {
+                                                Planet planetInfo = StarryboundServer.planets.protectedPlanets[this.client.playerData.loc.ToString()];
+                                                PlanetAccess access = planetInfo.canAccess(this.client.playerData.uuid);
+
+                                                if (access == PlanetAccess.ReadOnly && planetInfo.accessType != (int)ProtectionTypes.Public)
+                                                {
+                                                    returnData = false;
+                                                }
                                             }
                                         }
                                     }
@@ -412,6 +444,46 @@ namespace com.avilance.Starrybound
                                 }
                                 else
                                     StarryboundServer.logDebug("WorldStart", "[" + this.client.playerData.client + "][" + interpolation + ":" + clientID + "] InPlayerShip:[" + this.client.playerData.inPlayerShip + "]");
+
+                                if (coords != null)
+                                {
+                                    if (StarryboundServer.planets.protectedPlanets.ContainsKey(coords.ToString()) && !this.client.playerData.inPlayerShip)
+                                    {
+                                        PlanetAccess access = StarryboundServer.planets.protectedPlanets[coords.ToString()].canAccess(this.client.playerData.uuid);
+
+                                        if (access == PlanetAccess.Banned)
+                                        {
+                                            this.client.sendChatMessage("^#f75d5d;Error: You are either banned from this planet or do not have permission to land.");
+                                            this.client.playerData.inPlayerShip = true;
+                                            MemoryStream packetWarp = new MemoryStream();
+                                            BinaryWriter packetWrite = new BinaryWriter(packetWarp);
+                                            packetWrite.WriteBE((uint)WarpType.WarpToOwnShip);
+                                            packetWrite.Write(new WorldCoordinate());
+                                            packetWrite.WriteStarString("");
+                                            this.client.sendServerPacket(Packet.WarpCommand, packetWarp.ToArray());
+                                        }
+                                        else
+                                        {
+                                            this.client.sendChatMessage("^#00aeff;This planet is owned by " + StarryboundServer.planets.protectedPlanets[coords.ToString()].owner[1]);
+                                            string formatMessage = "You {0} have permission to build on this planet.";
+
+                                            switch (access)
+                                            {
+                                                case PlanetAccess.Owner:
+                                                case PlanetAccess.Moderator:
+                                                case PlanetAccess.Builder:
+                                                    this.client.sendChatMessage(string.Format(formatMessage, "do"));
+                                                    break;
+
+                                                default:
+                                                    if (StarryboundServer.planets.protectedPlanets[coords.ToString()].accessType == (int)ProtectionTypes.Whitelist) this.client.sendChatMessage(string.Format(formatMessage, "do not"));
+                                                    else this.client.sendChatMessage(string.Format(formatMessage, "do"));
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    else if (!StarryboundServer.spawnPlanet.Equals(coords) && !client.playerData.inPlayerShip) this.client.sendChatMessage("^#00aeff;This planet is unclaimed, you can claim it using /claim - You may only own ONE planet at any time.");
+                                }
                             }
                             else if (packetID == Packet.WorldStop)
                             {

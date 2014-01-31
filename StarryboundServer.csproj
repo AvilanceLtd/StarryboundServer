@@ -98,6 +98,7 @@
     <Compile Include="Commands\BanC.cs" />
     <Compile Include="Commands\GroupC.cs" />
     <Compile Include="Commands\Fuel.cs" />
+    <Compile Include="Commands\PlanetManagement.cs" />
     <Compile Include="Commands\Reload.cs" />
     <Compile Include="Commands\Rules.cs" />
     <Compile Include="Commands\Find.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="Packets\Packet7ClientConnect.cs" />
     <Compile Include="Packets\PacketBase.cs" />
     <Compile Include="Permissions\Groups.cs" />
+    <Compile Include="Permissions\Planets.cs" />
     <Compile Include="Permissions\Users.cs" />
     <Compile Include="PlayerData.cs" />
     <Compile Include="Config\BootstrapConfig.cs" />

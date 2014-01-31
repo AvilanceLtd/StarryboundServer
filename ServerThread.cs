@@ -13,7 +13,7 @@ namespace com.avilance.Starrybound
     {
 
         public Process process;
-        string[] filterConsole = new string[] { "Slow asset", " does not have a ", "Debug: Correcting path from ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <", "Sending Handshake Challenge", " accept from ", " Connection received from: ", " UniverseServer: client connection made from " };
+        string[] filterConsole = new string[] { "here: (", "Slow asset", " does not have a ", "Debug: Correcting path from ", "closing Unknown address type", "Warn: Missing", "Failed to place a dungeon", "Generating a dungeon", "Failed to place dungeon object", "Info:  <", "Sending Handshake Challenge", " accept from ", " Connection received from: ", " UniverseServer: client connection made from " };
 
         bool parseError = false;
 

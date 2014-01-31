@@ -42,6 +42,8 @@ namespace com.avilance.Starrybound.Commands
             MemoryStream packetWarp = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packetWarp);
 
+            this.client.playerData.inPlayerShip = false;
+
             uint warp = (uint)WarpType.WarpToOrbitedPlanet;
             string player = "";
             packetWrite.WriteBE(warp);

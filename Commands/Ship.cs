@@ -73,6 +73,8 @@ namespace com.avilance.Starrybound.Commands
                 }
             }
 
+            this.client.playerData.inPlayerShip = true;
+
             MemoryStream packetWarp = new MemoryStream();
             BinaryWriter packetWrite = new BinaryWriter(packetWarp);
             packetWrite.WriteBE(warp);
