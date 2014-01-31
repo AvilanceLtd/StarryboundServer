@@ -12,12 +12,17 @@ namespace com.avilance.Starrybound.Permissions
     [JsonObject(MemberSerialization.OptIn)]
     class Planet
     {
+        [JsonProperty]
         public string loc;
+        [JsonProperty]
         public int accessType = (int)ProtectionTypes.Public;
 
+        [JsonProperty]
         public string[] owner = new string[2];
 
+        [JsonProperty]
         public Dictionary<string, PlanetAccess> players = new Dictionary<string, PlanetAccess>();
+        [JsonProperty]
         public List<string> banlist = new List<string>();
 
         /*
