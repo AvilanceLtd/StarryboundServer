@@ -223,10 +223,9 @@ namespace com.avilance.Starrybound
 
         public void flushChatQueue()
         {
-            var buffer = this.packetQueue;
-            foreach (Packet11ChatSend chatPacket in buffer)
+            for (int i = 0; i < this.packetQueue.Count; i++)
             {
-                chatPacket.onSend();
+                this.packetQueue[i].onSend();
             }
 
             this.packetQueue = new List<Packet11ChatSend>();
