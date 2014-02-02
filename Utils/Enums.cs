@@ -250,11 +250,12 @@ namespace com.avilance.Starrybound.Util
 
     public enum ClientState
     {
-        PendingConnect = 0,
-        PendingAuthentication = 1,
-        PendingConnectResponse = 2,
-        Connected = 3,
-        Disposing = 4,
+        PendingConnect,
+        PendingServerConnect,
+        PendingAuthentication,
+        PendingConnectResponse,
+        Connected,
+        Disposing
     }
 
     public enum ServerState

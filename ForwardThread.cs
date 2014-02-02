@@ -125,12 +125,17 @@ namespace com.avilance.Starrybound
                                     this.client.rejectPreConnected("Violated PendingConnect protocol state with " + packetID);
                                     return;
                                 }
-                                else if (curState == ClientState.PendingAuthentication && packetID != Packet.HandshakeResponse)
+                                if (curState == ClientState.PendingServerConnect)
+                                {
+                                    this.client.rejectPreConnected("This should never happen. Report this to devs.");
+                                    return;
+                                }
+                                if (curState == ClientState.PendingAuthentication && packetID != Packet.HandshakeResponse)
                                 {
                                     this.client.rejectPreConnected("Violated PendingAuthentication protocol state with " + packetID);
                                     return;
                                 }
-                                else if (curState == ClientState.PendingConnectResponse)
+                                if (curState == ClientState.PendingConnectResponse)
                                 {
                                     int startTime = Utils.getTimestamp();
                                     while (true)
@@ -152,16 +157,21 @@ namespace com.avilance.Starrybound
                             }
                             else if (packetID == Packet.ClientConnect)
                             {
-                                this.client.state = ClientState.PendingAuthentication;
+                                this.client.state = ClientState.PendingServerConnect;
                                 returnData = new Packet7ClientConnect(this.client, packetData, this.direction).onReceive();
-                                MemoryStream packet = new MemoryStream();
-                                BinaryWriter packetWrite = new BinaryWriter(packet);
 
-                                passwordSalt = Utils.GenerateSecureSalt();
-                                packetWrite.WriteStarString("");
-                                packetWrite.WriteStarString(passwordSalt);
-                                packetWrite.WriteBE(StarryboundServer.config.passwordRounds);
-                                this.client.sendClientPacket(Packet.HandshakeChallenge, packet.ToArray());
+                                this.client.connectToServer();
+
+                                int startTime = Utils.getTimestamp();
+                                while (true)
+                                {
+                                    if (this.client.state == ClientState.PendingAuthentication) break;
+                                    if (Utils.getTimestamp() > startTime + StarryboundServer.config.connectTimeout)
+                                    {
+                                        this.client.rejectPreConnected("Connection Failed: Server did not connect in time.");
+                                        return;
+                                    }
+                                }
                             }
                             else if (packetID == Packet.HandshakeResponse)
                             {
@@ -360,14 +370,18 @@ namespace com.avilance.Starrybound
                                 uint protocolVersion = packetData.ReadUInt32BE();
                                 if (protocolVersion != StarryboundServer.ProtocolVersion)
                                 {
-                                    MemoryStream packet = new MemoryStream();
-                                    BinaryWriter packetWrite = new BinaryWriter(packet);
-                                    packetWrite.WriteBE(protocolVersion);
-                                    this.client.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-
                                     this.client.rejectPreConnected("Connection Failed: Unable to handle parent server protocol version.");
                                     return;
                                 }
+
+                                this.client.state = ClientState.PendingAuthentication;
+                                MemoryStream packet = new MemoryStream();
+                                BinaryWriter packetWrite = new BinaryWriter(packet);
+                                passwordSalt = Utils.GenerateSecureSalt();
+                                packetWrite.WriteStarString("");
+                                packetWrite.WriteStarString(passwordSalt);
+                                packetWrite.WriteBE(StarryboundServer.config.passwordRounds);
+                                this.client.sendClientPacket(Packet.HandshakeChallenge, packet.ToArray());
                             }
                             else if (packetID == Packet.HandshakeChallenge)
                             {

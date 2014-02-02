@@ -68,37 +68,50 @@ namespace com.avilance.Starrybound
 
                 StarryboundServer.logInfo("[" + playerData.client + "] Accepting new connection.");
 
+                MemoryStream packet = new MemoryStream();
+                BinaryWriter packetWrite = new BinaryWriter(packet);
+                packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+
                 if((int)StarryboundServer.serverState < 3)
                 {
-                    MemoryStream packet = new MemoryStream();
-                    BinaryWriter packetWrite = new BinaryWriter(packet);
-                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-
                     rejectPreConnected("Connection Failed: The server is not ready yet.");
                     return;
                 }
                 else if ((int)StarryboundServer.serverState > 3)
                 {
-                    MemoryStream packet = new MemoryStream();
-                    BinaryWriter packetWrite = new BinaryWriter(packet);
-                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-
                     rejectPreConnected("Connection Failed: The server is shutting down.");
                     return;
                 }
                 else if (StarryboundServer.restartTime != 0)
                 {
-                    MemoryStream packet = new MemoryStream();
-                    BinaryWriter packetWrite = new BinaryWriter(packet);
-                    packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                     this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-
                     rejectPreConnected("Connection Failed: The server is restarting.");
                     return;
                 }
 
+                // Forwarding for data from CLIENT (cIn) to SERVER (sOut)
+                this.ClientForwarder = new Thread(new ThreadStart(new ForwardThread(this, this.cIn, this.sOut, Direction.Client).run));
+                ClientForwarder.Start();
+
+                this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+            }
+            catch (Exception e)
+            {
+                StarryboundServer.logException("ClientThread Exception: " + e.ToString());
+                MemoryStream packet = new MemoryStream();
+                BinaryWriter packetWrite = new BinaryWriter(packet);
+                packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
+                this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
+                rejectPreConnected("Connection Failed: A internal server error occurred (1)");
+            }
+        }
+
+        public void connectToServer()
+        {
+            try
+            {
                 sSocket = new TcpClient();
                 sSocket.ReceiveTimeout = StarryboundServer.config.internalSocketTimeout * 1000;
                 sSocket.SendTimeout = StarryboundServer.config.internalSocketTimeout * 1000;
@@ -129,21 +142,17 @@ namespace com.avilance.Starrybound
                 this.ServerForwarder = new Thread(new ThreadStart(new ForwardThread(this, this.sIn, this.cOut, Direction.Server).run));
                 ServerForwarder.Start();
 
-                // Forwarding for data from CLIENT (cIn) to SERVER (sOut)
-                this.ClientForwarder = new Thread(new ThreadStart(new ForwardThread(this, this.cIn, this.sOut, Direction.Client).run));
-                ClientForwarder.Start();
-
                 StarryboundServer.failedConnections = 0;
             }
             catch (Exception e)
             {
-                StarryboundServer.logException("ClientThread Exception: " + e.ToString());
+                StarryboundServer.logException("connectToServer Exception: " + e.ToString());
                 StarryboundServer.failedConnections++;
                 MemoryStream packet = new MemoryStream();
                 BinaryWriter packetWrite = new BinaryWriter(packet);
                 packetWrite.WriteBE(StarryboundServer.ProtocolVersion);
                 this.sendClientPacket(Packet.ProtocolVersion, packet.ToArray());
-                rejectPreConnected("Connection Failed: A internal server error occurred (1)");
+                rejectPreConnected("Connection Failed: A internal server error occurred (12)");
             }
         }
 
