@@ -30,7 +30,6 @@ namespace com.avilance.Starrybound
         BinaryWriter outgoing;
         Client client;
         Direction direction;
-        private string passwordSalt;
 
         public ForwardThread(Client aClient, BinaryReader aInput, BinaryWriter aOutput, Direction aDirection) {
             this.client = aClient;
@@ -162,6 +161,8 @@ namespace com.avilance.Starrybound
 
                                 this.client.connectToServer();
 
+                                this.outgoing = this.client.sOut;
+
                                 int startTime = Utils.getTimestamp();
                                 while (true)
                                 {
@@ -178,9 +179,10 @@ namespace com.avilance.Starrybound
                                 string claimResponse = packetData.ReadStarString();
                                 string passwordHash = packetData.ReadStarString();
 
-                                string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.client.playerData.account + passwordSalt, StarryboundServer.config.passwordRounds);
+                                string verifyHash = Utils.StarHashPassword(StarryboundServer.config.proxyPass, this.client.playerData.account + this.client.passwordSalt, StarryboundServer.config.passwordRounds);
                                 if (passwordHash != verifyHash)
                                 {
+                                    StarryboundServer.logDebug("ForwardThread::HandshakeResponse", "Received passwordHash (" + passwordHash + ") from client while expecting " + verifyHash);
                                     this.client.rejectPreConnected("Your password was incorrect.");
                                     return;
                                 }
@@ -377,11 +379,13 @@ namespace com.avilance.Starrybound
                                 this.client.state = ClientState.PendingAuthentication;
                                 MemoryStream packet = new MemoryStream();
                                 BinaryWriter packetWrite = new BinaryWriter(packet);
-                                passwordSalt = Utils.GenerateSecureSalt();
+                                this.client.passwordSalt = Utils.GenerateSecureSalt();
                                 packetWrite.WriteStarString("");
-                                packetWrite.WriteStarString(passwordSalt);
+                                packetWrite.WriteStarString(this.client.passwordSalt);
                                 packetWrite.WriteBE(StarryboundServer.config.passwordRounds);
                                 this.client.sendClientPacket(Packet.HandshakeChallenge, packet.ToArray());
+
+                                returnData = false;
                             }
                             else if (packetID == Packet.HandshakeChallenge)
                             {

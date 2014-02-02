@@ -31,13 +31,15 @@ namespace com.avilance.Starrybound
         public PlayerData playerData = new PlayerData();
         public ClientState state = ClientState.PendingConnect;
 
+        public string passwordSalt;
+
         private TcpClient cSocket;
         private BinaryReader cIn;
         private BinaryWriter cOut;
 
         private TcpClient sSocket;
         private BinaryReader sIn;
-        private BinaryWriter sOut;
+        public BinaryWriter sOut;
 
         private Thread ServerForwarder;
         private Thread ClientForwarder;
@@ -45,7 +47,17 @@ namespace com.avilance.Starrybound
         public int connectedTime = 0;
 
         public int kickTargetTimestamp = 0;
-        public bool connectionAlive { get { if (this.cSocket.Connected && this.sSocket.Connected && this.state != ClientState.Disposing) return true; else return false; } }
+        public bool connectionAlive 
+        { 
+            get {
+                if (this.cSocket.Connected && this.state != ClientState.Disposing)
+                    if (this.sSocket == null) return true;
+                    else if (this.sSocket.Connected) return true;
+                    else return false;
+                else
+                    return false; 
+            } 
+        }
 
         public List<Packet11ChatSend> packetQueue = new List<Packet11ChatSend>();
 
