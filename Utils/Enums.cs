@@ -25,15 +25,17 @@ namespace com.avilance.Starrybound.Util
         HandshakeChallenge = 3, //Done
         ChatReceive = 4, //Done
         UniverseTimeUpdate = 5, //Not Needed
-        ClientConnect = 6, //Done
-        ClientDisconnect = 7, //Done
-        HandshakeResponse = 8, //Done
-        WarpCommand = 9, //Done
-        ChatSend = 10, //Done
-        ClientContextUpdate = 11, //In Progress - NetStateDelta
-        WorldStart = 12, //Done
-        WorldStop = 13, //Done
-        TileArrayUpdate = 14,
+	CelestialResponse = 6,
+        ClientConnect = 7, //Done
+        ClientDisconnect = 8, //Done
+        HandshakeResponse = 9, //Done
+        WarpCommand = 10, //Done
+        ChatSend = 11, //Done
+	CelestialRequest = 12,
+        ClientContextUpdate = 13, //In Progress - NetStateDelta
+        WorldStart = 14, //Done
+        WorldStop = 15, //Done
+        TileArrayUpdate = 16,
         /*
          * VLQI X
          * VLQI T
@@ -43,20 +45,20 @@ namespace com.avilance.Starrybound.Util
          * Star::NetTile
          * }
          */
-        TileUpdate = 15,
+        TileUpdate = 17,
         /*
          * int X
          * int Y
          * Star::NetTile
          */
-        TileLiquidUpdate = 16,
+        TileLiquidUpdate = 18,
         /*
          * VLQI X
          * VLQI Y
          * uchar
          * uchar
          */
-        TileDamageUpdate = 17,
+        TileDamageUpdate = 19,
         /*
          * int X
          * int Y
@@ -70,27 +72,27 @@ namespace com.avilance.Starrybound.Util
          * float
          * }
          */
-        TileModificationFailure = 18,
+        TileModificationFailure = 20,
         /*
          * VLQU Size
          * {
          * ???
          * }
          */
-        GiveItem = 19, //Done
-        SwapInContainerResult = 20,
-        EnvironmentUpdate = 21,
+        GiveItem = 21, //Done
+        SwapInContainerResult = 22,
+        EnvironmentUpdate = 23,
         /*
          * ByteArray
          * ByteArray
          */
-        EntityInteractResult = 22,
+        EntityInteractResult = 24,
         /*
          * uint ClientId
          * int EntityId
          * Star::Variant
          */
-        ModifyTileList = 23,
+        ModifyTileList = 25,
         /*
          * VLQU Size
          * {
@@ -98,7 +100,7 @@ namespace com.avilance.Starrybound.Util
          * }
          * bool
          */
-        DamageTile = 24,
+        DamageTile = 26,
         /*
          * int X
          * int Y
@@ -107,7 +109,7 @@ namespace com.avilance.Starrybound.Util
          * uchar
          * float
          */
-        DamageTileGroup = 25,
+        DamageTileGroup = 27,
         /*
          * VLQU
          * {
@@ -120,22 +122,22 @@ namespace com.avilance.Starrybound.Util
          * uchar
          * float
          */
-        RequestDrop = 26,
+        RequestDrop = 28,
         /*
          * VLQI SlotId?
          */
-        SpawnEntity = 27,
+        SpawnEntity = 29,
         /*
          * uchar Type
          * ByteArray loadArray
          */
-        EntityInteract = 28,
+        EntityInteract = 30,
         /*
          * int EntityId
          * float, float
          * float, float
          */
-        ConnectWire = 29,
+        ConnectWire = 31,
         /*
          * VLQI
          * VLQI
@@ -146,49 +148,49 @@ namespace com.avilance.Starrybound.Util
          * VLQI
          * VLQI
          */
-        DisconnectAllWires = 30,
+        DisconnectAllWires = 32,
         /*
          * VLQI
          * VLQI
          * VLQI
          * VLQI
          */
-        OpenContainer = 31,
-        CloseContainer = 32,
-        SwapInContainer = 33,
-        ItemApplyInContainer = 34,
-        StartCraftingInContainer = 35,
-        StopCraftingInContainer = 36,
-        BurnContainer = 37,
-        ClearContainer = 38,
-        WorldClientStateUpdate = 39,  //In Progress - NetStateDelta
-        EntityCreate = 40,
+        OpenContainer = 33,
+        CloseContainer = 34,
+        SwapInContainer = 35,
+        ItemApplyInContainer = 36,
+        StartCraftingInContainer = 37,
+        StopCraftingInContainer = 38,
+        BurnContainer = 39,
+        ClearContainer = 40,
+        WorldClientStateUpdate = 41,  //In Progress - NetStateDelta
+        EntityCreate = 42,
         /*
          * uchar Type
          * ByteArray loadArray
          * VLQI EntityId
          */
-        EntityUpdate = 41,
+        EntityUpdate = 43,
         /*
          * VLQI EntityId
          * ByteArray loadDeltaArray
          */
-        EntityDestroy = 42,
+        EntityDestroy = 44,
         /*
          * VLQI EntityId
          * bool
          */
-        DamageNotification = 43,
+        DamageNotification = 45,
         /*
          * Star::DamageNotification
          * [
          * ]
          */
-        StatusEffectRequest = 44,
+        StatusEffectRequest = 46,
         /*
          * Star::StatusEffectRequest
          */
-        UpdateWorldProperties = 45,
+        UpdateWorldProperties = 47,
         /*
          * VLQU
          * {
@@ -196,7 +198,7 @@ namespace com.avilance.Starrybound.Util
          * Star::Variant
          * }
          */
-        Heartbeat = 46, //Not Needed
+        Heartbeat = 48, //Not Needed
     }
 
     public enum Direction

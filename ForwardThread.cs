@@ -64,7 +64,7 @@ namespace com.avilance.Starrybound
                     #region Process Packet
                     //Packet ID and Vaildity Check.
                     uint temp = this.incoming.ReadVarUInt32();
-                    if (temp < 0 || temp > 46)
+                    if (temp < 0 || temp > 48)
                     {
                         this.client.forceDisconnect(direction, "Sent invalid packet ID [" + temp + "].");
                         return;
