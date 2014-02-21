@@ -35,7 +35,7 @@ namespace com.avilance.Starrybound
         public static ConfigFile config = new ConfigFile();
         public static ServerFile serverConfig = new ServerFile();
         public static readonly Version VersionNum = Assembly.GetExecutingAssembly().GetName().Version;
-        public static readonly int ProtocolVersion = 636;
+        public static readonly int ProtocolVersion = 639;
         public static readonly string unmoddedClientDigest = "515E04DF26D1E9777FCFB32D7789DDAF6EF733EFC3BEB798454DAB3BE6668719";
         public static StarboundVersion starboundVersion = new StarboundVersion();
         public static GeoIPCountry Geo;
